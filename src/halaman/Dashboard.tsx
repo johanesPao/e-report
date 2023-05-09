@@ -1,4 +1,4 @@
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 import { getNamaPengguna } from "../fitur_state/pengguna";
 
@@ -7,11 +7,9 @@ import Layout from "../komponen/Layout";
 const Dashboard = () => {
   const namaPengguna = useSelector(getNamaPengguna);
   return (
-    <div>
-      <Layout>
-        <p>Hello {namaPengguna}!</p>
-      </Layout>
-    </div>
+    <>
+      <Layout>Hello {namaPengguna}! Selamat datang di Dashboard!</Layout>
+    </>
   );
 };
 
