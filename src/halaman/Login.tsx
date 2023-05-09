@@ -78,7 +78,6 @@ const Login = () => {
     dispatch(setProsesAuth(false));
     if (Object.keys(hasil).length === 0) {
       dispatch(setAuthGagal(true));
-      console.log(authGagal);
       setNama("");
       setKataKunci("");
     } else {
