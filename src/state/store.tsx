@@ -1,17 +1,27 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { persistReducer, persistStore } from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
 // Import Slice
 import eventSlice from "../fitur_state/event";
 import penggunaSlice from "../fitur_state/pengguna";
 
-// Buat Store dan Isi Slice
-export const store = configureStore({
-  reducer: {
-    event: eventSlice.reducer,
-    pengguna: penggunaSlice.reducer,
-  },
+const persistConfig = {
+  key: "root",
+  storage,
+  whitelist: ["event", "pengguna"],
+};
+
+const rootReducer = combineReducers({
+  event: eventSlice.reducer,
+  pengguna: penggunaSlice.reducer,
 });
 
-// Export Types Helper
-export type AppDispatch = typeof store.dispatch;
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+export const store = configureStore({
+  reducer: persistedReducer,
+});
+
+export const persistor = persistStore(store);
 export type RootState = ReturnType<typeof store.getState>;

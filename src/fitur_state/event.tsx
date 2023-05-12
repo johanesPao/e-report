@@ -7,6 +7,7 @@ export interface EventState {
   authGagal: boolean;
   sesiAktif: boolean;
   sidebarAktif: boolean;
+  halaman: string;
   // ...
 }
 
@@ -16,6 +17,7 @@ const initialState: EventState = {
   authGagal: false,
   sesiAktif: false,
   sidebarAktif: false,
+  halaman: "dashboard",
   // ...
 };
 
@@ -38,6 +40,9 @@ const eventSlice = createSlice({
     setSidebarAktif: (state, action: PayloadAction<boolean>) => {
       state.sidebarAktif = action.payload;
     },
+    setHalaman: (state, action: PayloadAction<string>) => {
+      state.halaman = action.payload;
+    },
     // ...
   },
 });
@@ -48,6 +53,7 @@ export const {
   setAuthGagal,
   setSesiAktif,
   setSidebarAktif,
+  setHalaman,
   // ...
 } = eventSlice.actions;
 
@@ -56,5 +62,6 @@ export const getProsesAuth = (state: RootState) => state.event.prosesAuth;
 export const getAuthGagal = (state: RootState) => state.event.authGagal;
 export const getSesiAktif = (state: RootState) => state.event.sesiAktif;
 export const getSidebarAktif = (state: RootState) => state.event.sidebarAktif;
+export const getHalaman = (state: RootState) => state.event.halaman;
 
 export default eventSlice;

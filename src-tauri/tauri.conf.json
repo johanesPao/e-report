@@ -12,7 +12,10 @@
   },
   "tauri": {
     "allowlist": {
-      "all": false
+      "all": false,
+      "window": {
+        "close": true
+      }
     },
     "bundle": {
       "active": true,
@@ -55,7 +58,7 @@
     },
     "windows": [
       {
-        "fullscreen": false,
+        "fullscreen": true,
         "center": true,
         "decorations": true,
         "minWidth": 1600,

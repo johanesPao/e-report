@@ -1,4 +1,3 @@
-import { IconChevronRight, IconChevronLeft } from "@tabler/icons-react";
 import {
   UnstyledButton,
   Group,
@@ -9,8 +8,15 @@ import {
   rem,
 } from "@mantine/core";
 
+import AvaPengguna from "../aset/gambar/user.png";
+
+import { useAppSelector } from "../state/hook";
+import { getNamaPengguna, getEmailPengguna } from "../fitur_state/pengguna";
+
 export function NavigasiPengguna() {
   const theme = useMantineTheme();
+  const namaPengguna = useAppSelector(getNamaPengguna);
+  const emailPengguna = useAppSelector(getEmailPengguna);
 
   return (
     <Box
@@ -41,24 +47,15 @@ export function NavigasiPengguna() {
         }}
       >
         <Group>
-          <Avatar
-            src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=255&q=80"
-            radius="xl"
-          />
+          <Avatar src={AvaPengguna} radius="xl" />
           <Box sx={{ flex: 1 }}>
             <Text size="sm" weight={500}>
-              Amy Horsefighter
+              {namaPengguna}
             </Text>
             <Text color="dimmed" size="xs">
-              ahorsefighter@gmail.com
+              {emailPengguna}
             </Text>
           </Box>
-
-          {theme.dir === "ltr" ? (
-            <IconChevronRight size={rem(18)} />
-          ) : (
-            <IconChevronLeft size={rem(18)} />
-          )}
         </Group>
       </UnstyledButton>
     </Box>

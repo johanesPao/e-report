@@ -1,15 +1,14 @@
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 import Login from "./halaman/Login";
-import Dashboard from "./halaman/Dashboard";
+import Konten from "./komponen/Konten";
 
 function App() {
   return (
     <>
       <Routes>
-        <Route index element={<Login />} />
-        <Route path="dashboard" element={<Dashboard />} />
+        <Route index path="/" element={<Login />} />
+        <Route path="/konten" element={<Konten />} />
       </Routes>
     </>
   );

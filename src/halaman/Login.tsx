@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useAppSelector, useAppDispatch } from "../state/hook";
 import { invoke } from "@tauri-apps/api/tauri";
+import { appWindow } from "@tauri-apps/api/window";
 import {
   Paper,
   createStyles,
@@ -11,7 +12,11 @@ import {
   Title,
   Text,
   rem,
+  useMantineTheme,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { IconX, IconCheck, IconUser, IconPassword } from "@tabler/icons-react";
+import LogRocket from "logrocket";
 
 import {
   setProsesAuth,
@@ -19,8 +24,9 @@ import {
   setSesiAktif,
   getAuthGagal,
   getSesiAktif,
+  getProsesAuth,
 } from "../fitur_state/event";
-import { setNamaPengguna } from "../fitur_state/pengguna";
+import { setNamaPengguna, setEmailPengguna } from "../fitur_state/pengguna";
 import latar1 from "../aset/gambar/shoe1.jpg";
 import latar2 from "../aset/gambar/shoe2.jpg";
 import latar3 from "../aset/gambar/shoe3.jpg";
@@ -55,17 +61,21 @@ const useStyles = createStyles((theme) => ({
 }));
 
 const Login = () => {
+  const theme = useMantineTheme();
   const { classes } = useStyles();
-  const dispatch = useDispatch();
-  const sesiAktif = useSelector(getSesiAktif);
-  const authGagal = useSelector(getAuthGagal);
+  const dispatch = useAppDispatch();
+  const sesiAktif = useAppSelector(getSesiAktif);
+  const authGagal = useAppSelector(getAuthGagal);
+  const prosesAuth = useAppSelector(getProsesAuth);
   const [nama, setNama] = useState("");
   const [kataKunci, setKataKunci] = useState("");
   const navigasi = useNavigate();
 
-  if (sesiAktif) {
-    navigasi("dashboard");
-  }
+  useEffect(() => {
+    if (sesiAktif) {
+      navigasi("konten");
+    }
+  }, [sesiAktif, navigasi]);
 
   const prosesLogin = async () => {
     dispatch(setAuthGagal(false));
@@ -80,11 +90,33 @@ const Login = () => {
       dispatch(setAuthGagal(true));
       setNama("");
       setKataKunci("");
+      notifications.show({
+        title: "Login Gagal",
+        message: `Nama Pengguna tidak terdaftar.`,
+        autoClose: 5000,
+        color: "red",
+        icon: <IconX size="1.1rem" />,
+        withCloseButton: false,
+      });
     } else {
-      setAuthGagal(false);
-      setSesiAktif(true);
+      dispatch(setAuthGagal(false));
+      dispatch(setSesiAktif(true));
       dispatch(setNamaPengguna(nama));
-      navigasi("dashboard");
+      dispatch(setEmailPengguna(hasil["email"]));
+      LogRocket.identify(nama, {
+        name: nama,
+        email: hasil["email"],
+      });
+      console.log(hasil);
+      notifications.show({
+        title: "Login Sukses",
+        message: `Selamat datang kembali ${nama} di e-Report!`,
+        autoClose: 5000,
+        color: "teal",
+        icon: <IconCheck size="1.1rem" />,
+        withCloseButton: false,
+      });
+      navigasi("konten");
     }
   };
 
@@ -106,27 +138,45 @@ const Login = () => {
         </Text>
 
         <TextInput
-          label="Nama Pengguna"
+          placeholder="Nama Pengguna"
+          icon={<IconUser size="0.8rem" color={theme.colors.teal[5]} />}
           size="sm"
           value={nama}
+          error={authGagal}
+          disabled={prosesAuth}
           onChange={(e) => setNama(e.currentTarget.value)}
           onKeyDown={(e) => handleKeyDown(e)}
         />
         <PasswordInput
-          label="Kata Kunci"
+          placeholder="Kata Kunci"
+          icon={<IconPassword size="0.8rem" color={theme.colors.teal[5]} />}
           mt="md"
           size="sm"
           value={kataKunci}
+          error={authGagal}
+          disabled={prosesAuth}
           onChange={(e) => setKataKunci(e.currentTarget.value)}
           onKeyDown={(e) => handleKeyDown(e)}
         />
-        <Button fullWidth mt={32} size="xl" onClick={prosesLogin}>
+        <Button
+          fullWidth
+          mt={32}
+          size="xl"
+          onClick={prosesLogin}
+          loading={prosesAuth}
+        >
           Masuk
         </Button>
-
-        <Text ta="center" mt="md">
-          {authGagal && "Nama Pengguna tidak terdaftar"}
-        </Text>
+        <Button
+          fullWidth
+          mt={12}
+          size="xl"
+          style={{ backgroundColor: theme.colors.red[7] }}
+          disabled={prosesAuth}
+          onClick={() => appWindow.close()}
+        >
+          Tutup
+        </Button>
       </Paper>
     </div>
   );

@@ -9,6 +9,7 @@ pub struct Pengguna {
     password: String,
     peran: String,
     departemen: String,
+    email: String
 }
 
 fn muat_env(file: PathBuf) -> String {
