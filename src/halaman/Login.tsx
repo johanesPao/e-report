@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../state/hook";
 import { invoke } from "@tauri-apps/api/tauri";
@@ -23,10 +23,14 @@ import {
   setAuthGagal,
   setSesiAktif,
   getAuthGagal,
-  getSesiAktif,
   getProsesAuth,
 } from "../fitur_state/event";
-import { setNamaPengguna, setEmailPengguna } from "../fitur_state/pengguna";
+import {
+  setNamaPengguna,
+  setEmailPengguna,
+  setDepartemenPengguna,
+  setPeranPengguna,
+} from "../fitur_state/pengguna";
 import latar1 from "../aset/gambar/shoe1.jpg";
 import latar2 from "../aset/gambar/shoe2.jpg";
 import latar3 from "../aset/gambar/shoe3.jpg";
@@ -64,26 +68,47 @@ const Login = () => {
   const theme = useMantineTheme();
   const { classes } = useStyles();
   const dispatch = useAppDispatch();
-  const sesiAktif = useAppSelector(getSesiAktif);
   const authGagal = useAppSelector(getAuthGagal);
   const prosesAuth = useAppSelector(getProsesAuth);
   const [nama, setNama] = useState("");
   const [kataKunci, setKataKunci] = useState("");
   const navigasi = useNavigate();
 
-  useEffect(() => {
-    if (sesiAktif) {
-      navigasi("konten");
-    }
-  }, [sesiAktif, navigasi]);
+  // reset semua state
+  dispatch(setSesiAktif(false));
+  dispatch(setAuthGagal(false));
+  dispatch(setProsesAuth(false));
+  dispatch(setNamaPengguna(""));
+  dispatch(setEmailPengguna(""));
+  dispatch(setDepartemenPengguna(""));
+  dispatch(setPeranPengguna(""));
 
   const prosesLogin = async () => {
     dispatch(setAuthGagal(false));
     dispatch(setProsesAuth(true));
-    let respon: string = await invoke("login", {
-      nama: nama,
-      kataKunci,
-    });
+    let respon: string;
+    try {
+      respon = await invoke("login", {
+        nama: nama,
+        kataKunci,
+      });
+    } catch (error) {
+      console.error(error);
+      dispatch(setProsesAuth(false));
+      dispatch(setAuthGagal(true));
+      setNama("");
+      setKataKunci("");
+      notifications.show({
+        title: "Login Gagal",
+        message: "Terjadi kesalahan saat melakukan koneksi ke mongodb.",
+        autoClose: 5000,
+        color: "red",
+        icon: <IconX size="1.1rem" />,
+        withCloseButton: false,
+      });
+      return;
+    }
+
     let hasil = JSON.parse(respon);
     dispatch(setProsesAuth(false));
     if (Object.keys(hasil).length === 0) {
@@ -103,11 +128,14 @@ const Login = () => {
       dispatch(setSesiAktif(true));
       dispatch(setNamaPengguna(nama));
       dispatch(setEmailPengguna(hasil["email"]));
+      dispatch(setDepartemenPengguna(hasil["departemen"]));
+      dispatch(setPeranPengguna(hasil["peran"]));
       LogRocket.identify(nama, {
         name: nama,
         email: hasil["email"],
+        departemen: hasil["departemen"],
+        peran: hasil["peran"],
       });
-      console.log(hasil);
       notifications.show({
         title: "Login Sukses",
         message: `Selamat datang kembali ${nama} di e-Report!`,
@@ -124,6 +152,16 @@ const Login = () => {
     if (e.key === "Enter") {
       prosesLogin();
     }
+  };
+
+  const handleTutupAplikasi = () => {
+    dispatch(setAuthGagal(false));
+    dispatch(setProsesAuth(false));
+    dispatch(setNamaPengguna(""));
+    dispatch(setEmailPengguna(""));
+    dispatch(setDepartemenPengguna(""));
+    dispatch(setPeranPengguna(""));
+    appWindow.close();
   };
 
   return (
@@ -173,7 +211,7 @@ const Login = () => {
           size="xl"
           style={{ backgroundColor: theme.colors.red[7] }}
           disabled={prosesAuth}
-          onClick={() => appWindow.close()}
+          onClick={() => handleTutupAplikasi()}
         >
           Tutup
         </Button>

@@ -3,6 +3,7 @@
 
 use serde_json;
 mod db;
+mod fungsi;
 
 #[tauri::command]
 async fn login(nama: String, kata_kunci: String) -> Result<String, String> {

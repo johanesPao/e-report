@@ -5,6 +5,10 @@ import {
   IconChartDots,
   IconDeviceDesktopAnalytics,
   IconBinary,
+  IconCurrencyDollar,
+  IconShoe,
+  IconSubtask,
+  IconBackhoe,
 } from "@tabler/icons-react";
 import {
   ThemeIcon,
@@ -84,8 +88,8 @@ const halaman: NavLinkProp[] = [
     label: "Departemen",
     subMenu: [
       {
-        icon: <IconDeviceDesktopAnalytics size="4rem" />,
-        color: "red",
+        icon: <IconShoe size="4rem" />,
+        color: "blue",
         label: "Merchandising",
         links: [
           {
@@ -97,13 +101,13 @@ const halaman: NavLinkProp[] = [
         ],
       },
       {
-        icon: <IconDeviceDesktopAnalytics size="4rem" />,
-        color: "red",
+        icon: <IconSubtask size="4rem" />,
+        color: "violet",
         label: "Operation",
       },
       {
-        icon: <IconDeviceDesktopAnalytics size="4rem" />,
-        color: "red",
+        icon: <IconCurrencyDollar size="4rem" />,
+        color: "green",
         label: "Finance & Accounting",
         links: [
           {
@@ -115,7 +119,7 @@ const halaman: NavLinkProp[] = [
         ],
       },
       {
-        icon: <IconDeviceDesktopAnalytics size="4rem" />,
+        icon: <IconBackhoe size="4rem" />,
         color: "red",
         label: "Business Development",
         links: [
