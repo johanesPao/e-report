@@ -8,6 +8,7 @@ export interface EventState {
   sesiAktif: boolean;
   sidebarAktif: boolean;
   halaman: string;
+  konekKeBC: boolean;
   // ...
 }
 
@@ -18,6 +19,7 @@ const initialState: EventState = {
   sesiAktif: false,
   sidebarAktif: false,
   halaman: "dashboard",
+  konekKeBC: false,
   // ...
 };
 
@@ -43,6 +45,9 @@ const eventSlice = createSlice({
     setHalaman: (state, action: PayloadAction<string>) => {
       state.halaman = action.payload;
     },
+    setKonekKeBC: (state, action: PayloadAction<boolean>) => {
+      state.konekKeBC = action.payload;
+    },
     // ...
   },
 });
@@ -54,6 +59,7 @@ export const {
   setSesiAktif,
   setSidebarAktif,
   setHalaman,
+  setKonekKeBC,
   // ...
 } = eventSlice.actions;
 

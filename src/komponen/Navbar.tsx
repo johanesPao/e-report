@@ -18,8 +18,13 @@ import { appWindow } from "@tauri-apps/api/window";
 
 import { NavigasiPengguna } from "./NavigasiPengguna";
 import { NavLinks } from "./Navlink";
-import { setSesiAktif } from "../fitur_state/event";
-import { setEmailPengguna, setNamaPengguna } from "../fitur_state/pengguna";
+import { setSesiAktif, setKonekKeBC } from "../fitur_state/event";
+import {
+  setEmailPengguna,
+  setNamaPengguna,
+  setDepartemenPengguna,
+  setPeranPengguna,
+} from "../fitur_state/pengguna";
 
 function NavbarMod({
   onNavlinkClick,
@@ -31,17 +36,22 @@ function NavbarMod({
   const dispatch = useAppDispatch();
   const { height } = useViewportSize();
 
-  const keluarAkun = () => {
+  const resetAplikasi = () => {
     dispatch(setSesiAktif(false));
     dispatch(setNamaPengguna(""));
     dispatch(setEmailPengguna(""));
+    dispatch(setDepartemenPengguna(""));
+    dispatch(setPeranPengguna(""));
+    dispatch(setKonekKeBC(false));
+  };
+
+  const keluarAkun = () => {
+    resetAplikasi();
     navigasi("/");
   };
 
   const keluarAplikasi = () => {
-    dispatch(setSesiAktif(false));
-    dispatch(setNamaPengguna(""));
-    dispatch(setEmailPengguna(""));
+    resetAplikasi();
     appWindow.close();
   };
 

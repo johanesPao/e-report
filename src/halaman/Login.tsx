@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../state/hook";
 import { invoke } from "@tauri-apps/api/tauri";
@@ -13,6 +13,9 @@ import {
   Text,
   rem,
   useMantineTheme,
+  Switch,
+  Center,
+  Tooltip,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconX, IconCheck, IconUser, IconPassword } from "@tabler/icons-react";
@@ -24,6 +27,7 @@ import {
   setSesiAktif,
   getAuthGagal,
   getProsesAuth,
+  setKonekKeBC,
 } from "../fitur_state/event";
 import {
   setNamaPengguna,
@@ -73,15 +77,38 @@ const Login = () => {
   const [nama, setNama] = useState("");
   const [kataKunci, setKataKunci] = useState("");
   const navigasi = useNavigate();
+  const [bcTersedia, setBCTersedia] = useState(false);
+  const [koneksiBC, toggleKoneksiBC] = useState(false);
 
-  // reset semua state
-  dispatch(setSesiAktif(false));
-  dispatch(setAuthGagal(false));
-  dispatch(setProsesAuth(false));
-  dispatch(setNamaPengguna(""));
-  dispatch(setEmailPengguna(""));
-  dispatch(setDepartemenPengguna(""));
-  dispatch(setPeranPengguna(""));
+  const bc_tersedia = async () => {
+    try {
+      const respon: string = await invoke("cek_koneksi_bc");
+      const hasil = JSON.parse(respon);
+      if (!hasil["status"]) {
+        toggleKoneksiBC(false);
+        setBCTersedia(false);
+      } else {
+        toggleKoneksiBC(true);
+        setBCTersedia(true);
+      }
+    } catch (e) {
+      toggleKoneksiBC(false);
+      setBCTersedia(false);
+    }
+  };
+
+  useEffect(() => {
+    // reset semua state
+    dispatch(setSesiAktif(false));
+    dispatch(setAuthGagal(false));
+    dispatch(setProsesAuth(false));
+    dispatch(setNamaPengguna(""));
+    dispatch(setEmailPengguna(""));
+    dispatch(setDepartemenPengguna(""));
+    dispatch(setPeranPengguna(""));
+
+    bc_tersedia();
+  }, []);
 
   const prosesLogin = async () => {
     dispatch(setAuthGagal(false));
@@ -130,6 +157,7 @@ const Login = () => {
       dispatch(setEmailPengguna(hasil["email"]));
       dispatch(setDepartemenPengguna(hasil["departemen"]));
       dispatch(setPeranPengguna(hasil["peran"]));
+      dispatch(setKonekKeBC(true));
       LogRocket.identify(nama, {
         name: nama,
         email: hasil["email"],
@@ -185,6 +213,7 @@ const Login = () => {
           onChange={(e) => setNama(e.currentTarget.value)}
           onKeyDown={(e) => handleKeyDown(e)}
         />
+        <p>{bcTersedia}</p>
         <PasswordInput
           placeholder="Kata Kunci"
           icon={<IconPassword size="0.8rem" color={theme.colors.teal[5]} />}
@@ -196,9 +225,44 @@ const Login = () => {
           onChange={(e) => setKataKunci(e.currentTarget.value)}
           onKeyDown={(e) => handleKeyDown(e)}
         />
+        <Tooltip
+          label={
+            bcTersedia
+              ? "Hubungkan aplikasi dengan BC?"
+              : "Tidak dapat terhubung dengan BC pada jaringan yang anda gunakan."
+          }
+          color="orange"
+          withArrow
+        >
+          <Center>
+            <Switch
+              mt={15}
+              size="md"
+              label="Hubungkan ke BC"
+              disabled={!bcTersedia || prosesAuth}
+              checked={koneksiBC}
+              thumbIcon={
+                koneksiBC ? (
+                  <IconCheck
+                    size="0.8rem"
+                    color={theme.colors.teal[theme.fn.primaryShade()]}
+                    stroke={3}
+                  />
+                ) : (
+                  <IconX
+                    size="0.8rem"
+                    color={theme.colors.red[theme.fn.primaryShade()]}
+                    stroke={3}
+                  />
+                )
+              }
+              onChange={() => toggleKoneksiBC(!koneksiBC)}
+            />
+          </Center>
+        </Tooltip>
         <Button
           fullWidth
-          mt={32}
+          mt={15}
           size="xl"
           onClick={prosesLogin}
           loading={prosesAuth}
