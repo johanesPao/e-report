@@ -1,7 +1,7 @@
 const KelayakanTokoBaru = () => {
   return (
     <>
-      <p>Kelayakan Toko Baru</p>
+      <div>Kelayakan Toko Baru</div>
     </>
   );
 };

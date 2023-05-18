@@ -3,18 +3,20 @@
 
 use serde_json::{self, json};
 
-use fungsi::rahasia;
+use crate::db::mongo;
+use crate::db::mssql;
+use crate::fungsi::{kueri_bc, rahasia};
 
 mod db;
 mod fungsi;
 
 #[tauri::command]
 async fn login(nama: String, kata_kunci: String) -> Result<String, String> {
-    match db::mongo::autentikasi_user(nama, kata_kunci).await {
+    match mongo::autentikasi_user(nama, kata_kunci).await {
         Ok(Some(pengguna)) => {
             let json = serde_json::to_string(&pengguna).map_err(|e| e.to_string())?;
             Ok(json)
-        },
+        }
         Ok(None) => Ok(r###"{}"###.to_string()),
         Err(e) => Err(e.to_string()),
     }
@@ -22,18 +24,56 @@ async fn login(nama: String, kata_kunci: String) -> Result<String, String> {
 
 #[tauri::command]
 async fn cek_koneksi_bc() -> Result<String, String> {
-    match db::mssql::cek_koneksi_bc(rahasia::BC_IP, rahasia::BC_PORT, rahasia::BC_USER, rahasia::BC_PWD).await {
-        Ok(_) => {
-            Ok(json!({"status": true}).to_string())
-        },
-        Err(_) => Err(json!({"status": false}).to_string())
+    match mssql::cek_koneksi_bc(
+        rahasia::BC_IP,
+        rahasia::BC_PORT,
+        rahasia::BC_USER,
+        rahasia::BC_PWD,
+        rahasia::BC_DB,
+    )
+    .await
+    {
+        Ok(_) => Ok(json!({"status": true, "konten": "BC dapat diakses"}).to_string()),
+        Err(_) => Err(json!({"status": false, "konten": "BC tidak dapat diakses"}).to_string()),
+    }
+}
+
+#[tauri::command]
+async fn inisiasi_bc_ereport() -> Result<String, String> {
+    match mongo::param_bc().await {
+        Ok(Some(param)) => Ok(json!({"status": true, "konten": param}).to_string()),
+        Ok(None) => Err(json!({"status": false, "konten": "Gagal memuat param"}).to_string()),
+        Err(_) => Err(
+            json!({"status": false, "konten": "Terjadi kesalahan pada koneksi dengan mongo"})
+                .to_string(),
+        ),
+    }
+}
+
+#[tauri::command]
+async fn brand_ile(kueri: String) -> Result<String, String> {
+    match kueri_bc::parameter_brand(kueri).await {
+        Ok(hasil) => {
+            let json = json!({"status": true, "konten": {"brand": hasil}}).to_string();
+            Ok(json)
+        }
+        Err(_) => {
+            let json =
+                json!({"status": false, "konten": "Kesalahan dalam memuat data brand"}).to_string();
+            Err(json)
+        }
     }
 }
 
 #[tokio::main]
 async fn main() {
-  tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![login, cek_koneksi_bc])
-    .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+    tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![
+            login,
+            cek_koneksi_bc,
+            inisiasi_bc_ereport,
+            brand_ile
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }

@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+import DrawerInput from "./Drawer";
+
 import Dashboard from "../halaman/Dashboard";
 import Layout from "../komponen/Layout";
 import Penjualan from "../halaman/Penjualan";
@@ -13,6 +15,7 @@ import KelayakanTokoBaru from "../halaman/KelayakanTokoBaru";
 
 import { getSesiAktif, getHalaman, setHalaman } from "../fitur_state/event";
 import { useAppSelector, useAppDispatch } from "../state/hook";
+import { Container } from "@mantine/core";
 
 const Konten = () => {
   const navigasi = useNavigate();
@@ -52,7 +55,18 @@ const Konten = () => {
   };
 
   return (
-    <Layout onNavbarLinkClick={handleNavlinkClick}>{renderKonten()}</Layout>
+    <Layout onNavbarLinkClick={handleNavlinkClick}>
+      <Container
+        sx={{
+          padding: "0px",
+          margin: "0px",
+          minWidth: "100%",
+        }}
+      >
+        {renderKonten()}
+      </Container>
+      <DrawerInput />
+    </Layout>
   );
 };
 

@@ -28,6 +28,7 @@ import {
   getAuthGagal,
   getProsesAuth,
   setKonekKeBC,
+  getKonekKeBC,
 } from "../fitur_state/event";
 import {
   setNamaPengguna,
@@ -35,6 +36,7 @@ import {
   setDepartemenPengguna,
   setPeranPengguna,
 } from "../fitur_state/pengguna";
+import { setParameterBC, resetParameterBC } from "../fitur_state/dataParam";
 import latar1 from "../aset/gambar/shoe1.jpg";
 import latar2 from "../aset/gambar/shoe2.jpg";
 import latar3 from "../aset/gambar/shoe3.jpg";
@@ -77,6 +79,7 @@ const Login = () => {
   const [nama, setNama] = useState("");
   const [kataKunci, setKataKunci] = useState("");
   const navigasi = useNavigate();
+  const konekKeBC = useAppSelector(getKonekKeBC);
   const [bcTersedia, setBCTersedia] = useState(false);
   const [koneksiBC, toggleKoneksiBC] = useState(false);
 
@@ -157,7 +160,22 @@ const Login = () => {
       dispatch(setEmailPengguna(hasil["email"]));
       dispatch(setDepartemenPengguna(hasil["departemen"]));
       dispatch(setPeranPengguna(hasil["peran"]));
-      dispatch(setKonekKeBC(true));
+      if (koneksiBC) {
+        dispatch(setKonekKeBC(true));
+        // inisiasi data param BC
+        try {
+          const respon: string = await invoke("inisiasi_bc_ereport");
+          const parameterBC = JSON.parse(respon);
+          if (parameterBC["status"]) {
+            dispatch(setParameterBC(parameterBC["konten"]));
+          } else {
+            console.log("Gagal menyimpan parameter BC ke dalam redux.");
+            return;
+          }
+        } catch (e) {
+          console.log(`Gagal memuat parameter BC dari back-end. ${e}`);
+        }
+      }
       LogRocket.identify(nama, {
         name: nama,
         email: hasil["email"],
@@ -182,13 +200,17 @@ const Login = () => {
     }
   };
 
-  const handleTutupAplikasi = () => {
+  const handleTutupAplikasi = async () => {
     dispatch(setAuthGagal(false));
     dispatch(setProsesAuth(false));
     dispatch(setNamaPengguna(""));
     dispatch(setEmailPengguna(""));
     dispatch(setDepartemenPengguna(""));
     dispatch(setPeranPengguna(""));
+    if (konekKeBC) {
+      dispatch(setKonekKeBC(false));
+      dispatch(resetParameterBC());
+    }
     appWindow.close();
   };
 
@@ -204,6 +226,7 @@ const Login = () => {
         </Text>
 
         <TextInput
+          data-autofocus
           placeholder="Nama Pengguna"
           icon={<IconUser size="0.8rem" color={theme.colors.teal[5]} />}
           size="sm"

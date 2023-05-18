@@ -1,4 +1,4 @@
-import { AppShell } from "@mantine/core";
+import { AppShell, Header } from "@mantine/core";
 import NavbarMod from "./Navbar";
 
 function Layout({
@@ -14,6 +14,11 @@ function Layout({
         padding="md"
         fixed
         navbar={<NavbarMod onNavlinkClick={onNavbarLinkClick} />}
+        header={
+          <Header height={50} p="xs">
+            e-Report
+          </Header>
+        }
         styles={(theme) => ({
           main: {
             backgroundColor:
@@ -23,7 +28,12 @@ function Layout({
           },
         })}
       >
-        <div style={{ padding: 0, margin: 0 }}>{children}</div>
+        {/* <div
+          id="#drawer-area"
+          style={{ width: "100px", padding: 0, margin: 0 }}
+        > */}
+        {children}
+        {/* </div> */}
       </AppShell>
     </>
   );

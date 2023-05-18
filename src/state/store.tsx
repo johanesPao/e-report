@@ -5,16 +5,18 @@ import { configureStore, combineReducers } from "@reduxjs/toolkit";
 // Import Slice
 import eventSlice from "../fitur_state/event";
 import penggunaSlice from "../fitur_state/pengguna";
+import dataParamSlice from "../fitur_state/dataParam";
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["event", "pengguna"],
+  whitelist: ["event", "pengguna", "dataParam"],
 };
 
 const rootReducer = combineReducers({
   event: eventSlice.reducer,
   pengguna: penggunaSlice.reducer,
+  dataParam: dataParamSlice.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

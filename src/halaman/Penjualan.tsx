@@ -1,7 +1,13 @@
+import { Button } from "@mantine/core";
+import { setDrawerTerbuka } from "../fitur_state/event";
+import { useAppDispatch } from "../state/hook";
+
 const Penjualan = () => {
+  const dispatch = useAppDispatch();
   return (
     <>
-      <p>Penjualan</p>
+      <div>Penjualan</div>
+      <Button onClick={() => dispatch(setDrawerTerbuka(true))}>Open</Button>
     </>
   );
 };
