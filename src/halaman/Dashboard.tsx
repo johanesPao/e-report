@@ -1,17 +1,17 @@
 import { useAppSelector } from "../state/hook";
-import { getParameterBC } from "../fitur_state/dataParam";
+import { getParameterBc } from "../fitur_state/dataParam";
 import { invoke } from "@tauri-apps/api/tauri";
 import { Button } from "@mantine/core";
 
 const Dashboard = () => {
-  const parameterBC = useAppSelector(getParameterBC);
+  const parameterBc = useAppSelector(getParameterBc);
   const contohKueri: string = `
     SELECT DISTINCT
-      ${parameterBC.kolom_bc.brand_dim} AS [Brand]
-    FROM [PRI LIVE${parameterBC.tabel_bc.jurnal_item_437}]
+      ${parameterBc.kolom_bc.brand_dim} AS [Brand]
+    FROM [PRI LIVE${parameterBc.tabel_bc.jurnal_item_437}]
     WHERE
-      ${parameterBC.kolom_bc.brand_dim} != '' AND
-      ${parameterBC.kolom_bc.oricode} NOT LIKE '${parameterBC.argumen_bc.item_service_prefix}'
+      ${parameterBc.kolom_bc.brand_dim} != '' AND
+      ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
   `;
   const tarik = async () => {
     try {

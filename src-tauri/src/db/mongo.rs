@@ -1,4 +1,8 @@
-use mongodb::{bson, options::ClientOptions, Client, Database};
+use mongodb::{
+    bson::{self, Document},
+    options::ClientOptions,
+    Client, Database,
+};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::error::Error;
 
@@ -12,29 +16,6 @@ pub struct Pengguna {
     departemen: String,
     email: String,
     comp: Vec<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Parameter {
-    pub tabel_bc: TabelBc,
-    pub kolom_bc: KolomBc,
-    pub argumen_bc: ArgumenBc,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct TabelBc {
-    pub jurnal_item_437: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct KolomBc {
-    pub brand_dim: String,
-    pub oricode: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ArgumenBc {
-    pub item_service_prefix: String,
 }
 
 async fn buka_koneksi() -> Result<Option<Client>, Box<dyn Error>> {
@@ -76,18 +57,16 @@ where
     }
 }
 
-pub async fn param_bc() -> Result<Option<Parameter>, Box<dyn Error>>
-where
-    Parameter: DeserializeOwned + Unpin + Send + Sync,
-{
+pub async fn param_bc() -> Result<Option<Document>, Box<dyn Error>> {
     let database = bc_database().await?;
     let koleksi_parameter = database.collection(rahasia::KOLEKSI_PARAMETER);
 
-    if let Some(document) = koleksi_parameter.find_one(None, None).await? {
-        let parameter: Parameter = bson::from_document(document)?;
-
-        Ok(Some(parameter))
-    } else {
-        Ok(None)
+    let hasil_kueri = koleksi_parameter
+        .find_one(None, None)
+        .await
+        .expect("Kesalahan");
+    match hasil_kueri {
+        Some(dokumen) => Ok(dokumen),
+        None => Ok(None),
     }
 }

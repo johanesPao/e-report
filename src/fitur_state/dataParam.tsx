@@ -2,35 +2,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../state/store";
 
 export interface dataParamState {
-  parameterBC: {
-    kolom_bc: {
-      brand_dim: string;
-      oricode: string;
-    };
-    tabel_bc: {
-      jurnal_item_437: string;
-    };
-    argumen_bc: {
-      item_service_prefix: string;
-    };
-  };
+  parameterBc: { [key: string]: { [key: string]: string } };
   parameterBrand: string[];
   // ...
 }
 
 const initialState: dataParamState = {
-  parameterBC: {
-    kolom_bc: {
-      brand_dim: "",
-      oricode: "",
-    },
-    tabel_bc: {
-      jurnal_item_437: "",
-    },
-    argumen_bc: {
-      item_service_prefix: "",
-    },
-  },
+  parameterBc: {},
   parameterBrand: [],
   // ...
 };
@@ -39,14 +17,8 @@ const dataParamSlice = createSlice({
   name: "dataParam",
   initialState,
   reducers: {
-    setParameterBC: (
-      state,
-      action: PayloadAction<dataParamState["parameterBC"]>
-    ) => {
-      state.parameterBC = action.payload;
-    },
-    resetParameterBC: (state) => {
-      state.parameterBC = initialState.parameterBC;
+    setParameterBc: (state, action: PayloadAction<{}>) => {
+      state.parameterBc = action.payload;
     },
     setParameterBrand: (state, action: PayloadAction<string[]>) => {
       state.parameterBrand = action.payload;
@@ -56,13 +28,12 @@ const dataParamSlice = createSlice({
 });
 
 export const {
-  setParameterBC,
-  resetParameterBC,
+  setParameterBc,
   setParameterBrand,
   // ...
 } = dataParamSlice.actions;
 
-export const getParameterBC = (state: RootState) => state.dataParam.parameterBC;
+export const getParameterBc = (state: RootState) => state.dataParam.parameterBc;
 export const getParameterBrand = (state: RootState) =>
   state.dataParam.parameterBrand;
 

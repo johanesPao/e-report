@@ -37,7 +37,7 @@ import {
   setPeranPengguna,
   setCompPengguna,
 } from "../fitur_state/pengguna";
-import { setParameterBC, resetParameterBC } from "../fitur_state/dataParam";
+import { setParameterBc } from "../fitur_state/dataParam";
 import latar1 from "../aset/gambar/shoe1.jpg";
 import latar2 from "../aset/gambar/shoe2.jpg";
 import latar3 from "../aset/gambar/shoe3.jpg";
@@ -170,7 +170,7 @@ const Login = () => {
           const respon: string = await invoke("inisiasi_bc_ereport");
           const parameterBC = JSON.parse(respon);
           if (parameterBC["status"]) {
-            dispatch(setParameterBC(parameterBC["konten"]));
+            dispatch(setParameterBc(parameterBC["konten"]));
           } else {
             console.log("Gagal menyimpan parameter BC ke dalam redux.");
             return;
@@ -213,7 +213,7 @@ const Login = () => {
     dispatch(setCompPengguna([]));
     if (konekKeBC) {
       dispatch(setKonekKeBC(false));
-      dispatch(resetParameterBC());
+      dispatch(setParameterBc([{}]));
     }
     appWindow.close();
   };
