@@ -11,6 +11,7 @@ pub struct Pengguna {
     peran: String,
     departemen: String,
     email: String,
+    comp: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

@@ -6,6 +6,7 @@ export interface PenggunaState {
   emailPengguna: string;
   departemenPengguna: string;
   peranPengguna: string;
+  compPengguna: string[];
   // ...
 }
 
@@ -14,6 +15,7 @@ const initialState: PenggunaState = {
   emailPengguna: "",
   departemenPengguna: "",
   peranPengguna: "",
+  compPengguna: [],
   // ...
 };
 
@@ -33,6 +35,9 @@ const penggunaSlice = createSlice({
     setPeranPengguna: (state, action: PayloadAction<string>) => {
       state.peranPengguna = action.payload;
     },
+    setCompPengguna: (state, action: PayloadAction<string[]>) => {
+      state.compPengguna = action.payload;
+    },
   },
 });
 
@@ -41,6 +46,7 @@ export const {
   setEmailPengguna,
   setDepartemenPengguna,
   setPeranPengguna,
+  setCompPengguna,
   // ...
 } = penggunaSlice.actions;
 
@@ -52,5 +58,7 @@ export const getDepartemenPengguna = (state: RootState) =>
   state.pengguna.departemenPengguna;
 export const getPeranPengguna = (state: RootState) =>
   state.pengguna.peranPengguna;
+export const getCompPengguna = (state: RootState) =>
+  state.pengguna.compPengguna;
 
 export default penggunaSlice;

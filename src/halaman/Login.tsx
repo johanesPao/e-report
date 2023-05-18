@@ -35,6 +35,7 @@ import {
   setEmailPengguna,
   setDepartemenPengguna,
   setPeranPengguna,
+  setCompPengguna,
 } from "../fitur_state/pengguna";
 import { setParameterBC, resetParameterBC } from "../fitur_state/dataParam";
 import latar1 from "../aset/gambar/shoe1.jpg";
@@ -109,6 +110,7 @@ const Login = () => {
     dispatch(setEmailPengguna(""));
     dispatch(setDepartemenPengguna(""));
     dispatch(setPeranPengguna(""));
+    dispatch(setCompPengguna([]));
 
     bc_tersedia();
   }, []);
@@ -160,6 +162,7 @@ const Login = () => {
       dispatch(setEmailPengguna(hasil["email"]));
       dispatch(setDepartemenPengguna(hasil["departemen"]));
       dispatch(setPeranPengguna(hasil["peran"]));
+      dispatch(setCompPengguna(hasil["comp"]));
       if (koneksiBC) {
         dispatch(setKonekKeBC(true));
         // inisiasi data param BC
@@ -207,6 +210,7 @@ const Login = () => {
     dispatch(setEmailPengguna(""));
     dispatch(setDepartemenPengguna(""));
     dispatch(setPeranPengguna(""));
+    dispatch(setCompPengguna([]));
     if (konekKeBC) {
       dispatch(setKonekKeBC(false));
       dispatch(resetParameterBC());
