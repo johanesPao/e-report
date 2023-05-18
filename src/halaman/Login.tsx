@@ -103,14 +103,14 @@ const Login = () => {
 
   useEffect(() => {
     // reset semua state
-    dispatch(setSesiAktif(false));
-    dispatch(setAuthGagal(false));
-    dispatch(setProsesAuth(false));
     dispatch(setNamaPengguna(""));
     dispatch(setEmailPengguna(""));
     dispatch(setDepartemenPengguna(""));
     dispatch(setPeranPengguna(""));
     dispatch(setCompPengguna([]));
+    dispatch(setProsesAuth(false));
+    dispatch(setAuthGagal(false));
+    dispatch(setSesiAktif(false));
 
     bc_tersedia();
   }, []);
@@ -142,11 +142,11 @@ const Login = () => {
     }
 
     let hasil = JSON.parse(respon);
-    dispatch(setProsesAuth(false));
     if (Object.keys(hasil).length === 0) {
       dispatch(setAuthGagal(true));
       setNama("");
       setKataKunci("");
+      dispatch(setProsesAuth(false));
       notifications.show({
         title: "Login Gagal",
         message: `Nama Pengguna tidak terdaftar.`,
@@ -193,6 +193,7 @@ const Login = () => {
         icon: <IconCheck size="1.1rem" />,
         withCloseButton: false,
       });
+      dispatch(setProsesAuth(false));
       navigasi("konten");
     }
   };
