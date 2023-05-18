@@ -14,6 +14,7 @@ export interface dataParamState {
       item_service_prefix: string;
     };
   };
+  parameterBrand: string[];
   // ...
 }
 
@@ -30,6 +31,7 @@ const initialState: dataParamState = {
       item_service_prefix: "",
     },
   },
+  parameterBrand: [],
   // ...
 };
 
@@ -46,6 +48,9 @@ const dataParamSlice = createSlice({
     resetParameterBC: (state) => {
       state.parameterBC = initialState.parameterBC;
     },
+    setParameterBrand: (state, action: PayloadAction<string[]>) => {
+      state.parameterBrand = action.payload;
+    },
     // ...
   },
 });
@@ -53,9 +58,12 @@ const dataParamSlice = createSlice({
 export const {
   setParameterBC,
   resetParameterBC,
+  setParameterBrand,
   // ...
 } = dataParamSlice.actions;
 
 export const getParameterBC = (state: RootState) => state.dataParam.parameterBC;
+export const getParameterBrand = (state: RootState) =>
+  state.dataParam.parameterBrand;
 
 export default dataParamSlice;
