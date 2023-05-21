@@ -214,7 +214,7 @@ const Login = () => {
     dispatch(setCompPengguna([]));
     if (konekKeBC) {
       dispatch(setKonekKeBC(false));
-      dispatch(setParameterBc([{}]));
+      dispatch(setParameterBc({}));
     }
     appWindow.close();
   };
