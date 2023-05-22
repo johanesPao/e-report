@@ -9,6 +9,7 @@ export interface EventState {
   drawerTerbuka: boolean;
   halaman: string;
   konekKeBC: boolean;
+  indeksData: number;
   // ...
 }
 
@@ -20,6 +21,7 @@ const initialState: EventState = {
   drawerTerbuka: false,
   halaman: "dashboard",
   konekKeBC: false,
+  indeksData: 0,
   // ...
 };
 
@@ -48,6 +50,9 @@ const eventSlice = createSlice({
     setKonekKeBC: (state, action: PayloadAction<boolean>) => {
       state.konekKeBC = action.payload;
     },
+    setIndeksData: (state, action: PayloadAction<number>) => {
+      state.indeksData = action.payload;
+    },
     // ...
   },
 });
@@ -60,6 +65,7 @@ export const {
   setDrawerTerbuka,
   setHalaman,
   setKonekKeBC,
+  setIndeksData,
   // ...
 } = eventSlice.actions;
 
@@ -70,5 +76,6 @@ export const getSesiAktif = (state: RootState) => state.event.sesiAktif;
 export const getDrawerTerbuka = (state: RootState) => state.event.drawerTerbuka;
 export const getHalaman = (state: RootState) => state.event.halaman;
 export const getKonekKeBC = (state: RootState) => state.event.konekKeBC;
+export const getIndeksData = (state: RootState) => state.event.indeksData;
 
 export default eventSlice;

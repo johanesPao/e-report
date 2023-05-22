@@ -36,8 +36,10 @@ import {
   setDepartemenPengguna,
   setPeranPengguna,
   setCompPengguna,
+  setCompKueri,
 } from "../fitur_state/pengguna";
-import { setParameterBc } from "../fitur_state/dataParam";
+import { setParameterBc, setParameterBrand } from "../fitur_state/dataParam";
+import { brandLabel } from "../fungsi/bc";
 import latar1 from "../aset/gambar/shoe1.jpg";
 import latar2 from "../aset/gambar/shoe2.jpg";
 import latar3 from "../aset/gambar/shoe3.jpg";
@@ -165,12 +167,24 @@ const Login = () => {
       dispatch(setCompPengguna(hasil["comp"]));
       if (koneksiBC) {
         dispatch(setKonekKeBC(true));
+        let parameterBc;
         // inisiasi data param BC
         try {
           const respon: string = await invoke("inisiasi_bc_ereport");
-          const parameterBC = JSON.parse(respon);
-          if (parameterBC["status"]) {
-            dispatch(setParameterBc(parameterBC["konten"]));
+          parameterBc = JSON.parse(respon);
+          if (parameterBc["status"]) {
+            dispatch(setParameterBc(parameterBc["konten"]));
+            if (hasil["comp"].length === 1) {
+              console.log("executed");
+              console.log(`${hasil["comp"][0].toLowerCase()}`);
+              dispatch(
+                setCompKueri(
+                  parameterBc["konten"]["tabel_bc"][
+                    `${hasil["comp"][0].toLowerCase()}`
+                  ]
+                )
+              );
+            }
           } else {
             console.log("Gagal menyimpan parameter BC ke dalam redux.");
             return;

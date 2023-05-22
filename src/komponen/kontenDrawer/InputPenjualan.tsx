@@ -2,13 +2,21 @@ import { Button, Grid, Space } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
 import { IconDatabase } from "@tabler/icons-react";
 
-import { useAppDispatch } from "../../state/hook";
-import { setDrawerTerbuka } from "../../fitur_state/event";
+import { useAppDispatch, useAppSelector } from "../../state/hook";
+import { getIndeksData, setDrawerTerbuka } from "../../fitur_state/event";
 
 import MultiBrand from "../MultiBrand";
+import { getParameterBrand } from "../../fitur_state/dataParam";
+import { useState } from "react";
 
 const InputPenjualan = () => {
   const dispatch = useAppDispatch();
+  const parameterBrand = useAppSelector(getParameterBrand);
+  const indeksData = useAppSelector(getIndeksData);
+  const defaultMultiBrand = parameterBrand[indeksData].map(
+    (item) => item.value
+  );
+  const [valueMultiBrand, setValueMultiBrand] = useState(defaultMultiBrand);
 
   return (
     <>
@@ -24,7 +32,11 @@ const InputPenjualan = () => {
           {/* </Center> */}
         </Grid.Col>
         <Grid.Col span={12}>
-          <MultiBrand />
+          <MultiBrand
+            arrayBrandLabel={parameterBrand[indeksData]}
+            stateNilai={valueMultiBrand}
+            setNilai={setValueMultiBrand}
+          />
         </Grid.Col>
         <Grid.Col span="auto">
           <Space />

@@ -1,23 +1,36 @@
 import { MultiSelect } from "@mantine/core";
+import { BrandLabel } from "../fitur_state/dataParam";
+import { Dispatch, SetStateAction } from "react";
 
-const MultiBrand = () => {
-  const brandData = [
-    { label: "Adidas", value: "ADI" },
-    { label: "Nike", value: "NIK" },
-  ];
+interface MultiBrandProps {
+  arrayBrandLabel: BrandLabel[];
+  stateNilai: string[];
+  setNilai: Dispatch<SetStateAction<string[]>>;
+}
 
-  const defaultBrand = ["ADI", "NIK"];
-
+const MultiBrand = ({
+  arrayBrandLabel,
+  stateNilai,
+  setNilai,
+}: MultiBrandProps) => {
   return (
     <MultiSelect
-      data={brandData}
+      data={arrayBrandLabel}
       limit={10}
       // valueComponent={renderPilihan}
       // itemComponent={renderItem}
       searchable
-      defaultValue={defaultBrand}
+      nothingFound="Tidak ada brand ditemukan"
+      value={stateNilai}
+      onChange={setNilai}
       placeholder="Pilih Brand"
       label="Brand"
+      clearable
+      transitionProps={{
+        duration: 150,
+        transition: "scale-y",
+        timingFunction: "ease-out",
+      }}
     />
   );
 };

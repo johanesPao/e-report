@@ -1,9 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../state/store";
 
+export interface BrandLabel {
+  label: string;
+  value: string;
+}
+
 export interface dataParamState {
   parameterBc: { [key: string]: { [key: string]: string } };
-  parameterBrand: string[];
+  parameterBrand: BrandLabel[][];
   // ...
 }
 
@@ -20,7 +25,7 @@ const dataParamSlice = createSlice({
     setParameterBc: (state, action: PayloadAction<{}>) => {
       state.parameterBc = action.payload;
     },
-    setParameterBrand: (state, action: PayloadAction<string[]>) => {
+    setParameterBrand: (state, action: PayloadAction<BrandLabel[][]>) => {
       state.parameterBrand = action.payload;
     },
     // ...

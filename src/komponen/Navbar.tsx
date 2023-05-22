@@ -11,13 +11,21 @@ import { appWindow } from "@tauri-apps/api/window";
 
 import { NavigasiPengguna } from "./kontenNavbar/NavigasiPengguna";
 import { NavLinks } from "./kontenNavbar/Navlink";
-import { setSesiAktif, setKonekKeBC, setHalaman } from "../fitur_state/event";
+import {
+  setSesiAktif,
+  setKonekKeBC,
+  setHalaman,
+  setIndeksData,
+} from "../fitur_state/event";
 import {
   setEmailPengguna,
   setNamaPengguna,
   setDepartemenPengguna,
   setPeranPengguna,
+  setCompPengguna,
+  setCompKueri,
 } from "../fitur_state/pengguna";
+import { setParameterBc, setParameterBrand } from "../fitur_state/dataParam";
 
 function NavbarMod({
   onNavlinkClick,
@@ -38,6 +46,11 @@ function NavbarMod({
     dispatch(setPeranPengguna(""));
     dispatch(setKonekKeBC(false));
     dispatch(setHalaman("dashboard"));
+    dispatch(setCompPengguna([]));
+    dispatch(setCompKueri(""));
+    dispatch(setParameterBc({}));
+    dispatch(setParameterBrand([]));
+    dispatch(setIndeksData(0));
   };
 
   const keluarAkun = () => {

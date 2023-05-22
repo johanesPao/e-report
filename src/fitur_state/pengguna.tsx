@@ -7,6 +7,7 @@ export interface PenggunaState {
   departemenPengguna: string;
   peranPengguna: string;
   compPengguna: string[];
+  compKueri: string;
   // ...
 }
 
@@ -16,6 +17,8 @@ const initialState: PenggunaState = {
   departemenPengguna: "",
   peranPengguna: "",
   compPengguna: [],
+  compKueri: "",
+
   // ...
 };
 
@@ -38,6 +41,9 @@ const penggunaSlice = createSlice({
     setCompPengguna: (state, action: PayloadAction<string[]>) => {
       state.compPengguna = action.payload;
     },
+    setCompKueri: (state, action: PayloadAction<string>) => {
+      state.compKueri = action.payload;
+    },
   },
 });
 
@@ -47,6 +53,7 @@ export const {
   setDepartemenPengguna,
   setPeranPengguna,
   setCompPengguna,
+  setCompKueri,
   // ...
 } = penggunaSlice.actions;
 
@@ -60,5 +67,6 @@ export const getPeranPengguna = (state: RootState) =>
   state.pengguna.peranPengguna;
 export const getCompPengguna = (state: RootState) =>
   state.pengguna.compPengguna;
+export const getCompKueri = (state: RootState) => state.pengguna.compKueri;
 
 export default penggunaSlice;

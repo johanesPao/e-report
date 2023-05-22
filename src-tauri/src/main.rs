@@ -54,7 +54,7 @@ async fn inisiasi_bc_ereport() -> Result<String, String> {
 async fn brand_ile(kueri: String) -> Result<String, String> {
     match kueri_bc::parameter_brand(kueri).await {
         Ok(hasil) => {
-            let json = json!({"status": true, "konten": {"brand": hasil}}).to_string();
+            let json = json!({"status": true, "konten": hasil}).to_string();
             Ok(json)
         }
         Err(_) => {
