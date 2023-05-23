@@ -42,6 +42,7 @@ const MultiMC = ({
           transition: "scale-y",
           timingFunction: "ease-out",
         }}
+        mt={15}
       />
       <MultiSelect
         data={arrayGroupLabel}
@@ -58,6 +59,7 @@ const MultiMC = ({
           transition: "scale-y",
           timingFunction: "ease-out",
         }}
+        mt={15}
       />
       <MultiSelect
         data={arrayCatLabel}
@@ -74,6 +76,7 @@ const MultiMC = ({
           transition: "scale-y",
           timingFunction: "ease-out",
         }}
+        mt={15}
       />
     </>
   );
