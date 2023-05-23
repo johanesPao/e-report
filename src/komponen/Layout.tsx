@@ -9,9 +9,8 @@ import {
 import NavbarMod from "./Navbar";
 import { useAppDispatch, useAppSelector } from "../state/hook";
 import { getCompPengguna } from "../fitur_state/pengguna";
-import { getIndeksData, setIndeksData } from "../fitur_state/event";
+import { setIndeksData } from "../fitur_state/event";
 import { useState } from "react";
-import { getParameterBrand } from "../fitur_state/dataParam";
 
 function Layout({
   children,
@@ -21,7 +20,6 @@ function Layout({
   onNavbarLinkClick: (halamanBaru: string) => void;
 }) {
   const compPengguna = useAppSelector(getCompPengguna);
-  const parameterBrand = useAppSelector(getParameterBrand);
   const dispatch = useAppDispatch();
   const [comp, toggleComp] = useState(false);
 
@@ -76,15 +74,13 @@ function Layout({
               theme.colorScheme === "dark"
                 ? theme.colors.dark[8]
                 : theme.colors.gray[0],
+            paddingTop: 50,
+            paddingLeft: 330,
+            paddingRight: 0,
           },
         })}
       >
-        {/* <div
-          id="#drawer-area"
-          style={{ width: "100px", padding: 0, margin: 0 }}
-        > */}
         {children}
-        {/* </div> */}
       </AppShell>
     </>
   );
