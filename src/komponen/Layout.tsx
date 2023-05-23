@@ -77,6 +77,7 @@ function Layout({
             paddingTop: 50,
             paddingLeft: 330,
             paddingRight: 0,
+            paddingBottom: 0,
           },
         })}
       >
