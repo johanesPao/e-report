@@ -34,24 +34,12 @@ const InputPenjualan = () => {
   return (
     <>
       <Grid justify="space-around" mt={12}>
-        <Grid.Col span={12}>
-          <Center>
-            <DatePicker
-              size="sm"
-              type="range"
-              allowSingleDateInRange
-              numberOfColumns={2}
-            />
-          </Center>
-        </Grid.Col>
-        <Grid.Col span={12}>
+        <Grid.Col span={8}>
           <MultiBrand
             arrayBrandLabel={parameterBrand[indeksData]}
             stateNilai={nilaiBrand}
             setNilai={setNilaiBrand}
           />
-        </Grid.Col>
-        <Grid.Col span={12}>
           <MultiMC
             arrayDivLabel={parameterDiv[indeksData]}
             stateDiv={nilaiDiv}
@@ -64,19 +52,35 @@ const InputPenjualan = () => {
             setCat={setNilaiCat}
           />
         </Grid.Col>
+        <Grid.Col span={4}>
+          {/* <Center> */}
+          <DatePicker
+            size="md"
+            type="range"
+            allowSingleDateInRange
+            numberOfColumns={2}
+            pr={0}
+          />
+          {/* </Center> */}
+        </Grid.Col>
         <Grid.Col span="auto">
           <Space />
         </Grid.Col>
-        <Grid.Col span="content">
-          <Button color="red" onClick={() => dispatch(setDrawerTerbuka(false))}>
-            Tutup
-          </Button>
-        </Grid.Col>
-        <Grid.Col span="content">
-          <Button color="teal" leftIcon={<IconDatabase size={24} />}>
-            Tarik Data Penjualan
-          </Button>
-        </Grid.Col>
+        <Center>
+          <Grid.Col span="content">
+            <Button
+              color="red"
+              onClick={() => dispatch(setDrawerTerbuka(false))}
+            >
+              Tutup
+            </Button>
+          </Grid.Col>
+          <Grid.Col span="content">
+            <Button color="teal" leftIcon={<IconDatabase size={24} />}>
+              Tarik Data Penjualan
+            </Button>
+          </Grid.Col>
+        </Center>
       </Grid>
     </>
   );
