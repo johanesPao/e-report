@@ -38,8 +38,15 @@ import {
   setCompPengguna,
   setCompKueri,
 } from "../fitur_state/pengguna";
-import { setParameterBc, setParameterBrand } from "../fitur_state/dataParam";
-import { brandLabel } from "../fungsi/bc";
+import {
+  DataMultiSelect,
+  setParameterBc,
+  setParameterBrand,
+  setParameterCat,
+  setParameterDiv,
+  setParameterGroup,
+} from "../fitur_state/dataParam";
+import { brandLabel, mcLabel } from "../fungsi/bc";
 import latar1 from "../aset/gambar/shoe1.jpg";
 import latar2 from "../aset/gambar/shoe2.jpg";
 import latar3 from "../aset/gambar/shoe3.jpg";
@@ -100,6 +107,78 @@ const Login = () => {
     } catch (e) {
       toggleKoneksiBC(false);
       setBCTersedia(false);
+    }
+  };
+
+  const muatBrand = async (
+    compPengguna: string[],
+    parameterBc: { [key: string]: { [key: string]: string } }
+  ) => {
+    const arrayBrandLabel: DataMultiSelect[][] = [];
+    if (compPengguna.length === 1) {
+      const respon = await brandLabel(
+        parameterBc,
+        parameterBc.tabel_bc[`${compPengguna[0].toLowerCase()}`]
+      );
+      if (respon !== undefined && respon.length !== 0) {
+        arrayBrandLabel.push(respon);
+        dispatch(setParameterBrand(arrayBrandLabel));
+      }
+    } else {
+      const brandLabelPromises = compPengguna.map(async (comp) => {
+        const respon = await brandLabel(
+          parameterBc,
+          parameterBc.tabel_bc[`${comp.toLowerCase()}`]
+        );
+        if (respon !== undefined && respon.length !== 0) {
+          return respon;
+        }
+      });
+
+      const brandLabelJamak = await Promise.all(brandLabelPromises);
+      const brandLabelValid = brandLabelJamak.filter(
+        (hasil): hasil is DataMultiSelect[] => hasil !== undefined
+      );
+      arrayBrandLabel.push(...brandLabelValid);
+      dispatch(setParameterBrand(arrayBrandLabel));
+    }
+  };
+
+  const muatMC = async (
+    compPengguna: string[],
+    parameterBc: { [key: string]: { [key: string]: string } }
+  ) => {
+    if (compPengguna.length === 1) {
+      const respon = await mcLabel(
+        parameterBc,
+        parameterBc.tabel_bc[`${compPengguna[0].toLowerCase()}`]
+      );
+      if (respon !== undefined && respon.length !== 0) {
+        console.log(respon);
+        dispatch(setParameterDiv([respon[0][0]]));
+        dispatch(setParameterGroup([respon[0][1]]));
+        dispatch(setParameterCat([respon[0][2]]));
+      }
+    } else {
+      const mcLabelPromises = compPengguna.map(async (comp) => {
+        const respon = await mcLabel(
+          parameterBc,
+          parameterBc.tabel_bc[`${comp.toLocaleLowerCase()}`]
+        );
+        if (respon !== undefined && respon.length !== 0) {
+          return respon;
+        }
+      });
+
+      const mcLabelJamak = await Promise.all(mcLabelPromises);
+      const mcLabelValid = mcLabelJamak.filter(
+        (hasil): hasil is DataMultiSelect[][][] => hasil !== undefined
+      );
+      dispatch(setParameterDiv([mcLabelValid[0][0][0], mcLabelValid[1][0][0]]));
+      dispatch(
+        setParameterGroup([mcLabelValid[0][0][1], mcLabelValid[1][0][1]])
+      );
+      dispatch(setParameterCat([mcLabelValid[0][0][2], mcLabelValid[1][0][2]]));
     }
   };
 
@@ -175,8 +254,6 @@ const Login = () => {
           if (parameterBc["status"]) {
             dispatch(setParameterBc(parameterBc["konten"]));
             if (hasil["comp"].length === 1) {
-              console.log("executed");
-              console.log(`${hasil["comp"][0].toLowerCase()}`);
               dispatch(
                 setCompKueri(
                   parameterBc["konten"]["tabel_bc"][
@@ -185,6 +262,8 @@ const Login = () => {
                 )
               );
             }
+            await muatBrand(hasil["comp"], parameterBc["konten"]);
+            await muatMC(hasil["comp"], parameterBc["konten"]);
           } else {
             console.log("Gagal menyimpan parameter BC ke dalam redux.");
             return;

@@ -11,21 +11,7 @@ import { appWindow } from "@tauri-apps/api/window";
 
 import { NavigasiPengguna } from "./kontenNavbar/NavigasiPengguna";
 import { NavLinks } from "./kontenNavbar/Navlink";
-import {
-  setSesiAktif,
-  setKonekKeBC,
-  setHalaman,
-  setIndeksData,
-} from "../fitur_state/event";
-import {
-  setEmailPengguna,
-  setNamaPengguna,
-  setDepartemenPengguna,
-  setPeranPengguna,
-  setCompPengguna,
-  setCompKueri,
-} from "../fitur_state/pengguna";
-import { setParameterBc, setParameterBrand } from "../fitur_state/dataParam";
+import { resetAplikasi } from "../fungsi/basic";
 
 function NavbarMod({
   onNavlinkClick,
@@ -38,28 +24,13 @@ function NavbarMod({
   const headerHeight = 50;
   const { height } = useViewportSize();
 
-  const resetAplikasi = () => {
-    dispatch(setSesiAktif(false));
-    dispatch(setNamaPengguna(""));
-    dispatch(setEmailPengguna(""));
-    dispatch(setDepartemenPengguna(""));
-    dispatch(setPeranPengguna(""));
-    dispatch(setKonekKeBC(false));
-    dispatch(setHalaman("dashboard"));
-    dispatch(setCompPengguna([]));
-    dispatch(setCompKueri(""));
-    dispatch(setParameterBc({}));
-    dispatch(setParameterBrand([]));
-    dispatch(setIndeksData(0));
-  };
-
   const keluarAkun = () => {
-    resetAplikasi();
+    resetAplikasi(dispatch);
     navigasi("/");
   };
 
   const keluarAplikasi = () => {
-    resetAplikasi();
+    resetAplikasi(dispatch);
     appWindow.close();
   };
 

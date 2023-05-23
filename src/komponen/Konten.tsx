@@ -14,66 +14,20 @@ import LabaRugiToko from "../halaman/LabaRugiToko";
 import KelayakanTokoBaru from "../halaman/KelayakanTokoBaru";
 
 import { getSesiAktif, getHalaman, setHalaman } from "../fitur_state/event";
-import { getKonekKeBC } from "../fitur_state/event";
-import { getCompKueri, getCompPengguna } from "../fitur_state/pengguna";
-import {
-  BrandLabel,
-  getParameterBc,
-  setParameterBrand,
-} from "../fitur_state/dataParam";
 import { useAppSelector, useAppDispatch } from "../state/hook";
 import { Container } from "@mantine/core";
-import { brandLabel } from "../fungsi/bc";
 
 const Konten = () => {
   const navigasi = useNavigate();
   const dispatch = useAppDispatch();
   const sesiAktif = useAppSelector(getSesiAktif);
   const halaman = useAppSelector(getHalaman);
-  const koneksiBc = useAppSelector(getKonekKeBC);
-  const parameterBc = useAppSelector(getParameterBc);
-  const compKueri = useAppSelector(getCompKueri);
-  const compPengguna = useAppSelector(getCompPengguna);
-
-  const muatBrand = async () => {
-    const arrayBrandLabel: BrandLabel[][] = [];
-    if (compPengguna.length === 1) {
-      const respon = await brandLabel(parameterBc, compKueri);
-      if (respon !== undefined && respon.length !== 0) {
-        arrayBrandLabel.push(respon);
-        dispatch(setParameterBrand(arrayBrandLabel));
-      }
-    } else {
-      const brandLabelPromises = compPengguna.map(async (comp) => {
-        const respon = await brandLabel(
-          parameterBc,
-          parameterBc.tabel_bc[comp.toLowerCase()]
-        );
-        if (respon !== undefined && respon.length !== 0) {
-          return respon;
-        }
-      });
-
-      const brandLabelJamak = await Promise.all(brandLabelPromises);
-      const brandLabelValid = brandLabelJamak.filter(
-        (hasil): hasil is BrandLabel[] => hasil !== undefined
-      );
-      arrayBrandLabel.push(...brandLabelValid);
-      dispatch(setParameterBrand(arrayBrandLabel));
-    }
-  };
 
   useEffect(() => {
     if (!sesiAktif) {
       navigasi("/");
     }
   }, [sesiAktif, navigasi]);
-
-  useEffect(() => {
-    if (koneksiBc) {
-      muatBrand();
-    }
-  }, [koneksiBc]);
 
   const handleNavlinkClick = (halamanBaru: string) => {
     dispatch(setHalaman(halamanBaru));

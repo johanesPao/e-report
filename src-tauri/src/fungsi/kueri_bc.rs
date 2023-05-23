@@ -1,8 +1,6 @@
 use crate::db::mssql;
 
-pub async fn parameter_brand(
-    kueri: String,
-) -> Result<Vec<Vec<String>>, Box<dyn std::error::Error>> {
+pub async fn kueri_umum(kueri: String) -> Result<Vec<Vec<String>>, Box<dyn std::error::Error>> {
     let mut data = Vec::new();
     let hasil_kueri = mssql::kueri(kueri).await?;
     if hasil_kueri[0].len() > 0 {

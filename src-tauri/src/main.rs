@@ -51,15 +51,15 @@ async fn inisiasi_bc_ereport() -> Result<String, String> {
 }
 
 #[tauri::command]
-async fn brand_ile(kueri: String) -> Result<String, String> {
-    match kueri_bc::parameter_brand(kueri).await {
+async fn kueri_data(kueri: String) -> Result<String, String> {
+    match kueri_bc::kueri_umum(kueri).await {
         Ok(hasil) => {
             let json = json!({"status": true, "konten": hasil}).to_string();
             Ok(json)
         }
         Err(_) => {
             let json =
-                json!({"status": false, "konten": "Kesalahan dalam memuat data brand"}).to_string();
+                json!({"status": false, "konten": "Kesalahan dalam memuat data"}).to_string();
             Err(json)
         }
     }
@@ -72,7 +72,7 @@ async fn main() {
             login,
             cek_koneksi_bc,
             inisiasi_bc_ereport,
-            brand_ile
+            kueri_data
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -39,10 +39,8 @@ function Layout({
   const set_comp = (e: boolean) => {
     toggleComp(e);
     if (e) {
-      console.log(parameterBrand[1]);
       dispatch(setIndeksData(1));
     } else {
-      console.log(parameterBrand[0]);
       dispatch(setIndeksData(0));
     }
   };
