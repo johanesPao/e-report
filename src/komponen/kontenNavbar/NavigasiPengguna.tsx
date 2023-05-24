@@ -8,10 +8,10 @@ import {
   rem,
 } from "@mantine/core";
 
-import AvaPengguna from "../aset/gambar/user.png";
+import AvaPengguna from "../../aset/gambar/user.png";
 
-import { useAppSelector } from "../state/hook";
-import { getNamaPengguna, getEmailPengguna } from "../fitur_state/pengguna";
+import { useAppSelector } from "../../state/hook";
+import { getNamaPengguna, getEmailPengguna } from "../../fitur_state/pengguna";
 
 export function NavigasiPengguna() {
   const theme = useMantineTheme();

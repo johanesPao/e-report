@@ -1,4 +1,8 @@
-use mongodb::{bson, Client, Database, options::ClientOptions};
+use mongodb::{
+    bson::{self, Document},
+    options::ClientOptions,
+    Client, Database,
+};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::error::Error;
 
@@ -10,11 +14,12 @@ pub struct Pengguna {
     password: String,
     peran: String,
     departemen: String,
-    email: String
+    email: String,
+    comp: Vec<String>,
 }
 
 async fn buka_koneksi() -> Result<Option<Client>, Box<dyn Error>> {
-    let mongo_url=rahasia::MONGODB_URL;
+    let mongo_url = rahasia::MONGODB_URL;
     let options = ClientOptions::parse(&mongo_url).await?;
     let koneksi_client = Client::with_options(options)?;
 
@@ -28,7 +33,7 @@ async fn bc_database() -> Result<Database, Box<dyn Error>> {
     } else {
         Err(Box::new(mongodb::error::Error::from(std::io::Error::new(
             std::io::ErrorKind::Other,
-            "Connection Error"
+            "Connection Error",
         ))))
     }
 }
@@ -49,5 +54,19 @@ where
         Ok(Some(hasil))
     } else {
         Ok(None)
+    }
+}
+
+pub async fn param_bc() -> Result<Option<Document>, Box<dyn Error>> {
+    let database = bc_database().await?;
+    let koleksi_parameter = database.collection(rahasia::KOLEKSI_PARAMETER);
+
+    let hasil_kueri = koleksi_parameter
+        .find_one(None, None)
+        .await
+        .expect("Kesalahan");
+    match hasil_kueri {
+        Some(dokumen) => Ok(dokumen),
+        None => Ok(None),
     }
 }

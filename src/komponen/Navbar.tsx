@@ -1,11 +1,4 @@
-import {
-  ScrollArea,
-  Navbar,
-  Box,
-  Menu,
-  useMantineTheme,
-  Center,
-} from "@mantine/core";
+import { ScrollArea, Navbar, Box, Menu, useMantineTheme } from "@mantine/core";
 import { useViewportSize } from "@mantine/hooks";
 import {
   IconLogout,
@@ -16,10 +9,9 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../state/hook";
 import { appWindow } from "@tauri-apps/api/window";
 
-import { NavigasiPengguna } from "./NavigasiPengguna";
-import { NavLinks } from "./Navlink";
-import { setSesiAktif } from "../fitur_state/event";
-import { setEmailPengguna, setNamaPengguna } from "../fitur_state/pengguna";
+import { NavigasiPengguna } from "./kontenNavbar/NavigasiPengguna";
+import { NavLinks } from "./kontenNavbar/Navlink";
+import { resetAplikasi } from "../fungsi/basic";
 
 function NavbarMod({
   onNavlinkClick,
@@ -29,29 +21,21 @@ function NavbarMod({
   const theme = useMantineTheme();
   const navigasi = useNavigate();
   const dispatch = useAppDispatch();
+  const headerHeight = 50;
   const { height } = useViewportSize();
 
   const keluarAkun = () => {
-    dispatch(setSesiAktif(false));
-    dispatch(setNamaPengguna(""));
-    dispatch(setEmailPengguna(""));
+    resetAplikasi(dispatch);
     navigasi("/");
   };
 
   const keluarAplikasi = () => {
-    dispatch(setSesiAktif(false));
-    dispatch(setNamaPengguna(""));
-    dispatch(setEmailPengguna(""));
+    resetAplikasi(dispatch);
     appWindow.close();
   };
 
   return (
-    <Navbar height={`${height}`} p="xs" width={{ base: 330 }}>
-      <Navbar.Section mt="xs">
-        <Box>
-          <Center sx={{ fontSize: "30px" }}>e-Report</Center>
-        </Box>
-      </Navbar.Section>
+    <Navbar height={`${height - headerHeight}`} p="xs" width={{ base: 330 }}>
       <Navbar.Section grow component={ScrollArea} mx="-xs" px="xs">
         <Box py="md">
           <NavLinks onLinkClick={onNavlinkClick} />
