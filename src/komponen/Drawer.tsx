@@ -14,8 +14,13 @@ import InputKetersediaanStok from "./kontenDrawer/InputKetersediaanStok";
 import InputBuyingProposal from "./kontenDrawer/InputBuyingProposal";
 import InputLabaRugiToko from "./kontenDrawer/InputLabaRugiToko";
 import { useEffect, useState } from "react";
+import { PropsPenjualan } from "./Konten";
 
-const DrawerInput = () => {
+interface DrawerInputProps {
+  setPenjualan: React.Dispatch<React.SetStateAction<PropsPenjualan>>;
+}
+
+const DrawerInput = ({ setPenjualan }: DrawerInputProps) => {
   const halaman = useAppSelector(getHalaman);
   const drawerTerbuka = useAppSelector(getDrawerTerbuka);
   const dispatch = useAppDispatch();
@@ -50,7 +55,7 @@ const DrawerInput = () => {
   const renderInput = () => {
     switch (halaman) {
       case "penjualan":
-        return <InputPenjualan />;
+        return <InputPenjualan setPenjualan={setPenjualan} />;
       case "penerimaanBarang":
         return <InputPenerimaanBarang />;
       case "stok":
