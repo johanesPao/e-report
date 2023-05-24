@@ -9,7 +9,7 @@ import {
 import NavbarMod from "./Navbar";
 import { useAppDispatch, useAppSelector } from "../state/hook";
 import { getCompPengguna } from "../fitur_state/pengguna";
-import { setIndeksData } from "../fitur_state/event";
+import { getIndeksData, setIndeksData } from "../fitur_state/event";
 import { useState } from "react";
 
 function Layout({
@@ -33,6 +33,8 @@ function Layout({
     },
   }));
   const { classes } = useStyles();
+
+  const indeksData = useAppSelector(getIndeksData);
 
   const set_comp = (e: boolean) => {
     toggleComp(e);
@@ -58,6 +60,7 @@ function Layout({
                   <Switch
                     onLabel={compPengguna[1]}
                     offLabel={compPengguna[0]}
+                    value={indeksData}
                     size="xl"
                     color="red"
                     checked={comp}

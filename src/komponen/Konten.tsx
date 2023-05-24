@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import DrawerInput from "./Drawer";
@@ -17,17 +17,87 @@ import { getSesiAktif, getHalaman, setHalaman } from "../fitur_state/event";
 import { useAppSelector, useAppDispatch } from "../state/hook";
 import { Container } from "@mantine/core";
 
+export interface PropsPenjualan {
+  tglAwal: Date | null;
+  tglAkhir: Date | null;
+  brand: string[];
+  prodDiv: string[];
+  prodGrp: string[];
+  prodCat: string[];
+  SBU?: string[];
+  lokasi?: string[];
+  klasifikasi?: string[];
+  region?: string[];
+}
+
 const Konten = () => {
   const navigasi = useNavigate();
   const dispatch = useAppDispatch();
   const sesiAktif = useAppSelector(getSesiAktif);
   const halaman = useAppSelector(getHalaman);
+  const [penjualan, setPenjualan] = useState<PropsPenjualan>({
+    tglAwal: null,
+    tglAkhir: null,
+    brand: [],
+    prodDiv: [],
+    prodGrp: [],
+    prodCat: [],
+    SBU: [],
+    lokasi: [],
+    klasifikasi: [],
+    region: [],
+  });
+  const [rangeTanggalPenjualan, setRangeTanggalPenjualan] = useState<
+    [Date | null, Date | null]
+  >([null, null]);
+  const [nilaiBrandPenjualan, setNilaiBrandPenjualan] = useState<string[]>([]);
+  const [nilaiDivisiPenjualan, setNilaiDivisiPenjualan] = useState<string[]>(
+    []
+  );
+  const [nilaiGroupPenjualan, setNilaiGroupPenjualan] = useState<string[]>([]);
+  const [nilaiCatPenjualan, setNilaiCatenjualan] = useState<string[]>([]);
+  const [nilaiSBUPenjualan, setNilaiSBUPenjualan] = useState<string[]>([]);
+  const [nilaiLokasiPenjualan, setNilaiLokasiPenjualan] = useState<string[]>(
+    []
+  );
+  const [nilaiKlasifikasiPenjualan, setNilaiKlasifikasiPenjualan] = useState<
+    string[]
+  >([]);
+  const [nilaiRegionPenjualan, setNilaiRegionPenjualan] = useState<string[]>(
+    []
+  );
 
   useEffect(() => {
     if (!sesiAktif) {
       navigasi("/");
     }
   }, [sesiAktif, navigasi]);
+
+  // useEffect(() => {
+  //   setPenjualan((penjualanSebelumnya) => ({
+  //     ...penjualanSebelumnya,
+  //     tglAwal: rangeTanggalPenjualan[0],
+  //     tglAkhir: rangeTanggalPenjualan[1],
+  //     brand: nilaiBrandPenjualan,
+  //     prodDiv: nilaiDivisiPenjualan,
+  //     prodGrp: nilaiGroupPenjualan,
+  //     prodCat: nilaiCatPenjualan,
+  //     SBU: nilaiSBUPenjualan,
+  //     lokasi: nilaiLokasiPenjualan,
+  //     klasifikasi: nilaiKlasifikasiPenjualan,
+  //     region: nilaiRegionPenjualan,
+  //   }));
+  // }, [
+  //   rangeTanggalPenjualan,
+  //   nilaiBrandPenjualan,
+  //   nilaiDivisiPenjualan,
+  //   nilaiGroupPenjualan,
+  //   nilaiCatPenjualan,
+  //   nilaiSBUPenjualan,
+  //   nilaiLokasiPenjualan,
+  //   nilaiKlasifikasiPenjualan,
+  //   nilaiRegionPenjualan,
+  // ]);
 
   const handleNavlinkClick = (halamanBaru: string) => {
     dispatch(setHalaman(halamanBaru));
@@ -36,7 +106,7 @@ const Konten = () => {
   const renderKonten = () => {
     switch (halaman) {
       case "penjualan":
-        return <Penjualan />;
+        return <Penjualan propsPenjualan={penjualan} />;
       case "penerimaanBarang":
         return <PenerimaanBarang />;
       case "stok":
@@ -65,7 +135,7 @@ const Konten = () => {
       >
         {renderKonten()}
       </Container>
-      <DrawerInput />
+      <DrawerInput setPenjualan={setPenjualan} />
     </Layout>
   );
 };

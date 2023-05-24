@@ -1,6 +1,6 @@
 import { Button, Center, Grid, Space } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
-import { IconDatabase } from "@tabler/icons-react";
+import { IconDatabase, IconX } from "@tabler/icons-react";
 
 import { useAppDispatch, useAppSelector } from "../../state/hook";
 import { getIndeksData, setDrawerTerbuka } from "../../fitur_state/event";
@@ -23,8 +23,14 @@ import MultiLokasi from "../MultiLokasi";
 import MultiSBU from "../MultiSBU";
 import MultiKlasifikasi from "../MultiKlasifikasi";
 import MultiRegion from "../MultiRegion";
+import { PropsPenjualan } from "../Konten";
+import { notifications } from "@mantine/notifications";
 
-const InputPenjualan = () => {
+interface InputPenjualanProps {
+  setPenjualan: React.Dispatch<React.SetStateAction<PropsPenjualan>>;
+}
+
+const InputPenjualan = ({ setPenjualan }: InputPenjualanProps) => {
   const dispatch = useAppDispatch();
   const compPengguna = useAppSelector(getCompPengguna);
   const parameterBrand = useAppSelector(getParameterBrand);
@@ -40,7 +46,11 @@ const InputPenjualan = () => {
   const defaultDiv = parameterDiv[indeksData].map((item) => item.value);
   const defaultGroup = parameterGroup[indeksData].map((item) => item.value);
   const defaultCat = parameterCat[indeksData].map((item) => item.value);
-  const [nilaiBrand, setNilaiBrand] = useState(defaultBrand);
+  const [rangeTanggal, setRangeTanggal] = useState<[Date | null, Date | null]>([
+    null,
+    null,
+  ]);
+  const [nilaiBrand, setNilaiInputBrand] = useState(defaultBrand);
   const [nilaiDiv, setNilaiDiv] = useState(defaultDiv);
   const [nilaiGroup, setNilaiGroup] = useState(defaultGroup);
   const [nilaiCat, setNilaiCat] = useState(defaultCat);
@@ -73,6 +83,59 @@ const InputPenjualan = () => {
     [nilaiRegion, setNilaiRegion] = useState(defaultRegion);
   }
 
+  const prosesInput = () => {
+    if (rangeTanggal[0] === null || rangeTanggal[1] === null) {
+      notifications.show({
+        title: "Periode Tanggal Kosong",
+        message: "Harap pilih periode tanggal penarikan data penjualan",
+        autoClose: 3000,
+        color: "red",
+        icon: <IconX size="1.1rem" />,
+        withCloseButton: false,
+      });
+      return;
+    } else if (rangeTanggal[0].toISOString() > rangeTanggal[1].toISOString()) {
+      notifications.show({
+        title: "Periode Tanggal Invalid",
+        message: "Tanggal awal tidak bisa lebih kecil dari tanggal akhir",
+        autoClose: 3000,
+        color: "red",
+        icon: <IconX size="1.1rem" />,
+        withCloseButton: false,
+      });
+      return;
+    }
+    setPenjualan({
+      tglAwal: rangeTanggal[0],
+      tglAkhir: rangeTanggal[1],
+      brand: nilaiBrand,
+      prodDiv: nilaiDiv,
+      prodGrp: nilaiGroup,
+      prodCat: nilaiCat,
+      SBU:
+        (compPengguna.length === 1 && compPengguna[0] === "PRI") ||
+        (compPengguna.length === 2 && indeksData === 0)
+          ? nilaiSBU
+          : [],
+      lokasi:
+        (compPengguna.length === 1 && compPengguna[0] === "PRI") ||
+        (compPengguna.length === 2 && indeksData === 0)
+          ? nilaiLokasi
+          : [],
+      klasifikasi:
+        (compPengguna.length === 1 && compPengguna[0] === "PNT") ||
+        (compPengguna.length === 2 && indeksData === 1)
+          ? nilaiKlasifikasi
+          : [],
+      region:
+        (compPengguna.length === 1 && compPengguna[0] === "PNT") ||
+        (compPengguna.length === 2 && indeksData === 1)
+          ? nilaiRegion
+          : [],
+    });
+    dispatch(setDrawerTerbuka(false));
+  };
+
   return (
     <>
       <Grid justify="space-around" mt={12}>
@@ -80,7 +143,7 @@ const InputPenjualan = () => {
           <MultiBrand
             arrayBrandLabel={parameterBrand[indeksData]}
             stateNilai={nilaiBrand}
-            setNilai={setNilaiBrand}
+            setNilai={setNilaiInputBrand}
           />
           <MultiMC
             arrayDivLabel={parameterDiv[indeksData]}
@@ -99,6 +162,8 @@ const InputPenjualan = () => {
           <DatePicker
             size="md"
             type="range"
+            value={rangeTanggal}
+            onChange={setRangeTanggal}
             allowSingleDateInRange
             numberOfColumns={2}
             pr={0}
@@ -170,7 +235,11 @@ const InputPenjualan = () => {
             </Button>
           </Grid.Col>
           <Grid.Col span="content">
-            <Button color="teal" leftIcon={<IconDatabase size={24} />}>
+            <Button
+              color="teal"
+              leftIcon={<IconDatabase size={24} />}
+              onClick={() => prosesInput()}
+            >
               Tarik Data Penjualan
             </Button>
           </Grid.Col>
