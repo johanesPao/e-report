@@ -4,6 +4,10 @@ import {
   setParameterCat,
   setParameterDiv,
   setParameterGroup,
+  setParameterKlasifikasi,
+  setParameterLokasi,
+  setParameterRegion,
+  setParameterSBU,
 } from "../fitur_state/dataParam";
 import {
   setHalaman,
@@ -46,4 +50,8 @@ export const resetAplikasi = (dispatch: any) => {
   dispatch(setParameterDiv([]));
   dispatch(setParameterGroup([]));
   dispatch(setParameterCat([]));
+  dispatch(setParameterSBU([]));
+  dispatch(setParameterLokasi([]));
+  dispatch(setParameterKlasifikasi([]));
+  dispatch(setParameterRegion([]));
 };

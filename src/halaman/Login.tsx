@@ -45,12 +45,23 @@ import {
   setParameterCat,
   setParameterDiv,
   setParameterGroup,
+  setParameterKlasifikasi,
+  setParameterLokasi,
+  setParameterRegion,
+  setParameterSBU,
 } from "../fitur_state/dataParam";
-import { brandLabel, mcLabel } from "../fungsi/bc";
+import {
+  lokasiLabel,
+  brandLabel,
+  mcLabel,
+  klasifikasiLabel,
+  regionLabel,
+} from "../fungsi/bc";
 import latar1 from "../aset/gambar/shoe1.jpg";
 import latar2 from "../aset/gambar/shoe2.jpg";
 import latar3 from "../aset/gambar/shoe3.jpg";
 import latar4 from "../aset/gambar/shoe4.jpg";
+import { resetAplikasi } from "../fungsi/basic";
 
 const kolamGambar: string[] = [latar1, latar2, latar3, latar4];
 let gambarAcak: number = Math.floor(Math.random() * kolamGambar.length);
@@ -154,7 +165,6 @@ const Login = () => {
         parameterBc.tabel_bc[`${compPengguna[0].toLowerCase()}`]
       );
       if (respon !== undefined && respon.length !== 0) {
-        console.log(respon);
         dispatch(setParameterDiv([respon[0][0]]));
         dispatch(setParameterGroup([respon[0][1]]));
         dispatch(setParameterCat([respon[0][2]]));
@@ -182,17 +192,66 @@ const Login = () => {
     }
   };
 
+  const muatLokasi = async (
+    compPengguna: string[],
+    parameterBc: { [key: string]: { [key: string]: string } }
+  ) => {
+    const respon = await lokasiLabel(
+      parameterBc,
+      parameterBc.tabel_bc[
+        `${
+          compPengguna.length === 1
+            ? compPengguna[0].toLowerCase()
+            : compPengguna[compPengguna.indexOf("PRI")].toLowerCase()
+        }`
+      ]
+    );
+    if (respon !== undefined && respon.length !== 0) {
+      dispatch(setParameterLokasi(respon));
+    }
+  };
+
+  const muatKlasifikasi = async (
+    compPengguna: string[],
+    parameterBc: { [key: string]: { [key: string]: string } }
+  ) => {
+    const respon = await klasifikasiLabel(
+      parameterBc,
+      parameterBc.tabel_bc[
+        `${
+          compPengguna.length === 1
+            ? compPengguna[0].toLowerCase()
+            : compPengguna[compPengguna.indexOf("PNT")].toLowerCase()
+        }`
+      ]
+    );
+    if (respon !== undefined && respon.length !== 0) {
+      dispatch(setParameterKlasifikasi(respon));
+    }
+  };
+
+  const muatRegion = async (
+    compPengguna: string[],
+    parameterBc: { [key: string]: { [key: string]: string } }
+  ) => {
+    const respon = await regionLabel(
+      parameterBc,
+      parameterBc.tabel_bc[
+        `${
+          compPengguna.length === 1
+            ? compPengguna[0].toLowerCase()
+            : compPengguna[compPengguna.indexOf("PNT")].toLowerCase()
+        }`
+      ]
+    );
+    if (respon !== undefined && respon.length !== 0) {
+      dispatch(setParameterRegion(respon));
+    }
+  };
+
   useEffect(() => {
     // reset semua state
-    dispatch(setNamaPengguna(""));
-    dispatch(setEmailPengguna(""));
-    dispatch(setDepartemenPengguna(""));
-    dispatch(setPeranPengguna(""));
-    dispatch(setCompPengguna([]));
-    dispatch(setProsesAuth(false));
-    dispatch(setAuthGagal(false));
-    dispatch(setSesiAktif(false));
-
+    resetAplikasi(dispatch);
     bc_tersedia();
   }, []);
 
@@ -262,8 +321,42 @@ const Login = () => {
                 )
               );
             }
-            await muatBrand(hasil["comp"], parameterBc["konten"]);
-            await muatMC(hasil["comp"], parameterBc["konten"]);
+            try {
+              // inisiasi data brand
+              await muatBrand(hasil["comp"], parameterBc["konten"]);
+              // inisiasi data mc
+              await muatMC(hasil["comp"], parameterBc["konten"]);
+              // inisiasi data Lokasi & SBU jika PRI
+              if (
+                (hasil["comp"].length === 1 && hasil["comp"][0] === "PRI") ||
+                hasil["comp"].includes("PRI")
+              ) {
+                let arraySBU: DataMultiSelect[] = [];
+                parameterBc["konten"]["sbu"].map((sbu: string) => {
+                  arraySBU.push({ label: sbu, value: sbu });
+                });
+                dispatch(setParameterSBU(arraySBU));
+                await muatLokasi(hasil["comp"], parameterBc["konten"]);
+              }
+              // inisiasi data Klasifikasi & Region jika PNT
+              if (
+                (hasil["comp"].length === 1 && hasil["comp"][0] === "PNT") ||
+                hasil["comp"].includes("PNT")
+              ) {
+                await muatKlasifikasi(hasil["comp"], parameterBc["konten"]);
+                await muatRegion(hasil["comp"], parameterBc["konten"]);
+              }
+            } catch (e) {
+              resetAplikasi(dispatch);
+              notifications.show({
+                title: "Kesalahan",
+                message: `Terjadi kesalahan dalam proses inisiasi data: [${e}]`,
+                autoClose: 3000,
+                color: "red",
+                icon: <IconX size="1.1rem" />,
+                withCloseButton: false,
+              });
+            }
           } else {
             console.log("Gagal menyimpan parameter BC ke dalam redux.");
             return;

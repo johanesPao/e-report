@@ -103,3 +103,91 @@ export const mcLabel = async (parameterBc: any, comp: string) => {
     console.log(e);
   }
 };
+
+export const lokasiLabel = async (parameterBc: any, comp: string) => {
+  const kueri: string = `
+    SELECT DISTINCT
+      ${parameterBc.kolom_bc.loc_code} AS [Kode Lokasi]
+    FROM [${comp}${parameterBc.tabel_bc.jurnal_item_437}]
+    WHERE
+      ${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.sales_prefix}' AND
+      ${parameterBc.kolom_bc.brand_dim} != '' AND
+      ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
+  `;
+
+  // tarik data lokasi
+  try {
+    console.log(kueri);
+    const respon: string = await invoke("kueri_data", {
+      kueri,
+    });
+    const hasil = JSON.parse(respon);
+    if (hasil["status"]) {
+      let arrLokasiLabel: DataMultiSelect[] = [];
+      hasil["konten"].map((data: string) =>
+        arrLokasiLabel.push({ label: data[0], value: data[0] })
+      );
+      return arrLokasiLabel;
+    }
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const klasifikasiLabel = async (parameterBc: any, comp: string) => {
+  const kueri: string = `
+    SELECT DISTINCT
+      ${parameterBc.kolom_bc.kode} AS [Kode Klasifikasi],
+      ${parameterBc.kolom_bc.name} AS [Deskripsi Klasifikasi]
+    FROM [${comp}${parameterBc.tabel_bc.dim_val_437}]
+    WHERE
+      ${parameterBc.kolom_bc.dim_code} = '${parameterBc.argumen_bc.classification}'
+  `;
+
+  // tarik data klasifikasi
+  try {
+    console.log(kueri);
+    const respon: string = await invoke("kueri_data", {
+      kueri,
+    });
+    const hasil = JSON.parse(respon);
+    if (hasil["status"]) {
+      let arrKlasifikasiLabel: DataMultiSelect[] = [];
+      hasil["konten"].map((data: string) =>
+        arrKlasifikasiLabel.push({ label: toTitle(data[1]), value: data[0] })
+      );
+      return arrKlasifikasiLabel;
+    }
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const regionLabel = async (parameterBc: any, comp: string) => {
+  const kueri: string = `
+    SELECT DISTINCT
+      ${parameterBc.kolom_bc.kode} AS [Kode Region],
+      ${parameterBc.kolom_bc.name} AS [Deskripsi Region]
+    FROM [${comp}${parameterBc.tabel_bc.dim_val_437}]
+    WHERE
+      ${parameterBc.kolom_bc.dim_code} = '${parameterBc.argumen_bc.region}'
+  `;
+
+  // tarik data region
+  try {
+    console.log(kueri);
+    const respon: string = await invoke("kueri_data", {
+      kueri,
+    });
+    const hasil = JSON.parse(respon);
+    if (hasil["status"]) {
+      let arrRegionLabel: DataMultiSelect[] = [];
+      hasil["konten"].map((data: string) =>
+        arrRegionLabel.push({ label: toTitle(data[1]), value: data[0] })
+      );
+      return arrRegionLabel;
+    }
+  } catch (e) {
+    console.log(e);
+  }
+};

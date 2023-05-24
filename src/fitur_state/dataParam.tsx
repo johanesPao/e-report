@@ -7,11 +7,15 @@ export interface DataMultiSelect {
 }
 
 export interface dataParamState {
-  parameterBc: { [key: string]: { [key: string]: string } };
+  parameterBc: {};
   parameterBrand: DataMultiSelect[][];
   parameterDiv: DataMultiSelect[][];
   parameterGroup: DataMultiSelect[][];
   parameterCat: DataMultiSelect[][];
+  parameterSBU: DataMultiSelect[];
+  parameterLokasi: DataMultiSelect[];
+  parameterKlasifikasi: DataMultiSelect[];
+  parameterRegion: DataMultiSelect[];
   // ...
 }
 
@@ -21,6 +25,10 @@ const initialState: dataParamState = {
   parameterDiv: [],
   parameterGroup: [],
   parameterCat: [],
+  parameterSBU: [],
+  parameterLokasi: [],
+  parameterKlasifikasi: [],
+  parameterRegion: [],
   // ...
 };
 
@@ -43,6 +51,21 @@ const dataParamSlice = createSlice({
     setParameterCat: (state, action: PayloadAction<DataMultiSelect[][]>) => {
       state.parameterCat = action.payload;
     },
+    setParameterSBU: (state, action: PayloadAction<DataMultiSelect[]>) => {
+      state.parameterSBU = action.payload;
+    },
+    setParameterLokasi: (state, action: PayloadAction<DataMultiSelect[]>) => {
+      state.parameterLokasi = action.payload;
+    },
+    setParameterKlasifikasi: (
+      state,
+      action: PayloadAction<DataMultiSelect[]>
+    ) => {
+      state.parameterKlasifikasi = action.payload;
+    },
+    setParameterRegion: (state, action: PayloadAction<DataMultiSelect[]>) => {
+      state.parameterRegion = action.payload;
+    },
     // ...
   },
 });
@@ -53,6 +76,10 @@ export const {
   setParameterDiv,
   setParameterGroup,
   setParameterCat,
+  setParameterSBU,
+  setParameterLokasi,
+  setParameterKlasifikasi,
+  setParameterRegion,
   // ...
 } = dataParamSlice.actions;
 
@@ -65,5 +92,13 @@ export const getParameterGroup = (state: RootState) =>
   state.dataParam.parameterGroup;
 export const getParameterCat = (state: RootState) =>
   state.dataParam.parameterCat;
+export const getParameterSBU = (state: RootState) =>
+  state.dataParam.parameterSBU;
+export const getParameterLokasi = (state: RootState) =>
+  state.dataParam.parameterLokasi;
+export const getParameterKlasifikasi = (state: RootState) =>
+  state.dataParam.parameterKlasifikasi;
+export const getParameterRegion = (state: RootState) =>
+  state.dataParam.parameterRegion;
 
 export default dataParamSlice;

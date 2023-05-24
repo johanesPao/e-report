@@ -2,27 +2,27 @@ import { MultiSelect } from "@mantine/core";
 import { DataMultiSelect } from "../fitur_state/dataParam";
 import { Dispatch, SetStateAction } from "react";
 
-interface MultiBrandProps {
-  arrayBrandLabel: DataMultiSelect[];
+interface MultiRegionProps {
+  arrayRegionLabel: DataMultiSelect[];
   stateNilai: string[];
   setNilai: Dispatch<SetStateAction<string[]>>;
 }
 
-const MultiBrand = ({
-  arrayBrandLabel,
+const MultiRegion = ({
+  arrayRegionLabel,
   stateNilai,
   setNilai,
-}: MultiBrandProps) => {
+}: MultiRegionProps) => {
   return (
     <MultiSelect
-      data={arrayBrandLabel}
+      data={arrayRegionLabel}
       limit={10}
       searchable
-      nothingFound="Tidak ada brand ditemukan"
+      nothingFound="Tidak ada region ditemukan"
       value={stateNilai}
       onChange={setNilai}
-      placeholder="Pilih Brand"
-      label="Brand"
+      placeholder="Pilih Region"
+      label="Region"
       clearable
       transitionProps={{
         duration: 150,
@@ -34,4 +34,4 @@ const MultiBrand = ({
   );
 };
 
-export default MultiBrand;
+export default MultiRegion;
