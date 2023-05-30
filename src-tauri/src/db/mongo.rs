@@ -3,20 +3,11 @@ use mongodb::{
     options::ClientOptions,
     Client, Database,
 };
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::de::DeserializeOwned;
 use std::error::Error;
 
 use crate::fungsi::rahasia;
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Pengguna {
-    nama: String,
-    password: String,
-    peran: String,
-    departemen: String,
-    email: String,
-    comp: Vec<String>,
-}
+use crate::struktur::Pengguna;
 
 async fn buka_koneksi() -> Result<Option<Client>, Box<dyn Error>> {
     let mongo_url = rahasia::MONGODB_URL;

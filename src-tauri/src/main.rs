@@ -1,7 +1,9 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use polars::prelude::*;
 use serde_json::{self, json};
+use struktur::DataFrameSerial;
 
 use crate::db::mongo;
 use crate::db::mssql;
@@ -9,6 +11,7 @@ use crate::fungsi::{kueri_bc, rahasia};
 
 mod db;
 mod fungsi;
+mod struktur;
 
 #[tauri::command]
 async fn login(nama: String, kata_kunci: String) -> Result<String, String> {
@@ -65,6 +68,25 @@ async fn kueri_data(kueri: String) -> Result<String, String> {
     }
 }
 
+#[tauri::command]
+async fn handle_data_penjualan(kueri: String) -> Result<String, String> {
+    match kueri_bc::kueri_penjualan(kueri).await {
+        Ok(hasil) => {
+            let data_penjualan = json!({"status": true, "konten": hasil}).to_string();
+            let vektor_series = hasil.ke_serial();
+            let df = DataFrame::new(vektor_series);
+
+            println!("{:?}", df);
+
+            Ok(data_penjualan)
+        }
+        Err(_) => {
+            let json = json!({"status": false, "konten": "Kesalahan dalam memuat"}).to_string();
+            Err(json)
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() {
     tauri::Builder::default()
@@ -72,7 +94,8 @@ async fn main() {
             login,
             cek_koneksi_bc,
             inisiasi_bc_ereport,
-            kueri_data
+            kueri_data,
+            handle_data_penjualan
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
