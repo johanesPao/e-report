@@ -7,7 +7,9 @@ export interface DataMultiSelect {
 }
 
 export interface dataParamState {
-  parameterBc: {};
+  parameterBc: {
+    [key: string]: any;
+  };
   parameterBrand: DataMultiSelect[][];
   parameterDiv: DataMultiSelect[][];
   parameterGroup: DataMultiSelect[][];

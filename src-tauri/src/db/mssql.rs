@@ -36,7 +36,7 @@ pub async fn cek_koneksi_bc(
     Ok(())
 }
 
-pub async fn kueri(kueri: String) -> Result<Vec<Vec<Row>>, Box<dyn std::error::Error>> {
+pub async fn eksekusi_kueri(kueri: String) -> Result<Vec<Vec<Row>>, Box<dyn std::error::Error>> {
     let mut klien = buka_koneksi_bc(
         rahasia::BC_IP,
         rahasia::BC_PORT,

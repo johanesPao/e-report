@@ -10,7 +10,7 @@ export const brandLabel = async (parameterBc: any, comp: string) => {
     FROM [${comp}${parameterBc.tabel_bc.jurnal_item_437}] AS a
     LEFT JOIN [${comp}${parameterBc.tabel_bc.dim_val_437}] AS b
     ON
-      a.${parameterBc.kolom_bc.brand_dim} = b.${parameterBc.kolom_bc.kode} AND
+      a.${parameterBc.kolom_bc.brand_dim} = b.${parameterBc.kolom_bc.code} AND
       b.${parameterBc.kolom_bc.dim_code} = '${parameterBc.argumen_bc.brand}'
     WHERE
       a.${parameterBc.kolom_bc.brand_dim} != '' AND
@@ -20,7 +20,7 @@ export const brandLabel = async (parameterBc: any, comp: string) => {
   // tarik data brand
   try {
     console.log(kueri);
-    const respon: string = await invoke("kueri_data", {
+    const respon: string = await invoke("kueri_sederhana", {
       kueri,
     });
     const hasil = JSON.parse(respon);
@@ -45,7 +45,7 @@ export const mcLabel = async (parameterBc: any, comp: string) => {
     FROM [${comp}${parameterBc.tabel_bc.jurnal_item_a21}] AS a
     LEFT JOIN [${comp}${parameterBc.tabel_bc.dim_val_437}] AS b
     ON
-      a.${parameterBc.kolom_bc.prod_div} = b.${parameterBc.kolom_bc.kode} AND
+      a.${parameterBc.kolom_bc.prod_div} = b.${parameterBc.kolom_bc.code} AND
       b.${parameterBc.kolom_bc.dim_code} = '${parameterBc.argumen_bc.prod_div}'
     WHERE
       a.${parameterBc.kolom_bc.prod_div} != ''
@@ -57,7 +57,7 @@ export const mcLabel = async (parameterBc: any, comp: string) => {
     FROM [${comp}${parameterBc.tabel_bc.jurnal_item_a21}] AS a
     LEFT JOIN [${comp}${parameterBc.tabel_bc.dim_val_437}] AS b
     ON
-      a.${parameterBc.kolom_bc.prod_group} = b.${parameterBc.kolom_bc.kode} AND
+      a.${parameterBc.kolom_bc.prod_group} = b.${parameterBc.kolom_bc.code} AND
       b.${parameterBc.kolom_bc.dim_code} = '${parameterBc.argumen_bc.prod_group}'
     WHERE
       a.${parameterBc.kolom_bc.prod_group} != ''
@@ -69,7 +69,7 @@ export const mcLabel = async (parameterBc: any, comp: string) => {
     FROM [${comp}${parameterBc.tabel_bc.jurnal_item_a21}] AS a
     LEFT JOIN [${comp}${parameterBc.tabel_bc.dim_val_437}] AS b
     ON
-      a.${parameterBc.kolom_bc.prod_cat} = b.${parameterBc.kolom_bc.kode} AND
+      a.${parameterBc.kolom_bc.prod_cat} = b.${parameterBc.kolom_bc.code} AND
       b.${parameterBc.kolom_bc.dim_code} = '${parameterBc.argumen_bc.prod_cat}'
     WHERE
       a.${parameterBc.kolom_bc.prod_cat} != ''
@@ -81,7 +81,9 @@ export const mcLabel = async (parameterBc: any, comp: string) => {
     let arrMcLabel: DataMultiSelect[][][] = [];
     const mcLabelPromises = kueri.map(async (kueriItem) => {
       console.log(kueriItem);
-      const respon: string = await invoke("kueri_data", { kueri: kueriItem });
+      const respon: string = await invoke("kueri_sederhana", {
+        kueri: kueriItem,
+      });
       const hasil = JSON.parse(respon);
       if (hasil !== undefined && hasil.length !== 0) {
         // destrukturisasi dan labeling
@@ -118,7 +120,7 @@ export const lokasiLabel = async (parameterBc: any, comp: string) => {
   // tarik data lokasi
   try {
     console.log(kueri);
-    const respon: string = await invoke("kueri_data", {
+    const respon: string = await invoke("kueri_sederhana", {
       kueri,
     });
     const hasil = JSON.parse(respon);
@@ -137,7 +139,7 @@ export const lokasiLabel = async (parameterBc: any, comp: string) => {
 export const klasifikasiLabel = async (parameterBc: any, comp: string) => {
   const kueri: string = `
     SELECT DISTINCT
-      ${parameterBc.kolom_bc.kode} AS [Kode Klasifikasi],
+      ${parameterBc.kolom_bc.code} AS [Kode Klasifikasi],
       ${parameterBc.kolom_bc.name} AS [Deskripsi Klasifikasi]
     FROM [${comp}${parameterBc.tabel_bc.dim_val_437}]
     WHERE
@@ -147,7 +149,7 @@ export const klasifikasiLabel = async (parameterBc: any, comp: string) => {
   // tarik data klasifikasi
   try {
     console.log(kueri);
-    const respon: string = await invoke("kueri_data", {
+    const respon: string = await invoke("kueri_sederhana", {
       kueri,
     });
     const hasil = JSON.parse(respon);
@@ -166,7 +168,7 @@ export const klasifikasiLabel = async (parameterBc: any, comp: string) => {
 export const regionLabel = async (parameterBc: any, comp: string) => {
   const kueri: string = `
     SELECT DISTINCT
-      ${parameterBc.kolom_bc.kode} AS [Kode Region],
+      ${parameterBc.kolom_bc.code} AS [Kode Region],
       ${parameterBc.kolom_bc.name} AS [Deskripsi Region]
     FROM [${comp}${parameterBc.tabel_bc.dim_val_437}]
     WHERE
@@ -176,7 +178,7 @@ export const regionLabel = async (parameterBc: any, comp: string) => {
   // tarik data region
   try {
     console.log(kueri);
-    const respon: string = await invoke("kueri_data", {
+    const respon: string = await invoke("kueri_sederhana", {
       kueri,
     });
     const hasil = JSON.parse(respon);

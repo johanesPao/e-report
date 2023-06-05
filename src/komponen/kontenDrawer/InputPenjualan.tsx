@@ -8,6 +8,7 @@ import { getIndeksData, setDrawerTerbuka } from "../../fitur_state/event";
 import MultiBrand from "../MultiBrand";
 import MultiMC from "../MultiMC";
 import {
+  getParameterBc,
   getParameterBrand,
   getParameterCat,
   getParameterDiv,
@@ -33,6 +34,7 @@ interface InputPenjualanProps {
 const InputPenjualan = ({ setPenjualan }: InputPenjualanProps) => {
   const dispatch = useAppDispatch();
   const compPengguna = useAppSelector(getCompPengguna);
+  const parameterBc = useAppSelector(getParameterBc);
   const parameterBrand = useAppSelector(getParameterBrand);
   const parameterDiv = useAppSelector(getParameterDiv);
   const parameterGroup = useAppSelector(getParameterGroup);
@@ -69,7 +71,7 @@ const InputPenjualan = ({ setPenjualan }: InputPenjualanProps) => {
     | React.Dispatch<React.SetStateAction<string[]>>
     | undefined;
   if (
-    (compPengguna.length === 1 && compPengguna[0] === "PRI") ||
+    (compPengguna.length === 1 && compPengguna[0] === parameterBc.comp.pri) ||
     (compPengguna.length === 2 && indeksData === 0)
   ) {
     const defaultLokasi = parameterLokasi.map((item) => item.value);
@@ -113,22 +115,26 @@ const InputPenjualan = ({ setPenjualan }: InputPenjualanProps) => {
       prodGrp: nilaiGroup,
       prodCat: nilaiCat,
       SBU:
-        (compPengguna.length === 1 && compPengguna[0] === "PRI") ||
+        (compPengguna.length === 1 &&
+          compPengguna[0] === parameterBc.comp.pri) ||
         (compPengguna.length === 2 && indeksData === 0)
           ? nilaiSBU
           : [],
       lokasi:
-        (compPengguna.length === 1 && compPengguna[0] === "PRI") ||
+        (compPengguna.length === 1 &&
+          compPengguna[0] === parameterBc.comp.pri) ||
         (compPengguna.length === 2 && indeksData === 0)
           ? nilaiLokasi
           : [],
       klasifikasi:
-        (compPengguna.length === 1 && compPengguna[0] === "PNT") ||
+        (compPengguna.length === 1 &&
+          compPengguna[0] === parameterBc.comp.pnt) ||
         (compPengguna.length === 2 && indeksData === 1)
           ? nilaiKlasifikasi
           : [],
       region:
-        (compPengguna.length === 1 && compPengguna[0] === "PNT") ||
+        (compPengguna.length === 1 &&
+          compPengguna[0] === parameterBc.comp.pnt) ||
         (compPengguna.length === 2 && indeksData === 1)
           ? nilaiRegion
           : [],
@@ -170,7 +176,8 @@ const InputPenjualan = ({ setPenjualan }: InputPenjualanProps) => {
           />
           {/* </Center> */}
         </Grid.Col>
-        {(compPengguna.length === 1 && compPengguna.includes("PRI")) ||
+        {(compPengguna.length === 1 &&
+          compPengguna.includes(parameterBc.comp.pri)) ||
         (compPengguna.length === 2 && indeksData === 0) ? (
           <>
             <Grid.Col span={12}>
@@ -195,7 +202,8 @@ const InputPenjualan = ({ setPenjualan }: InputPenjualanProps) => {
             </Grid.Col>
           </>
         ) : null}
-        {(compPengguna.length === 1 && compPengguna.includes("PNT")) ||
+        {(compPengguna.length === 1 &&
+          compPengguna.includes(parameterBc.comp.pnt)) ||
         (compPengguna.length === 2 && indeksData === 1) ? (
           <>
             <Grid.Col span={12}>

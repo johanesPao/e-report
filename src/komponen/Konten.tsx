@@ -47,57 +47,12 @@ const Konten = () => {
     klasifikasi: [],
     region: [],
   });
-  const [rangeTanggalPenjualan, setRangeTanggalPenjualan] = useState<
-    [Date | null, Date | null]
-  >([null, null]);
-  const [nilaiBrandPenjualan, setNilaiBrandPenjualan] = useState<string[]>([]);
-  const [nilaiDivisiPenjualan, setNilaiDivisiPenjualan] = useState<string[]>(
-    []
-  );
-  const [nilaiGroupPenjualan, setNilaiGroupPenjualan] = useState<string[]>([]);
-  const [nilaiCatPenjualan, setNilaiCatenjualan] = useState<string[]>([]);
-  const [nilaiSBUPenjualan, setNilaiSBUPenjualan] = useState<string[]>([]);
-  const [nilaiLokasiPenjualan, setNilaiLokasiPenjualan] = useState<string[]>(
-    []
-  );
-  const [nilaiKlasifikasiPenjualan, setNilaiKlasifikasiPenjualan] = useState<
-    string[]
-  >([]);
-  const [nilaiRegionPenjualan, setNilaiRegionPenjualan] = useState<string[]>(
-    []
-  );
 
   useEffect(() => {
     if (!sesiAktif) {
       navigasi("/");
     }
   }, [sesiAktif, navigasi]);
-
-  // useEffect(() => {
-  //   setPenjualan((penjualanSebelumnya) => ({
-  //     ...penjualanSebelumnya,
-  //     tglAwal: rangeTanggalPenjualan[0],
-  //     tglAkhir: rangeTanggalPenjualan[1],
-  //     brand: nilaiBrandPenjualan,
-  //     prodDiv: nilaiDivisiPenjualan,
-  //     prodGrp: nilaiGroupPenjualan,
-  //     prodCat: nilaiCatPenjualan,
-  //     SBU: nilaiSBUPenjualan,
-  //     lokasi: nilaiLokasiPenjualan,
-  //     klasifikasi: nilaiKlasifikasiPenjualan,
-  //     region: nilaiRegionPenjualan,
-  //   }));
-  // }, [
-  //   rangeTanggalPenjualan,
-  //   nilaiBrandPenjualan,
-  //   nilaiDivisiPenjualan,
-  //   nilaiGroupPenjualan,
-  //   nilaiCatPenjualan,
-  //   nilaiSBUPenjualan,
-  //   nilaiLokasiPenjualan,
-  //   nilaiKlasifikasiPenjualan,
-  //   nilaiRegionPenjualan,
-  // ]);
 
   const handleNavlinkClick = (halamanBaru: string) => {
     dispatch(setHalaman(halamanBaru));

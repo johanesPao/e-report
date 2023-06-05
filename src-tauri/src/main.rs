@@ -3,7 +3,7 @@
 
 use polars::prelude::*;
 use serde_json::{self, json};
-use struktur::DataFrameSerial;
+use struktur::*;
 
 use crate::db::mongo;
 use crate::db::mssql;
@@ -54,7 +54,7 @@ async fn inisiasi_bc_ereport() -> Result<String, String> {
 }
 
 #[tauri::command]
-async fn kueri_data(kueri: String) -> Result<String, String> {
+async fn kueri_sederhana(kueri: String) -> Result<String, String> {
     match kueri_bc::kueri_umum(kueri).await {
         Ok(hasil) => {
             let json = json!({"status": true, "konten": hasil}).to_string();
@@ -69,22 +69,85 @@ async fn kueri_data(kueri: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-async fn handle_data_penjualan(kueri: String) -> Result<String, String> {
-    match kueri_bc::kueri_penjualan(kueri).await {
-        Ok(hasil) => {
-            let data_penjualan = json!({"status": true, "konten": hasil}).to_string();
-            let vektor_series = hasil.ke_serial();
-            let df = DataFrame::new(vektor_series);
-
-            println!("{:?}", df);
-
-            Ok(data_penjualan)
-        }
-        Err(_) => {
-            let json = json!({"status": false, "konten": "Kesalahan dalam memuat"}).to_string();
-            Err(json)
+async fn handle_data_penjualan(set_kueri: Vec<Kueri<'_>>) -> Result<String, String> {
+    for kueri in set_kueri {
+        println!("Melakukan kueri {}", kueri.judul);
+        match kueri_bc::kueri_penjualan(kueri).await {
+            Ok(hasil) => match hasil {
+                HasilKueri::DataILEEnum(vektor_data) => {
+                    // Konversi vektor struct hasil kueri ke dalam dataframe polars
+                    println!("Konversi DataILE ke polars");
+                    let vektor_series = vektor_data.ke_series();
+                    let df_ile = DataFrame::new(vektor_series);
+                    println!("{:?}", df_ile);
+                }
+                HasilKueri::DataSalespersonRegionILEEnum(vektor_data) => {
+                    println!("Konversi DataSalespersonRegion ke polars");
+                    let vektor_series = vektor_data.ke_series();
+                    let df_salespersonregion = DataFrame::new(vektor_series);
+                    println!("{:?}", df_salespersonregion);
+                }
+                HasilKueri::DataTokoILEEnum(vektor_data) => {
+                    println!("Konversi DataToko ke polars");
+                    let vektor_series = vektor_data.ke_series();
+                    let df_toko = DataFrame::new(vektor_series);
+                    println!("{:?}", df_toko);
+                }
+                HasilKueri::DataProdukILEEnum(vektor_data) => {
+                    println!("Konversi DataProduk ke polars");
+                    let vektor_series = vektor_data.ke_series();
+                    let df_produk = DataFrame::new(vektor_series);
+                    println!("{:?}", df_produk);
+                }
+                HasilKueri::DataVatILEEnum(vektor_data) => {
+                    println!("Konversi DataVAT ke polars");
+                    let vektor_series = vektor_data.ke_series();
+                    let df_vat = DataFrame::new(vektor_series);
+                    println!("{:?}", df_vat);
+                }
+                HasilKueri::DataPromoILEEnum(vektor_data) => {
+                    println!("Konversi DataPromo ke polars");
+                    let vektor_series = vektor_data.ke_series();
+                    let df_promo = DataFrame::new(vektor_series);
+                    println!("{:?}", df_promo);
+                }
+                HasilKueri::DataDiskonILEEnum(vektor_data) => {
+                    println!("Konversi DataDiskon ke polars");
+                    let vektor_series = vektor_data.ke_series();
+                    let df_diskon = DataFrame::new(vektor_series);
+                    println!("{:?}", df_diskon);
+                }
+                HasilKueri::DataDokumenLainnyaILEEnum(vektor_data) => {
+                    println!("Konversi DataDokumenLainnya ke polars");
+                    let vektor_series = vektor_data.ke_series();
+                    let df_dok_lainnya = DataFrame::new(vektor_series);
+                    println!("{:?}", df_dok_lainnya);
+                }
+                HasilKueri::DataKuantitasILEEnum(vektor_data) => {
+                    println!("Konversi DataKuantitas ke polars");
+                    let vektor_series = vektor_data.ke_series();
+                    let df_kuantitas = DataFrame::new(vektor_series);
+                    println!("{:?}", df_kuantitas);
+                }
+                HasilKueri::DataCPPUILEEnum(vektor_data) => {
+                    println!("Konversi DataCPPU ke polars");
+                    let vektor_series = vektor_data.ke_series();
+                    let df_cppu = DataFrame::new(vektor_series);
+                    println!("{:?}", df_cppu);
+                }
+                HasilKueri::DataRPPUILEEnum(vektor_data) => {
+                    println!("Konversi DataRPPU ke polars");
+                    let vektor_series = vektor_data.ke_series();
+                    let df_rppu = DataFrame::new(vektor_series);
+                    println!("{:?}", df_rppu);
+                }
+            },
+            Err(_) => {
+                let json = json!({"status": false, "konten": "Kesalahan dalam memuat"}).to_string();
+            }
         }
     }
+    Ok(json!({"status": true, "konten": "on progress"}).to_string())
 }
 
 #[tokio::main]
@@ -94,7 +157,7 @@ async fn main() {
             login,
             cek_koneksi_bc,
             inisiasi_bc_ereport,
-            kueri_data,
+            kueri_sederhana,
             handle_data_penjualan
         ])
         .run(tauri::generate_context!())
