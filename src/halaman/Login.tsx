@@ -202,7 +202,9 @@ const Login = () => {
         `${
           compPengguna.length === 1
             ? compPengguna[0].toLowerCase()
-            : compPengguna[compPengguna.indexOf("PRI")].toLowerCase()
+            : compPengguna[
+                compPengguna.indexOf(parameterBc.comp.pri)
+              ].toLowerCase()
         }`
       ]
     );
@@ -221,7 +223,9 @@ const Login = () => {
         `${
           compPengguna.length === 1
             ? compPengguna[0].toLowerCase()
-            : compPengguna[compPengguna.indexOf("PNT")].toLowerCase()
+            : compPengguna[
+                compPengguna.indexOf(parameterBc.comp.pnt)
+              ].toLowerCase()
         }`
       ]
     );
@@ -240,7 +244,9 @@ const Login = () => {
         `${
           compPengguna.length === 1
             ? compPengguna[0].toLowerCase()
-            : compPengguna[compPengguna.indexOf("PNT")].toLowerCase()
+            : compPengguna[
+                compPengguna.indexOf(parameterBc.comp.pnt)
+              ].toLowerCase()
         }`
       ]
     );
@@ -299,10 +305,10 @@ const Login = () => {
       dispatch(setAuthGagal(false));
       dispatch(setSesiAktif(true));
       dispatch(setNamaPengguna(nama));
-      dispatch(setEmailPengguna(hasil["email"]));
-      dispatch(setDepartemenPengguna(hasil["departemen"]));
-      dispatch(setPeranPengguna(hasil["peran"]));
-      dispatch(setCompPengguna(hasil["comp"]));
+      dispatch(setEmailPengguna(hasil.email));
+      dispatch(setDepartemenPengguna(hasil.departemen));
+      dispatch(setPeranPengguna(hasil.peran));
+      dispatch(setCompPengguna(hasil.comp));
       if (koneksiBC) {
         dispatch(setKonekKeBC(true));
         let parameterBc;
@@ -310,41 +316,41 @@ const Login = () => {
         try {
           const respon: string = await invoke("inisiasi_bc_ereport");
           parameterBc = JSON.parse(respon);
-          if (parameterBc["status"]) {
-            dispatch(setParameterBc(parameterBc["konten"]));
-            if (hasil["comp"].length === 1) {
+          if (parameterBc.status) {
+            dispatch(setParameterBc(parameterBc.konten));
+            if (hasil.comp.length === 1) {
               dispatch(
                 setCompKueri(
-                  parameterBc["konten"]["tabel_bc"][
-                    `${hasil["comp"][0].toLowerCase()}`
-                  ]
+                  parameterBc.konten.tabel_bc[`${hasil.comp[0].toLowerCase()}`]
                 )
               );
             }
             try {
               // inisiasi data brand
-              await muatBrand(hasil["comp"], parameterBc["konten"]);
+              await muatBrand(hasil.comp, parameterBc.konten);
               // inisiasi data mc
-              await muatMC(hasil["comp"], parameterBc["konten"]);
+              await muatMC(hasil.comp, parameterBc.konten);
               // inisiasi data Lokasi & SBU jika PRI
               if (
-                (hasil["comp"].length === 1 && hasil["comp"][0] === "PRI") ||
-                hasil["comp"].includes("PRI")
+                (hasil.comp.length === 1 &&
+                  hasil.comp[0] === parameterBc.konten.comp.pri) ||
+                hasil.comp.includes(parameterBc.konten.comp.pri)
               ) {
                 let arraySBU: DataMultiSelect[] = [];
-                parameterBc["konten"]["sbu"].map((sbu: string) => {
+                parameterBc.konten.sbu.map((sbu: string) => {
                   arraySBU.push({ label: sbu, value: sbu });
                 });
                 dispatch(setParameterSBU(arraySBU));
-                await muatLokasi(hasil["comp"], parameterBc["konten"]);
+                await muatLokasi(hasil.comp, parameterBc.konten);
               }
               // inisiasi data Klasifikasi & Region jika PNT
               if (
-                (hasil["comp"].length === 1 && hasil["comp"][0] === "PNT") ||
-                hasil["comp"].includes("PNT")
+                (hasil.comp.length === 1 &&
+                  hasil.comp[0] === parameterBc.konten.comp.pnt) ||
+                hasil.comp.includes(parameterBc.konten.comp.pnt)
               ) {
-                await muatKlasifikasi(hasil["comp"], parameterBc["konten"]);
-                await muatRegion(hasil["comp"], parameterBc["konten"]);
+                await muatKlasifikasi(hasil.comp, parameterBc.konten);
+                await muatRegion(hasil.comp, parameterBc.konten);
               }
             } catch (e) {
               resetAplikasi(dispatch);
@@ -367,9 +373,9 @@ const Login = () => {
       }
       LogRocket.identify(nama, {
         name: nama,
-        email: hasil["email"],
-        departemen: hasil["departemen"],
-        peran: hasil["peran"],
+        email: hasil.email,
+        departemen: hasil.departemen,
+        peran: hasil.peran,
       });
       notifications.show({
         title: "Login Sukses",

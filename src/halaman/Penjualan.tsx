@@ -15,7 +15,7 @@ const Penjualan = ({ propsPenjualan }: { propsPenjualan: PropsPenjualan }) => {
         aksiRedux={dispatch}
         warna="teal"
       />
-      {/* <div>Nilai Tgl Awal: {`${propsPenjualan.tglAwal}`}</div>
+      <div>Nilai Tgl Awal: {`${propsPenjualan.tglAwal}`}</div>
       <div>Nilai Tgl Akhir: {`${propsPenjualan.tglAkhir}`}</div>
       <div>Nilai Brand: {`${propsPenjualan.brand}`}</div>
       <div>Nilai Produk Divisi: {`${propsPenjualan.prodDiv}`}</div>
@@ -24,7 +24,7 @@ const Penjualan = ({ propsPenjualan }: { propsPenjualan: PropsPenjualan }) => {
       <div>Nilai SBU: {`${propsPenjualan.SBU}`}</div>
       <div>Nilai Lokasi: {`${propsPenjualan.lokasi}`}</div>
       <div>Nilai Klasifikasi: {`${propsPenjualan.klasifikasi}`}</div>
-      <div>Nilai Region: {`${propsPenjualan.region}`}</div> */}
+      <div>Nilai Region: {`${propsPenjualan.region}`}</div>
     </>
   );
 };
