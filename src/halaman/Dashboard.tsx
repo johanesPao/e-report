@@ -17,28 +17,39 @@ import {
   tokoByILEPostDate,
   vatByILEPostDate,
 } from "../fungsi/kueri";
+import { getIndeksData } from "../fitur_state/event";
 
 const Dashboard = () => {
   const parameterBc = useAppSelector(getParameterBc);
   const compPengguna = useAppSelector(getCompPengguna);
-  const compKueri = useAppSelector(getCompKueri);
+  let compKueri = useAppSelector(getCompKueri);
+  const indeksData = useAppSelector(getIndeksData);
   const tglAwal: string = "2023-04-01";
   const tglAkhir: string = "2023-04-30";
 
   const tarik = async () => {
     try {
+      console.log(compKueri);
+      const singleMode: boolean = compPengguna.length === 1;
+      if (!singleMode) {
+        compKueri = parameterBc.tabel_bc[`${
+          indeksData ? 
+          parameterBc.comp.pnt.toLowerCase() : 
+          parameterBc.comp.pri.toLowerCase()
+        }`]
+      }
       const arrKueri: setKueri[] = [
-        ILEByPostDate(parameterBc, tglAwal, tglAkhir),
-        salespersonAndRegionByILEPostDate(parameterBc, tglAwal, tglAkhir),
-        tokoByILEPostDate(parameterBc, tglAwal, tglAkhir),
-        produkByILEPostDate(parameterBc, tglAwal, tglAkhir),
-        vatByILEPostDate(parameterBc, tglAwal, tglAkhir),
-        promoByILEPostDate(parameterBc, tglAwal, tglAkhir),
-        diskonByILEPostDate(parameterBc, tglAwal, tglAkhir),
-        dokumenLainnyaByILEPostDate(parameterBc, tglAwal, tglAkhir),
-        quantityByILEPostDate(parameterBc, tglAwal, tglAkhir),
-        cppuByILEPostDate(parameterBc, tglAwal, tglAkhir),
-        rppuByILEPostDate(parameterBc, tglAwal, tglAkhir),
+        ILEByPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+        salespersonAndRegionByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+        tokoByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+        produkByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+        vatByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+        promoByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+        diskonByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+        dokumenLainnyaByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+        quantityByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+        cppuByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+        rppuByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
       ];
 
       const respon: string = await invoke("handle_data_penjualan", {

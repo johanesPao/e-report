@@ -6,8 +6,17 @@ export interface setKueri {
 export const ILEByPostDate = (
   parameterBc: { [key: string]: any },
   tglAwal: string,
-  tglAkhir: string
+  tglAkhir: string,
+  compKueri: string
 ) => {
+  const eksklusi: string = compKueri === parameterBc.tabel_bc[`${parameterBc.comp.pnt.toLowerCase()}`] ?
+   `
+  AND 
+  ${parameterBc.kolom_bc.source_no} != '${parameterBc.argumen_bc.cust_sample}' AND
+  ${parameterBc.kolom_bc.source_no} != '${parameterBc.argumen_bc.cust_marketing}'
+  ` :
+  ``;
+  
   let setKueri: setKueri = {
     judul: "ILEByPostDate",
     kueri: `
@@ -22,7 +31,7 @@ export const ILEByPostDate = (
     ${parameterBc.kolom_bc.brand_dim} [Brand],
     ${parameterBc.kolom_bc.oricode} [OriCode],
     ${parameterBc.kolom_bc.size} [Ukuran]
-    FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+    FROM [${compKueri}${
       parameterBc.tabel_bc.jurnal_item_437
     }]
     WHERE
@@ -34,7 +43,7 @@ export const ILEByPostDate = (
     ${parameterBc.kolom_bc.brand_dim} != '' AND
     ${parameterBc.kolom_bc.oricode} NOT LIKE '${
       parameterBc.argumen_bc.item_service_prefix
-    }'
+    }' ${eksklusi}
     `,
   };
   console.log(setKueri.kueri);
@@ -44,7 +53,8 @@ export const ILEByPostDate = (
 export const salespersonAndRegionByILEPostDate = (
   parameterBc: { [key: string]: any },
   tglAwal: string,
-  tglAkhir: string
+  tglAkhir: string,
+  compKueri: string
 ) => {
   let setKueri: setKueri = {
     judul: "salespersonAndRegionByILEPostDate",
@@ -53,7 +63,7 @@ export const salespersonAndRegionByILEPostDate = (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no_entry} [No. Entri],
         ${parameterBc.kolom_bc.dim_set_id} [ID Set Dimensi]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.jurnal_item_437
     }]
     WHERE
@@ -70,7 +80,7 @@ export const salespersonAndRegionByILEPostDate = (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.dim_set_id} [ID Set Dimensi],
         ${parameterBc.kolom_bc.dim_val_code} [Nilai Dimensi]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.dim_set_entry_437
     }]
     WHERE
@@ -79,7 +89,7 @@ export const salespersonAndRegionByILEPostDate = (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.dim_set_id} [ID Set Dimensi],
         ${parameterBc.kolom_bc.dim_val_code} [Nilai Dimensi]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.dim_set_entry_437
     }]
       WHERE
@@ -107,7 +117,8 @@ export const salespersonAndRegionByILEPostDate = (
 export const tokoByILEPostDate = (
   parameterBc: { [key: string]: any },
   tglAwal: string,
-  tglAkhir: string
+  tglAkhir: string,
+  compKueri: string
 ) => {
   let setKueri: setKueri = {
     judul: "tokoByILEPostDate",
@@ -115,7 +126,7 @@ export const tokoByILEPostDate = (
     WITH ile AS (
       SELECT DISTINCT
       ${parameterBc.kolom_bc.store_dim} [Dimensi Toko]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.jurnal_item_437
     }]
       WHERE
@@ -132,7 +143,7 @@ export const tokoByILEPostDate = (
         SELECT DISTINCT
           ${parameterBc.kolom_bc.code} [Kode Toko],
           ${parameterBc.kolom_bc.name} [Toko]
-        FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+        FROM [${compKueri}${
       parameterBc.tabel_bc.dim_val_437
     }]
       )
@@ -151,7 +162,8 @@ export const tokoByILEPostDate = (
 export const produkByILEPostDate = (
   parameterBc: { [key: string]: any },
   tglAwal: string,
-  tglAkhir: string
+  tglAkhir: string,
+  compKueri: string
 ) => {
   let setKueri: setKueri = {
     judul: "produkByILEPostDate",
@@ -159,7 +171,7 @@ export const produkByILEPostDate = (
     WITH ile AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.oricode} [OriCode]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.jurnal_item_437
     }]
     WHERE
@@ -177,7 +189,7 @@ export const produkByILEPostDate = (
         ${parameterBc.kolom_bc.no} [OriCode],
         ${parameterBc.kolom_bc.desc} [Deskripsi Produk],
         ${parameterBc.kolom_bc.color_desc} [Deskripsi Warna]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.master_item_437
     }]
     ), mc AS (
@@ -188,7 +200,7 @@ export const produkByILEPostDate = (
         ${parameterBc.kolom_bc.prod_cat} [Kategori Produk],
         ${parameterBc.kolom_bc.period} [Period],
         ${parameterBc.kolom_bc.season} [Season]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.master_item_a21
     }]
     )
@@ -215,7 +227,8 @@ export const produkByILEPostDate = (
 export const vatByILEPostDate = (
   parameterBc: { [key: string]: any },
   tglAwal: string,
-  tglAkhir: string
+  tglAkhir: string,
+  compKueri: string
 ) => {
   let setKueri: setKueri = {
     judul: "vatByILEPostDate",
@@ -225,7 +238,7 @@ export const vatByILEPostDate = (
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.oricode} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.jurnal_item_437
     }]
     WHERE
@@ -243,7 +256,7 @@ export const vatByILEPostDate = (
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.vat_bus_post_group} [BPG PPN],
         ${parameterBc.kolom_bc.vat_prod_post_group} [PPG PPN]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.vat_entry_437
     }]
       WHERE
@@ -258,7 +271,7 @@ export const vatByILEPostDate = (
         ${parameterBc.kolom_bc.vat_bus_post_group} [BPG PPN],
         ${parameterBc.kolom_bc.vat_prod_post_group} [PPG PPN],
         ${parameterBc.kolom_bc.vat} [PPN]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.vat_post_setup_437
     }]
     ), shipment_doc_vat AS (
@@ -267,7 +280,7 @@ export const vatByILEPostDate = (
         ${parameterBc.kolom_bc.no} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran],
         ${parameterBc.kolom_bc.vat} [PPN]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.sales_shipment_437
     }]
     ), retur_doc_vat AS (
@@ -276,7 +289,7 @@ export const vatByILEPostDate = (
         ${parameterBc.kolom_bc.no} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran],
         ${parameterBc.kolom_bc.vat} [PPN]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.ret_receipt_437
     }]
     )
@@ -312,7 +325,8 @@ export const vatByILEPostDate = (
 export const promoByILEPostDate = (
   parameterBc: { [key: string]: any },
   tglAwal: string,
-  tglAkhir: string
+  tglAkhir: string,
+  compKueri: string
 ) => {
   let setKueri: setKueri = {
     judul: "promoByILEPostDate",
@@ -320,7 +334,7 @@ export const promoByILEPostDate = (
     WITH ile AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no_entry} [No. Entri]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.jurnal_item_437
     }]
     WHERE
@@ -337,14 +351,14 @@ export const promoByILEPostDate = (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no_entry} [No. Entri],
         ${parameterBc.kolom_bc.lsc_offer_no} [Kode Promo]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.jurnal_item_5ec
     }]
     ), promo AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no} [Kode Promo],
         ${parameterBc.kolom_bc.desc} [Nama Promo]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.disc_map_5ec
     }]
     )
@@ -365,7 +379,8 @@ export const promoByILEPostDate = (
 export const diskonByILEPostDate = (
   parameterBc: { [key: string]: any },
   tglAwal: string,
-  tglAkhir: string
+  tglAkhir: string,
+  compKueri: string
 ) => {
   let setKueri: setKueri = {
     judul: "diskonByILEPostDate",
@@ -375,7 +390,7 @@ export const diskonByILEPostDate = (
         ${parameterBc.kolom_bc.no_entry} [No. Entri],
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.doc_line_no} [Baris Dokumen]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.jurnal_item_437
     }]
     WHERE
@@ -397,7 +412,7 @@ export const diskonByILEPostDate = (
           ABS(SUM(${parameterBc.kolom_bc.sales_amount_actual})),
           0
         ) [Diskon]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.va_entry_437
     }]
       WHERE
@@ -414,7 +429,7 @@ export const diskonByILEPostDate = (
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.line_no} [Nomor Baris],
         ${parameterBc.kolom_bc.line_disc} / 100 [Diskon]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.sales_shipment_437
     }]
     ), retur_doc AS (
@@ -422,7 +437,7 @@ export const diskonByILEPostDate = (
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.line_no} [Nomor Baris],
         ${parameterBc.kolom_bc.line_disc} / 100 [Diskon]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.ret_receipt_437
     }]
     )
@@ -467,7 +482,8 @@ export const diskonByILEPostDate = (
 export const dokumenLainnyaByILEPostDate = (
   parameterBc: { [key: string]: any },
   tglAwal: string,
-  tglAkhir: string
+  tglAkhir: string,
+  compKueri: string
 ) => {
   let setKueri: setKueri = {
     judul: "dokumenLainnyaByILEPostDate",
@@ -475,11 +491,11 @@ export const dokumenLainnyaByILEPostDate = (
     SELECT DISTINCT
         ile.${parameterBc.kolom_bc.no_entry} [No. Entri],
         va_entry.${parameterBc.kolom_bc.no_doc} [No. Dokumen 2]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.jurnal_item_437
     }] AS ile
       LEFT JOIN [${
-        parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]
+        compKueri
       }${parameterBc.tabel_bc.va_entry_437}] AS va_entry
         ON ile.${parameterBc.kolom_bc.no_entry} = va_entry.${
       parameterBc.kolom_bc.ile_entry_no
@@ -497,7 +513,8 @@ export const dokumenLainnyaByILEPostDate = (
 export const quantityByILEPostDate = (
   parameterBc: { [key: string]: any },
   tglAwal: string,
-  tglAkhir: string
+  tglAkhir: string,
+  compKueri: string
 ) => {
   let setKueri: setKueri = {
     judul: "quantityByILEPostDate",
@@ -505,7 +522,7 @@ export const quantityByILEPostDate = (
     SELECT DISTINCT
         ${parameterBc.kolom_bc.no_entry} [No. Entri],
         SUM(${parameterBc.kolom_bc.quantity}) [Kuantitas]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.jurnal_item_437
     }]
       WHERE
@@ -529,7 +546,8 @@ export const quantityByILEPostDate = (
 export const cppuByILEPostDate = (
   parameterBc: { [key: string]: any },
   tglAwal: string,
-  tglAkhir: string
+  tglAkhir: string,
+  compKueri: string
 ) => {
   let setKueri: setKueri = {
     judul: "cppuByILEPostDate",
@@ -537,7 +555,7 @@ export const cppuByILEPostDate = (
     WITH ile AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no_entry} [No. Entri]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.jurnal_item_437
     }]
     WHERE
@@ -562,7 +580,7 @@ export const cppuByILEPostDate = (
         SUM(${
           parameterBc.kolom_bc.sales_amount_actual
         }) [Total Sales at Retail Aft. VAT]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.va_entry_437
     }]
       GROUP BY
@@ -586,7 +604,8 @@ export const cppuByILEPostDate = (
 export const rppuByILEPostDate = (
   parameterBc: { [key: string]: any },
   tglAwal: string,
-  tglAkhir: string
+  tglAkhir: string,
+  compKueri: string
 ) => {
   let setKueri: setKueri = {
     judul: "rppuByILEPostDate",
@@ -599,7 +618,7 @@ export const rppuByILEPostDate = (
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.oricode} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran]
-    FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+    FROM [${compKueri}${
       parameterBc.tabel_bc.jurnal_item_437
     }]
     WHERE
@@ -619,7 +638,7 @@ export const rppuByILEPostDate = (
         ${parameterBc.kolom_bc.trans_no} [No. Transaksi],
         ${parameterBc.kolom_bc.oricode} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.store_sales_stat_5ec
     }]
     ), lsctse AS (
@@ -629,7 +648,7 @@ export const rppuByILEPostDate = (
         ${parameterBc.kolom_bc.oricode} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran],
         ${parameterBc.kolom_bc.price} [Retail Price per Unit]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.store_sales_entry_5ec
     }]
     ), shipment AS (
@@ -638,7 +657,7 @@ export const rppuByILEPostDate = (
         ${parameterBc.kolom_bc.no} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran],
         ${parameterBc.kolom_bc.unit_price} [Retail Price per Unit]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.sales_shipment_437
     }]
     ), retur AS (
@@ -647,7 +666,7 @@ export const rppuByILEPostDate = (
         ${parameterBc.kolom_bc.no} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran],
         ${parameterBc.kolom_bc.unit_price} [Retail Price per Unit]
-      FROM [${parameterBc.tabel_bc[`${parameterBc.comp.pri.toLowerCase()}`]}${
+      FROM [${compKueri}${
       parameterBc.tabel_bc.ret_receipt_437
     }]
     )

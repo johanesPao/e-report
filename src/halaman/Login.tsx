@@ -25,6 +25,7 @@ import {
   setProsesAuth,
   setAuthGagal,
   setSesiAktif,
+  setIndeksData,
   getAuthGagal,
   getProsesAuth,
   setKonekKeBC,
@@ -36,7 +37,7 @@ import {
   setDepartemenPengguna,
   setPeranPengguna,
   setCompPengguna,
-  setCompKueri,
+  setCompKueri
 } from "../fitur_state/pengguna";
 import {
   DataMultiSelect,
@@ -324,6 +325,8 @@ const Login = () => {
                   parameterBc.konten.tabel_bc[`${hasil.comp[0].toLowerCase()}`]
                 )
               );
+            } else {
+              dispatch(setIndeksData(0));
             }
             try {
               // inisiasi data brand
