@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Button, Center, Grid, Space } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { DatePicker } from "@mantine/dates";
 import { IconDatabase, IconX } from "@tabler/icons-react";
 
@@ -18,20 +20,22 @@ import {
   getParameterRegion,
   getParameterSBU,
 } from "../../fitur_state/dataParam";
-import { useState } from "react";
 import { getCompPengguna } from "../../fitur_state/pengguna";
 import MultiLokasi from "../MultiLokasi";
 import MultiSBU from "../MultiSBU";
 import MultiKlasifikasi from "../MultiKlasifikasi";
 import MultiRegion from "../MultiRegion";
 import { PropsPenjualan } from "../Konten";
-import { notifications } from "@mantine/notifications";
 
 interface InputPenjualanProps {
   setPenjualan: React.Dispatch<React.SetStateAction<PropsPenjualan>>;
+  setMuatDataPenjualan: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const InputPenjualan = ({ setPenjualan }: InputPenjualanProps) => {
+const InputPenjualan = ({
+  setPenjualan,
+  setMuatDataPenjualan,
+}: InputPenjualanProps) => {
   const dispatch = useAppDispatch();
   const compPengguna = useAppSelector(getCompPengguna);
   const parameterBc = useAppSelector(getParameterBc);
@@ -139,6 +143,7 @@ const InputPenjualan = ({ setPenjualan }: InputPenjualanProps) => {
           ? nilaiRegion
           : [],
     });
+    setMuatDataPenjualan(true);
     dispatch(setDrawerTerbuka(false));
   };
 

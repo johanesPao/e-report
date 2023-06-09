@@ -1,11 +1,107 @@
+import { useEffect } from "react";
+import { invoke } from "@tauri-apps/api/tauri";
+
 import { useAppDispatch, useAppSelector } from "../state/hook";
-import { getKonekKeBC } from "../fitur_state/event";
+import { getIndeksData, getKonekKeBC } from "../fitur_state/event";
 import { TombolDrawer } from "../komponen/TombolDrawer";
 import { PropsPenjualan } from "../komponen/Konten";
+import {
+  ILEByPostDate,
+  cppuByILEPostDate,
+  diskonByILEPostDate,
+  dokumenLainnyaByILEPostDate,
+  produkByILEPostDate,
+  promoByILEPostDate,
+  quantityByILEPostDate,
+  rppuByILEPostDate,
+  salespersonAndRegionByILEPostDate,
+  setKueri,
+  tokoByILEPostDate,
+  vatByILEPostDate,
+} from "../fungsi/kueri";
+import { getParameterBc } from "../fitur_state/dataParam";
+import { getCompKueri, getCompPengguna } from "../fitur_state/pengguna";
 
-const Penjualan = ({ propsPenjualan }: { propsPenjualan: PropsPenjualan }) => {
+const Penjualan = ({
+  propsPenjualan,
+  propsMuatDataPenjualan,
+}: {
+  propsPenjualan: PropsPenjualan;
+  propsMuatDataPenjualan: boolean;
+}) => {
   const dispatch = useAppDispatch();
   const konekKeBc = useAppSelector(getKonekKeBC);
+  const parameterBc = useAppSelector(getParameterBc);
+  const compPengguna = useAppSelector(getCompPengguna);
+  let compKueri = useAppSelector(getCompKueri);
+  const indeksData = useAppSelector(getIndeksData);
+
+  useEffect(() => {
+    async function tarik_data_penjualan() {
+      const singleMode: boolean = compPengguna.length === 1;
+      let compPRI: boolean;
+      let tglAwal: string;
+      let tglAkhir: string;
+      let arrKueri: setKueri[];
+
+      if (!singleMode) {
+        compKueri =
+          parameterBc.tabel_bc[
+            `${
+              indeksData
+                ? parameterBc.comp.pnt.toLowerCase()
+                : parameterBc.comp.pri.toLowerCase()
+            }`
+          ];
+        compPRI = indeksData == 0;
+      } else {
+        compPRI = compPengguna[0] === parameterBc.comp.pri;
+      }
+
+      if (propsPenjualan.tglAwal !== null && propsPenjualan.tglAkhir !== null) {
+        tglAwal = propsPenjualan.tglAwal.toISOString().split("T")[0];
+        tglAkhir = propsPenjualan.tglAkhir.toISOString().split("T")[0];
+        arrKueri = [
+          ILEByPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+          salespersonAndRegionByILEPostDate(
+            parameterBc,
+            tglAwal,
+            tglAkhir,
+            compKueri
+          ),
+          tokoByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+          produkByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+          vatByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+          promoByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+          diskonByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+          dokumenLainnyaByILEPostDate(
+            parameterBc,
+            tglAwal,
+            tglAkhir,
+            compKueri
+          ),
+          quantityByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+          cppuByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+          rppuByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+        ];
+
+        try {
+          const respon: string = await invoke("handle_data_penjualan", {
+            setKueri: arrKueri,
+            rppu: compPRI,
+          });
+          const hasil = JSON.parse(respon);
+          console.log(hasil);
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    }
+
+    if (propsMuatDataPenjualan) {
+      tarik_data_penjualan();
+    }
+  }, [propsPenjualan]);
 
   return (
     <>
@@ -25,6 +121,11 @@ const Penjualan = ({ propsPenjualan }: { propsPenjualan: PropsPenjualan }) => {
       <div>Nilai Lokasi: {`${propsPenjualan.lokasi}`}</div>
       <div>Nilai Klasifikasi: {`${propsPenjualan.klasifikasi}`}</div>
       <div>Nilai Region: {`${propsPenjualan.region}`}</div>
+      {propsMuatDataPenjualan ? (
+        <div>Memuat data penjualan</div>
+      ) : (
+        <div>Menunggu instruksi</div>
+      )}
     </>
   );
 };

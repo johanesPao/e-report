@@ -47,6 +47,7 @@ const Konten = () => {
     klasifikasi: [],
     region: [],
   });
+  const [muatDataPenjualan, setMuatDataPenjualan] = useState(false);
 
   useEffect(() => {
     if (!sesiAktif) {
@@ -61,7 +62,12 @@ const Konten = () => {
   const renderKonten = () => {
     switch (halaman) {
       case "penjualan":
-        return <Penjualan propsPenjualan={penjualan} />;
+        return (
+          <Penjualan
+            propsPenjualan={penjualan}
+            propsMuatDataPenjualan={muatDataPenjualan}
+          />
+        );
       case "penerimaanBarang":
         return <PenerimaanBarang />;
       case "stok":
@@ -90,7 +96,10 @@ const Konten = () => {
       >
         {renderKonten()}
       </Container>
-      <DrawerInput setPenjualan={setPenjualan} />
+      <DrawerInput
+        setPenjualan={setPenjualan}
+        setMuatDataPenjualan={setMuatDataPenjualan}
+      />
     </Layout>
   );
 };

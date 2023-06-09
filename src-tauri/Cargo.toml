@@ -23,7 +23,7 @@ futures = "0.3.28"
 tokio = "1.28.0"
 tiberius = { version = "0.12.2", features = ["chrono"] }    
 tokio-util = "0.7.8"
-polars = { git = "https://github.com/pola-rs/polars", features = ["lazy"] }
+polars = { git = "https://github.com/pola-rs/polars", features = ["lazy", "serde"] }
 lazy_static = "1.4.0"
 tokio-stream = "0.1.14"
 chrono="0.4.24"
