@@ -18,9 +18,13 @@ import { PropsPenjualan } from "./Konten";
 
 interface DrawerInputProps {
   setPenjualan: React.Dispatch<React.SetStateAction<PropsPenjualan>>;
+  setMuatDataPenjualan: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const DrawerInput = ({ setPenjualan }: DrawerInputProps) => {
+const DrawerInput = ({
+  setPenjualan,
+  setMuatDataPenjualan,
+}: DrawerInputProps) => {
   const halaman = useAppSelector(getHalaman);
   const drawerTerbuka = useAppSelector(getDrawerTerbuka);
   const dispatch = useAppDispatch();
@@ -55,7 +59,12 @@ const DrawerInput = ({ setPenjualan }: DrawerInputProps) => {
   const renderInput = () => {
     switch (halaman) {
       case "penjualan":
-        return <InputPenjualan setPenjualan={setPenjualan} />;
+        return (
+          <InputPenjualan
+            setPenjualan={setPenjualan}
+            setMuatDataPenjualan={setMuatDataPenjualan}
+          />
+        );
       case "penerimaanBarang":
         return <InputPenerimaanBarang />;
       case "stok":

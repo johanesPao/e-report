@@ -3,11 +3,12 @@
 
 use polars::prelude::*;
 use serde_json::{self, json};
-use struktur::*;
+use tokio::io::{AsyncWriteExt, BufWriter};
 
 use crate::db::mongo;
 use crate::db::mssql;
 use crate::fungsi::{kueri_bc, rahasia};
+use struktur::*;
 
 mod db;
 mod fungsi;
@@ -69,7 +70,7 @@ async fn kueri_sederhana(kueri: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-async fn handle_data_penjualan(set_kueri: Vec<Kueri<'_>>) -> Result<String, String> {
+async fn handle_data_penjualan(set_kueri: Vec<Kueri<'_>>, rppu: bool) -> Result<String, String> {
     let mut df_utama: DataFrame = DataFrame::default();
     let mut vektor_dataframe: Vec<DataFrame> = Vec::new();
     for kueri in set_kueri {
@@ -80,83 +81,96 @@ async fn handle_data_penjualan(set_kueri: Vec<Kueri<'_>>) -> Result<String, Stri
                     // Konversi vektor struct hasil kueri ke dalam dataframe polars
                     println!("Konversi DataILE ke polars");
                     let vektor_series = vektor_data.ke_series();
-                    let df_ile = DataFrame::new(vektor_series).expect("Gagal membuat dataframe ILE");
+                    let df_ile =
+                        DataFrame::new(vektor_series).expect("Gagal membuat dataframe ILE");
                     df_utama = df_ile;
                     println!("{:?}", df_utama);
                 }
                 HasilKueri::DataSalespersonRegionILEEnum(vektor_data) => {
                     println!("Konversi DataSalespersonRegion ke polars");
                     let vektor_series = vektor_data.ke_series();
-                    let df_salespersonregion = DataFrame::new(vektor_series).expect("Gagal membuat dataframe salespersonregion");
+                    let df_salespersonregion = DataFrame::new(vektor_series)
+                        .expect("Gagal membuat dataframe salespersonregion");
                     println!("{:?}", df_salespersonregion);
                     vektor_dataframe.push(df_salespersonregion);
                 }
                 HasilKueri::DataTokoILEEnum(vektor_data) => {
                     println!("Konversi DataToko ke polars");
                     let vektor_series = vektor_data.ke_series();
-                    let df_toko = DataFrame::new(vektor_series).expect("Gagal membuat dataframe toko");
+                    let df_toko =
+                        DataFrame::new(vektor_series).expect("Gagal membuat dataframe toko");
                     println!("{:?}", df_toko);
                     vektor_dataframe.push(df_toko);
                 }
                 HasilKueri::DataProdukILEEnum(vektor_data) => {
                     println!("Konversi DataProduk ke polars");
                     let vektor_series = vektor_data.ke_series();
-                    let df_produk = DataFrame::new(vektor_series).expect("Gagal membuat dataframe produk");
+                    let df_produk =
+                        DataFrame::new(vektor_series).expect("Gagal membuat dataframe produk");
                     println!("{:?}", df_produk);
                     vektor_dataframe.push(df_produk);
                 }
                 HasilKueri::DataVatILEEnum(vektor_data) => {
                     println!("Konversi DataVAT ke polars");
                     let vektor_series = vektor_data.ke_series();
-                    let df_vat = DataFrame::new(vektor_series).expect("Gagal membuat dataframe VAT");
+                    let df_vat =
+                        DataFrame::new(vektor_series).expect("Gagal membuat dataframe VAT");
                     println!("{:?}", df_vat);
                     vektor_dataframe.push(df_vat);
                 }
                 HasilKueri::DataPromoILEEnum(vektor_data) => {
                     println!("Konversi DataPromo ke polars");
                     let vektor_series = vektor_data.ke_series();
-                    let df_promo = DataFrame::new(vektor_series).expect("Gagal membuat dataframe promo");
+                    let df_promo =
+                        DataFrame::new(vektor_series).expect("Gagal membuat dataframe promo");
                     println!("{:?}", df_promo);
                     vektor_dataframe.push(df_promo);
                 }
                 HasilKueri::DataDiskonILEEnum(vektor_data) => {
                     println!("Konversi DataDiskon ke polars");
                     let vektor_series = vektor_data.ke_series();
-                    let df_diskon = DataFrame::new(vektor_series).expect("Gagal membuat dataframe diskon");
+                    let df_diskon =
+                        DataFrame::new(vektor_series).expect("Gagal membuat dataframe diskon");
                     println!("{:?}", df_diskon);
                     vektor_dataframe.push(df_diskon);
                 }
                 HasilKueri::DataDokumenLainnyaILEEnum(vektor_data) => {
                     println!("Konversi DataDokumenLainnya ke polars");
                     let vektor_series = vektor_data.ke_series();
-                    let df_dok_lainnya = DataFrame::new(vektor_series).expect("Gagal membuat dataframe dokumen lainnya");
+                    let df_dok_lainnya = DataFrame::new(vektor_series)
+                        .expect("Gagal membuat dataframe dokumen lainnya");
                     println!("{:?}", df_dok_lainnya);
                     vektor_dataframe.push(df_dok_lainnya);
                 }
                 HasilKueri::DataKuantitasILEEnum(vektor_data) => {
                     println!("Konversi DataKuantitas ke polars");
                     let vektor_series = vektor_data.ke_series();
-                    let df_kuantitas = DataFrame::new(vektor_series).expect("Gagal membuat dataframe kuantitas");
+                    let df_kuantitas =
+                        DataFrame::new(vektor_series).expect("Gagal membuat dataframe kuantitas");
                     println!("{:?}", df_kuantitas);
                     vektor_dataframe.push(df_kuantitas);
                 }
                 HasilKueri::DataCPPUILEEnum(vektor_data) => {
                     println!("Konversi DataCPPU ke polars");
                     let vektor_series = vektor_data.ke_series();
-                    let df_cppu = DataFrame::new(vektor_series).expect("Gagal membuat dataframe CPPU");
+                    let df_cppu =
+                        DataFrame::new(vektor_series).expect("Gagal membuat dataframe CPPU");
                     println!("{:?}", df_cppu);
                     vektor_dataframe.push(df_cppu);
                 }
                 HasilKueri::DataRPPUILEEnum(vektor_data) => {
-                    println!("Konversi DataRPPU ke polars");
-                    let vektor_series = vektor_data.ke_series();
-                    let df_rppu = DataFrame::new(vektor_series).expect("Gagal membuat dataframe RPPU");
-                    println!("{:?}", df_rppu);
-                    vektor_dataframe.push(df_rppu);
+                    println!("Konversi DataRPPU ke polars jika rppu true");
+                    if rppu {
+                        let vektor_series = vektor_data.ke_series();
+                        let df_rppu =
+                            DataFrame::new(vektor_series).expect("Gagal membuat dataframe RPPU");
+                        println!("{:?}", df_rppu);
+                        vektor_dataframe.push(df_rppu);
+                    };
                 }
             },
             Err(_) => {
-                let _json = json!({"status": false, "konten": "Kesalahan dalam matching Enum dengan hasil kueri"}).to_string();
+                let _ = json!({"status": false, "konten": "Kesalahan dalam matching Enum dengan hasil kueri"}).to_string();
             }
         }
     }
@@ -164,27 +178,175 @@ async fn handle_data_penjualan(set_kueri: Vec<Kueri<'_>>) -> Result<String, Stri
     println!("{:?}", df_utama);
     println!("{:?}", vektor_dataframe);
     // Inisiasi df_gabung dari df_utama dan df_salespersonregion (vektor_dataframe[0])
-    let mut df_gabung = df_utama.left_join(&vektor_dataframe[0], ["no_entry"], ["no_entry"]).expect("Gagal join df_ile dengan df_salespersonregion");
+    let mut df_gabung = df_utama
+        .left_join(&vektor_dataframe[0], ["no_entry"], ["no_entry"])
+        .expect("Gagal join df_ile dengan df_salespersonregion");
     // df_gabung dengan df_toko (vektor_dataframe[1]) [left_on "store_dim", right_on "kode_toko"]
-    df_gabung = df_gabung.left_join(&vektor_dataframe[1], ["store_dim"], ["kode_toko"]).expect("Gagal join df_gabung dengan df_toko");
+    df_gabung = df_gabung
+        .left_join(&vektor_dataframe[1], ["store_dim"], ["kode_toko"])
+        .expect("Gagal join df_gabung dengan df_toko");
     // df_gabung dengan df_produk (vektor_dataframe[2]) [left_on "oricode", right_on "oricode"]
-    df_gabung = df_gabung.left_join(&vektor_dataframe[2], ["oricode"], ["oricode"]).expect("Gagal join df_gabung dengan df_produk");
+    df_gabung = df_gabung
+        .left_join(&vektor_dataframe[2], ["oricode"], ["oricode"])
+        .expect("Gagal join df_gabung dengan df_produk");
     // df_gabung dengan df_vat (vektor_datafrane[3]) [left_on "no_dokumen", right_on "no_dokumen"]
-    df_gabung = df_gabung.left_join(&vektor_dataframe[3], ["no_dokumen"], ["no_dokumen"]).expect("Gagal join df_gabung dengan df_vat");
+    df_gabung = df_gabung
+        .left_join(&vektor_dataframe[3], ["no_dokumen"], ["no_dokumen"])
+        .expect("Gagal join df_gabung dengan df_vat");
     // df_gabung dengan df_promo (vektor_dataframe[4]) [left_on "no_entry", right_on "no_entry"]
-    df_gabung = df_gabung.left_join(&vektor_dataframe[4], ["no_entry"], ["no_entry"]).expect("Gagal join df_gabung dengan df_promo");
+    df_gabung = df_gabung
+        .left_join(&vektor_dataframe[4], ["no_entry"], ["no_entry"])
+        .expect("Gagal join df_gabung dengan df_promo");
     // df_gabung dengan df_diskon (vektor_dataframe[5]) [left_on "no_entry", right_on "no_entry"]
-    df_gabung = df_gabung.left_join(&vektor_dataframe[5], ["no_entry"], ["no_entry"]).expect("Gagal join df_gabung dengan df_diskon");
+    df_gabung = df_gabung
+        .left_join(&vektor_dataframe[5], ["no_entry"], ["no_entry"])
+        .expect("Gagal join df_gabung dengan df_diskon");
     // df_gabung dengan df_dok_lainnya (vektor_dataframe[6]) [left_on "no_entry", right_on "no_entry"]
-    df_gabung = df_gabung.left_join(&vektor_dataframe[6], ["no_entry"], ["no_entry"]).expect("Gagal join df_gabung dengan df_dok_lainnya");
+    df_gabung = df_gabung
+        .left_join(&vektor_dataframe[6], ["no_entry"], ["no_entry"])
+        .expect("Gagal join df_gabung dengan df_dok_lainnya");
     // df_gabung dengan df_kuantitas (vektor_dataframe[7]) [left_on "no_entry", right_on "no_entry"]
-    df_gabung = df_gabung.left_join(&vektor_dataframe[7], ["no_entry"], ["no_entry"]).expect("Gagal join df_gabung dengan df_kuantitas");
+    df_gabung = df_gabung
+        .left_join(&vektor_dataframe[7], ["no_entry"], ["no_entry"])
+        .expect("Gagal join df_gabung dengan df_kuantitas");
+    // konversi kuantitas -1
+    df_gabung = df_gabung
+        .lazy()
+        .with_column((col("kuantitas") * lit(-1)).alias("kuantitas"))
+        .collect()
+        .unwrap();
     // df_gabung dengan df_cppu (vektor_dataframe[8]) [left_on "no_entry", right_on "no_entry"]
-    df_gabung = df_gabung.left_join(&vektor_dataframe[8], ["no_entry"], ["no_entry"]).expect("Gagal join df_gabung dengan df_cppu");
+    df_gabung = df_gabung
+        .left_join(&vektor_dataframe[8], ["no_entry"], ["no_entry"])
+        .expect("Gagal join df_gabung dengan df_cppu");
+    // jika rppu true (PRI)
     // df_gabung dengan df_rppu (vektor_dataframe[9]) [left_on "no_entry", right_on "no_entry"]
-    df_gabung = df_gabung.left_join(&vektor_dataframe[9], ["no_entry"], ["no_entry"]).expect("Gagal join df_gabung dengan df_rppu");
+    if rppu {
+        df_gabung = df_gabung
+            .left_join(&vektor_dataframe[9], ["no_entry"], ["no_entry"])
+            .expect("Gagal join df_gabung dengan df_rppu");
+        // RETAIL PRICE PER UNIT AFT DISC
+        df_gabung = df_gabung
+            .lazy()
+            .with_column(
+                (col("retail_price_per_unit") * (lit(1) - col("diskon")))
+                    .alias("retail_price_per_unit_aft_disc"),
+            )
+            .collect()
+            .unwrap();
+        // RETAIL PRICE PER UNIT AFT VAT
+        df_gabung = df_gabung
+            .lazy()
+            .with_column(
+                (col("retail_price_per_unit_aft_disc") / (lit(1) + col("ppn")))
+                    .alias("retail_price_per_unit_aft_vat"),
+            )
+            .collect()
+            .unwrap();
+        // TOTAL SALES AT RETAIL
+        df_gabung = df_gabung
+            .lazy()
+            .with_column(
+                (col("retail_price_per_unit") * col("kuantitas")).alias("total_sales_at_retail"),
+            )
+            .collect()
+            .unwrap();
+        // TOTAL SALES AT RETAUL AFT DISC
+        df_gabung = df_gabung
+            .lazy()
+            .with_column(
+                (col("retail_price_per_unit_aft_disc") * col("kuantitas"))
+                    .alias("total_sales_at_retail_aft_disc"),
+            )
+            .collect()
+            .unwrap();
+        // TOTAL SALES AT RETAIL AFT VAT
+        df_gabung = df_gabung
+            .lazy()
+            .with_column(
+                (col("retail_price_per_unit_aft_vat") * col("kuantitas"))
+                    .alias("total_sales_at_retail_aft_vat"),
+            )
+            .collect()
+            .unwrap();
+    // jika rppu false (PNT), deduksi mundur semua komponen sales at retail dari total_sales_at_retail_aft_ppn
+    } else {
+        // TOTAL SALES AT RETAIL AFT DISC
+        df_gabung = df_gabung
+            .lazy()
+            .with_column(
+                (col("total_sales_at_retail_aft_vat") * (lit(1) + col("ppn")))
+                    .alias("total_sales_at_retail_aft_disc"),
+            )
+            .collect()
+            .unwrap();
+        // TOTAL SALES AT RETAIL
+        df_gabung = df_gabung
+            .lazy()
+            .with_column(
+                (col("total_sales_at_retail_aft_disc") / (lit(1) - col("diskon")))
+                    .alias("total_sales_at_retail"),
+            )
+            .collect()
+            .unwrap();
+        // RETAIL PRICE PER UNIT AFT VAT
+        df_gabung = df_gabung
+            .lazy()
+            .with_column(
+                (col("total_sales_at_retail_aft_vat") / col("kuantitas"))
+                    .alias("retail_price_per_unit_aft_vat"),
+            )
+            .collect()
+            .unwrap();
+        // RETAIL PRICE PER UNIT AFT DISC
+        df_gabung = df_gabung
+            .lazy()
+            .with_column(
+                (col("total_sales_at_retail_aft_disc") / col("kuantitas"))
+                    .alias("retail_price_per_unit_aft_disc"),
+            )
+            .collect()
+            .unwrap();
+        // RETAIL PRICE PER UNIT
+        df_gabung = df_gabung
+            .lazy()
+            .with_column(
+                (col("total_sales_at_retail") / col("kuantitas")).alias("retail_price_per_unit"),
+            )
+            .collect()
+            .unwrap();
+    }
+    // TOTAL SALES AT COST
+    df_gabung = df_gabung
+        .lazy()
+        .with_column((col("cost_price_per_unit") * col("kuantitas")).alias("total_sales_at_cost"))
+        .collect()
+        .unwrap();
+    // TOTAL MARGIN AFT PPN (RP)
+    df_gabung = df_gabung
+        .lazy()
+        .with_column(
+            (col("total_sales_at_retail_aft_vat") - col("total_sales_at_cost"))
+                .alias("total_margin_aft_vat_rp"),
+        )
+        .collect()
+        .unwrap();
+    // TOTAL MARGIN AFT PPN (%)
+    df_gabung = df_gabung
+        .lazy()
+        .with_column(
+            (when(col("total_sales_at_retail_aft_vat").lt_eq(0))
+                .then(lit(0))
+                .otherwise(col("total_margin_aft_vat_rp") / col("total_sales_at_retail_aft_vat")))
+            .alias("total_margin_aft_vat_persen"),
+        )
+        .collect()
+        .unwrap();
+    // REORDER DATAFRAME
+    // &df_gabung.select([""]).unwrap();
     println!("{:?}", df_gabung);
-    Ok(json!({"status": true, "konten": "on progress"}).to_string())
+    // let json = serde_json::Value(&df_gabung).unwrap();
+    Ok(json!({"status": true, "konten": df_gabung}).to_string())
 }
 
 #[tokio::main]
