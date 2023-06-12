@@ -3,7 +3,6 @@
 
 use polars::prelude::*;
 use serde_json::{self, json};
-use tokio::io::{AsyncWriteExt, BufWriter};
 
 use crate::db::mongo;
 use crate::db::mssql;
@@ -70,7 +69,30 @@ async fn kueri_sederhana(kueri: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-async fn handle_data_penjualan(set_kueri: Vec<Kueri<'_>>, rppu: bool) -> Result<String, String> {
+async fn handle_data_penjualan(
+    set_kueri: Vec<Kueri<'_>>,
+    rppu: bool,
+    set_dimensi: Vec<Dimensi<'_>>,
+) -> Result<String, String> {
+    // Konstruksi string contain untuk dimensi toko ke SBU
+    let mut peta_dimensi_ecommerce: String = String::new();
+    let mut peta_dimensi_fisik_sport: String = String::new();
+    let mut peta_dimensi_fisik_football: String = String::new();
+    let mut peta_dimensi_our_daily_dose: String = String::new();
+    let mut peta_dimensi_wholesale: String = String::new();
+    let mut peta_dimensi_bazaar_others: String = String::new();
+    for dimensi in set_dimensi {
+        match dimensi.sbu {
+            "e-Commerce" => peta_dimensi_ecommerce = dimensi.dimensi.join("|"),
+            "Fisik Sport" => peta_dimensi_fisik_sport = dimensi.dimensi.join("|"),
+            "Fisik Football" => peta_dimensi_fisik_football = dimensi.dimensi.join("|"),
+            "Our Daily Dose" => peta_dimensi_our_daily_dose = dimensi.dimensi.join("|"),
+            "Wholesale" => peta_dimensi_wholesale = dimensi.dimensi.join("|"),
+            "Bazaar (Others)" => peta_dimensi_bazaar_others = dimensi.dimensi.join("|"),
+            _ => eprintln!("Dimensi::sbu tidak dikenal"),
+        }
+    }
+
     let mut df_utama: DataFrame = DataFrame::default();
     let mut vektor_dataframe: Vec<DataFrame> = Vec::new();
     for kueri in set_kueri {
@@ -185,6 +207,61 @@ async fn handle_data_penjualan(set_kueri: Vec<Kueri<'_>>, rppu: bool) -> Result<
     df_gabung = df_gabung
         .left_join(&vektor_dataframe[1], ["store_dim"], ["kode_toko"])
         .expect("Gagal join df_gabung dengan df_toko");
+    // Pemetaan SBU berdasar dimensi_toko (store_dim)
+    df_gabung = df_gabung
+        .lazy()
+        .with_column(
+            when(
+                col("store_dim")
+                    .str()
+                    .contains(lit(peta_dimensi_ecommerce), false),
+            )
+            .then(lit("e-Commerce"))
+            .otherwise(
+                when(
+                    col("store_dim")
+                        .str()
+                        .contains(lit(peta_dimensi_fisik_sport), false),
+                )
+                .then(lit("Fisik Sport"))
+                .otherwise(
+                    when(
+                        col("store_dim")
+                            .str()
+                            .contains(lit(peta_dimensi_fisik_football), false),
+                    )
+                    .then(lit("Fisik Football"))
+                    .otherwise(
+                        when(
+                            col("store_dim")
+                                .str()
+                                .contains(lit(peta_dimensi_our_daily_dose), false),
+                        )
+                        .then(lit("Our Daily Dose"))
+                        .otherwise(
+                            when(
+                                col("store_dim")
+                                    .str()
+                                    .contains(lit(peta_dimensi_wholesale), false),
+                            )
+                            .then(lit("Wholesale"))
+                            .otherwise(
+                                when(
+                                    col("store_dim")
+                                        .str()
+                                        .contains(lit(peta_dimensi_bazaar_others), false),
+                                )
+                                .then(lit("Bazaar (Others)"))
+                                .otherwise(lit("Dimensi Toko Tidak Dikenal")),
+                            ),
+                        ),
+                    ),
+                ),
+            )
+            .alias("sbu"),
+        )
+        .collect()
+        .unwrap();
     // df_gabung dengan df_produk (vektor_dataframe[2]) [left_on "oricode", right_on "oricode"]
     df_gabung = df_gabung
         .left_join(&vektor_dataframe[2], ["oricode"], ["oricode"])

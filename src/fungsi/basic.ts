@@ -55,3 +55,56 @@ export const resetAplikasi = (dispatch: any) => {
   dispatch(setParameterKlasifikasi([]));
   dispatch(setParameterRegion([]));
 };
+
+export interface Dimensi {
+  sbu: string;
+  dimensi: string[];
+}
+
+export const dimensiECommerce = (parameterBc: { [key: string]: any }) => {
+  const dimensi: Dimensi = {
+    sbu: parameterBc.peta_dimensi_sbu.ecommerce.sbu,
+    dimensi: parameterBc.peta_dimensi_sbu.ecommerce.dimensi,
+  };
+  return dimensi;
+};
+
+export const dimensiFisikSport = (parameterBc: { [key: string]: any }) => {
+  const dimensi: Dimensi = {
+    sbu: parameterBc.peta_dimensi_sbu.fisik_sport.sbu,
+    dimensi: parameterBc.peta_dimensi_sbu.fisik_sport.dimensi,
+  };
+  return dimensi;
+};
+
+export const dimensiFisikFootball = (parameterBc: { [key: string]: any }) => {
+  const dimensi: Dimensi = {
+    sbu: parameterBc.peta_dimensi_sbu.fisik_football.sbu,
+    dimensi: parameterBc.peta_dimensi_sbu.fisik_football.dimensi,
+  };
+  return dimensi;
+};
+
+export const dimensiOurDailyDose = (parameterBc: { [key: string]: any }) => {
+  const dimensi: Dimensi = {
+    sbu: parameterBc.peta_dimensi_sbu.our_daily_dose.sbu,
+    dimensi: parameterBc.peta_dimensi_sbu.our_daily_dose.dimensi,
+  };
+  return dimensi;
+};
+
+export const dimensiWholesale = (parameterBc: { [key: string]: any }) => {
+  const dimensi: Dimensi = {
+    sbu: parameterBc.peta_dimensi_sbu.wholesale.sbu,
+    dimensi: parameterBc.peta_dimensi_sbu.wholesale.dimensi,
+  };
+  return dimensi;
+};
+
+export const dimensiBazaarOthers = (parameterBc: { [key: string]: any }) => {
+  const dimensi: Dimensi = {
+    sbu: parameterBc.peta_dimensi_sbu.bazaar_others.sbu,
+    dimensi: parameterBc.peta_dimensi_sbu.bazaar_others.dimensi,
+  };
+  return dimensi;
+};

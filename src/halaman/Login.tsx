@@ -37,7 +37,7 @@ import {
   setDepartemenPengguna,
   setPeranPengguna,
   setCompPengguna,
-  setCompKueri
+  setCompKueri,
 } from "../fitur_state/pengguna";
 import {
   DataMultiSelect,
