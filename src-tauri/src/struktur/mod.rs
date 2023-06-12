@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 use polars::prelude::*;
-use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize};
 use struct_field_names_as_array::FieldNamesAsArray;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -581,35 +581,25 @@ impl DataFrameSerial for Vec<DataRPPUByILE> {
     }
 }
 
-// kita masih membutuhkan serialisasi hasil akhir, kecuali jika dataframe polars
-// memiliki fitur serde json
-// impl Serialize for DataILE {
-//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-//     where
-//         S: Serializer,
-//     {
-//         let mut data_penjualan = serializer.serialize_struct("DataILE", 10)?;
-//         data_penjualan.serialize_field("no_entry", &self.no_entry)?;
-//         data_penjualan.serialize_field("post_date", &self.post_date.map(|dt| dt.to_string()))?;
-//         data_penjualan.serialize_field(
-//             "system_created_at",
-//             &self.system_created_at.map(|dt| dt.to_string()),
-//         )?;
-//         data_penjualan.serialize_field("store_dim", &self.store_dim)?;
-//         data_penjualan.serialize_field("loc_code", &self.loc_code)?;
-//         data_penjualan.serialize_field("no_dokumen", &self.no_dokumen)?;
-//         data_penjualan.serialize_field("source_no", &self.source_no)?;
-//         data_penjualan.serialize_field("brand_dim", &self.brand_dim)?;
-//         data_penjualan.serialize_field("oricode", &self.oricode)?;
-//         data_penjualan.serialize_field("ukuran", &self.ukuran)?;
-//         data_penjualan.end()
-//     }
-// }
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Kueri<'a> {
     pub judul: &'a str,
     pub kueri: &'a str,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Dimensi<'a> {
+    pub sbu: &'a str,
+    #[serde(deserialize_with = "deserialize_dimensi")]
+    pub dimensi: Vec<String>,
+}
+
+fn deserialize_dimensi<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let vec: Vec<String> = Deserialize::deserialize(deserializer)?;
+    Ok(vec)
 }
 
 pub enum HasilKueri {

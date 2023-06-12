@@ -21,6 +21,15 @@ import {
 } from "../fungsi/kueri";
 import { getParameterBc } from "../fitur_state/dataParam";
 import { getCompKueri, getCompPengguna } from "../fitur_state/pengguna";
+import {
+  Dimensi,
+  dimensiBazaarOthers,
+  dimensiECommerce,
+  dimensiFisikFootball,
+  dimensiFisikSport,
+  dimensiOurDailyDose,
+  dimensiWholesale,
+} from "../fungsi/basic";
 
 const Penjualan = ({
   propsPenjualan,
@@ -43,6 +52,7 @@ const Penjualan = ({
       let tglAwal: string;
       let tglAkhir: string;
       let arrKueri: setKueri[];
+      let arrDimensi: Dimensi[];
 
       if (!singleMode) {
         compKueri =
@@ -85,10 +95,20 @@ const Penjualan = ({
           rppuByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
         ];
 
+        arrDimensi = [
+          dimensiECommerce(parameterBc),
+          dimensiFisikSport(parameterBc),
+          dimensiFisikFootball(parameterBc),
+          dimensiOurDailyDose(parameterBc),
+          dimensiWholesale(parameterBc),
+          dimensiBazaarOthers(parameterBc),
+        ];
+
         try {
           const respon: string = await invoke("handle_data_penjualan", {
             setKueri: arrKueri,
             rppu: compPRI,
+            setDimensi: arrDimensi,
           });
           const hasil = JSON.parse(respon);
           console.log(hasil);
