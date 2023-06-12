@@ -221,6 +221,23 @@ pub async fn kueri_penjualan(kueri: Kueri<'_>) -> Result<HasilKueri, Box<dyn std
             }
             Ok(HasilKueri::DataCPPUILEEnum(vektor_data))
         }
+        "klasifikasiByILEPostDate" => {
+            let mut vektor_data = Vec::new();
+            let hasil_kueri = &mssql::eksekusi_kueri(kueri.kueri.to_string()).await?[0];
+            if hasil_kueri.len() > 0 {
+                for baris in 0..hasil_kueri.len() {
+                    let no_entry = hasil_kueri[baris].get(0);
+                    let classification =
+                        hasil_kueri[baris].get(1).map(|teks: &str| teks.to_string());
+                    let data_klasifikasi = DataKlasifikasiByILE {
+                        no_entry,
+                        classification,
+                    };
+                    vektor_data.push(data_klasifikasi);
+                }
+            }
+            Ok(HasilKueri::DataKlasifikasiILEEnum(vektor_data))
+        }
         "rppuByILEPostDate" => {
             let mut vektor_data = Vec::new();
             let hasil_kueri = &mssql::eksekusi_kueri(kueri.kueri.to_string()).await?[0];

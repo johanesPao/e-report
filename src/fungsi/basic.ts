@@ -108,3 +108,14 @@ export const dimensiBazaarOthers = (parameterBc: { [key: string]: any }) => {
   };
   return dimensi;
 };
+
+export interface Filter {
+  brand: string[];
+  prod_div: string[];
+  prod_grp: string[];
+  prod_cat: string[];
+  sbu?: string[];
+  lokasi?: string[];
+  klasifikasi?: string[];
+  region?: string[];
+}

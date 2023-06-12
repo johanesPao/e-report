@@ -1,4 +1,4 @@
-export interface setKueri {
+export interface Kueri {
   judul: string;
   kueri: string;
 }
@@ -9,15 +9,16 @@ export const ILEByPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  const eksklusi: string = compKueri === parameterBc.tabel_bc[`${parameterBc.comp.pnt.toLowerCase()}`] ?
-   `
+  const eksklusi: string =
+    compKueri === parameterBc.tabel_bc[`${parameterBc.comp.pnt.toLowerCase()}`]
+      ? `
   AND 
   ${parameterBc.kolom_bc.source_no} != '${parameterBc.argumen_bc.cust_sample}' AND
   ${parameterBc.kolom_bc.source_no} != '${parameterBc.argumen_bc.cust_marketing}'
-  ` :
-  ``;
-  
-  let setKueri: setKueri = {
+  `
+      : ``;
+
+  let setKueri: Kueri = {
     judul: "ILEByPostDate",
     kueri: `
     SELECT DISTINCT
@@ -31,19 +32,13 @@ export const ILEByPostDate = (
     ${parameterBc.kolom_bc.brand_dim} [Brand],
     ${parameterBc.kolom_bc.oricode} [OriCode],
     ${parameterBc.kolom_bc.size} [Ukuran]
-    FROM [${compKueri}${
-      parameterBc.tabel_bc.jurnal_item_437
-    }]
+    FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}]
     WHERE
     ${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
     ${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
-    ${parameterBc.kolom_bc.store_dim} LIKE '${
-      parameterBc.argumen_bc.sales_prefix
-    }' AND
+    ${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.sales_prefix}' AND
     ${parameterBc.kolom_bc.brand_dim} != '' AND
-    ${parameterBc.kolom_bc.oricode} NOT LIKE '${
-      parameterBc.argumen_bc.item_service_prefix
-    }' ${eksklusi}
+    ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}' ${eksklusi}
     `,
   };
   console.log(setKueri.kueri);
@@ -56,42 +51,32 @@ export const salespersonAndRegionByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: setKueri = {
+  let setKueri: Kueri = {
     judul: "salespersonAndRegionByILEPostDate",
     kueri: `
     WITH ile AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no_entry} [No. Entri],
         ${parameterBc.kolom_bc.dim_set_id} [ID Set Dimensi]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.jurnal_item_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}]
     WHERE
       ${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
       ${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
-      ${parameterBc.kolom_bc.store_dim} LIKE '${
-      parameterBc.argumen_bc.sales_prefix
-    }' AND
+      ${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.sales_prefix}' AND
       ${parameterBc.kolom_bc.brand_dim} != '' AND
-      ${parameterBc.kolom_bc.oricode} NOT LIKE '${
-      parameterBc.argumen_bc.item_service_prefix
-    }'
+      ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
     ), dim_set_entry_slsperson AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.dim_set_id} [ID Set Dimensi],
         ${parameterBc.kolom_bc.dim_val_code} [Nilai Dimensi]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.dim_set_entry_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.dim_set_entry_437}]
     WHERE
       ${parameterBc.kolom_bc.dim_code} = '${parameterBc.argumen_bc.salesperson}'
     ), dim_set_entry_region AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.dim_set_id} [ID Set Dimensi],
         ${parameterBc.kolom_bc.dim_val_code} [Nilai Dimensi]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.dim_set_entry_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.dim_set_entry_437}]
       WHERE
         ${parameterBc.kolom_bc.dim_code} = '${parameterBc.argumen_bc.region}'
     )
@@ -120,32 +105,24 @@ export const tokoByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: setKueri = {
+  let setKueri: Kueri = {
     judul: "tokoByILEPostDate",
     kueri: `
     WITH ile AS (
       SELECT DISTINCT
       ${parameterBc.kolom_bc.store_dim} [Dimensi Toko]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.jurnal_item_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}]
       WHERE
       ${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
       ${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
-      ${parameterBc.kolom_bc.store_dim} LIKE '${
-      parameterBc.argumen_bc.sales_prefix
-    }' AND
+      ${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.sales_prefix}' AND
       ${parameterBc.kolom_bc.brand_dim} != '' AND
-      ${parameterBc.kolom_bc.oricode} NOT LIKE '${
-      parameterBc.argumen_bc.item_service_prefix
-    }'
+      ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
       ), toko AS (
         SELECT DISTINCT
           ${parameterBc.kolom_bc.code} [Kode Toko],
           ${parameterBc.kolom_bc.name} [Toko]
-        FROM [${compKueri}${
-      parameterBc.tabel_bc.dim_val_437
-    }]
+        FROM [${compKueri}${parameterBc.tabel_bc.dim_val_437}]
       )
       SELECT DISTINCT
         ile.[Dimensi Toko] [Kode Toko],
@@ -165,33 +142,25 @@ export const produkByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: setKueri = {
+  let setKueri: Kueri = {
     judul: "produkByILEPostDate",
     kueri: `
     WITH ile AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.oricode} [OriCode]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.jurnal_item_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}]
     WHERE
     ${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
     ${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
-    ${parameterBc.kolom_bc.store_dim} LIKE '${
-      parameterBc.argumen_bc.sales_prefix
-    }' AND
+    ${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.sales_prefix}' AND
     ${parameterBc.kolom_bc.brand_dim} != '' AND
-    ${parameterBc.kolom_bc.oricode} NOT LIKE '${
-      parameterBc.argumen_bc.item_service_prefix
-    }'
+    ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
     ), deskripsi AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no} [OriCode],
         ${parameterBc.kolom_bc.desc} [Deskripsi Produk],
         ${parameterBc.kolom_bc.color_desc} [Deskripsi Warna]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.master_item_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.master_item_437}]
     ), mc AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no} [OriCode],
@@ -200,9 +169,7 @@ export const produkByILEPostDate = (
         ${parameterBc.kolom_bc.prod_cat} [Kategori Produk],
         ${parameterBc.kolom_bc.period} [Period],
         ${parameterBc.kolom_bc.season} [Season]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.master_item_a21
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.master_item_a21}]
     )
     SELECT DISTINCT
       ile.[OriCode],
@@ -230,7 +197,7 @@ export const vatByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: setKueri = {
+  let setKueri: Kueri = {
     judul: "vatByILEPostDate",
     kueri: `
     WITH ile AS (
@@ -238,60 +205,42 @@ export const vatByILEPostDate = (
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.oricode} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.jurnal_item_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}]
     WHERE
     ${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
     ${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
-    ${parameterBc.kolom_bc.store_dim} LIKE '${
-      parameterBc.argumen_bc.sales_prefix
-    }' AND
+    ${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.sales_prefix}' AND
     ${parameterBc.kolom_bc.brand_dim} != '' AND
-    ${parameterBc.kolom_bc.oricode} NOT LIKE '${
-      parameterBc.argumen_bc.item_service_prefix
-    }'
+    ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
     ), vat_entry AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.vat_bus_post_group} [BPG PPN],
         ${parameterBc.kolom_bc.vat_prod_post_group} [PPG PPN]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.vat_entry_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.vat_entry_437}]
       WHERE
-        ${parameterBc.kolom_bc.gen_prod_post_group} = '${
-      parameterBc.argumen_bc.direct
-    }' OR
-        ${parameterBc.kolom_bc.gen_prod_post_group} = '${
-      parameterBc.argumen_bc.consign
-    }'
+        ${parameterBc.kolom_bc.gen_prod_post_group} = '${parameterBc.argumen_bc.direct}' OR
+        ${parameterBc.kolom_bc.gen_prod_post_group} = '${parameterBc.argumen_bc.consign}'
     ), vat_posting AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.vat_bus_post_group} [BPG PPN],
         ${parameterBc.kolom_bc.vat_prod_post_group} [PPG PPN],
         ${parameterBc.kolom_bc.vat} [PPN]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.vat_post_setup_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.vat_post_setup_437}]
     ), shipment_doc_vat AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.no} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran],
         ${parameterBc.kolom_bc.vat} [PPN]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.sales_shipment_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.sales_shipment_437}]
     ), retur_doc_vat AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.no} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran],
         ${parameterBc.kolom_bc.vat} [PPN]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.ret_receipt_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.ret_receipt_437}]
     )
     SELECT DISTINCT
       ile.[No. Dokumen],
@@ -328,39 +277,29 @@ export const promoByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: setKueri = {
+  let setKueri: Kueri = {
     judul: "promoByILEPostDate",
     kueri: `
     WITH ile AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no_entry} [No. Entri]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.jurnal_item_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}]
     WHERE
     ${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
     ${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
-    ${parameterBc.kolom_bc.store_dim} LIKE '${
-      parameterBc.argumen_bc.sales_prefix
-    }' AND
+    ${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.sales_prefix}' AND
     ${parameterBc.kolom_bc.brand_dim} != '' AND
-    ${parameterBc.kolom_bc.oricode} NOT LIKE '${
-      parameterBc.argumen_bc.item_service_prefix
-    }'
+    ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
     ), ile5ec AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no_entry} [No. Entri],
         ${parameterBc.kolom_bc.lsc_offer_no} [Kode Promo]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.jurnal_item_5ec
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_5ec}]
     ), promo AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no} [Kode Promo],
         ${parameterBc.kolom_bc.desc} [Nama Promo]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.disc_map_5ec
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.disc_map_5ec}]
     )
     SELECT DISTINCT
       ile.[No. Entri],
@@ -382,7 +321,7 @@ export const diskonByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: setKueri = {
+  let setKueri: Kueri = {
     judul: "diskonByILEPostDate",
     kueri: `
     WITH ile AS (
@@ -390,19 +329,13 @@ export const diskonByILEPostDate = (
         ${parameterBc.kolom_bc.no_entry} [No. Entri],
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.doc_line_no} [Baris Dokumen]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.jurnal_item_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}]
     WHERE
     ${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
     ${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
-    ${parameterBc.kolom_bc.store_dim} LIKE '${
-      parameterBc.argumen_bc.sales_prefix
-    }' AND
+    ${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.sales_prefix}' AND
     ${parameterBc.kolom_bc.brand_dim} != '' AND
-    ${parameterBc.kolom_bc.oricode} NOT LIKE '${
-      parameterBc.argumen_bc.item_service_prefix
-    }'
+    ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
     ), va_entry AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.ile_entry_no} [No. Entri],
@@ -412,16 +345,10 @@ export const diskonByILEPostDate = (
           ABS(SUM(${parameterBc.kolom_bc.sales_amount_actual})),
           0
         ) [Diskon]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.va_entry_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.va_entry_437}]
       WHERE
-        ${parameterBc.kolom_bc.no_doc} NOT LIKE '${
-      parameterBc.argumen_bc.sales_ship_series_prefix
-    }' AND
-        ${parameterBc.kolom_bc.no_doc} NOT LIKE '${
-      parameterBc.argumen_bc.sales_ret_series_prefix
-    }'
+        ${parameterBc.kolom_bc.no_doc} NOT LIKE '${parameterBc.argumen_bc.sales_ship_series_prefix}' AND
+        ${parameterBc.kolom_bc.no_doc} NOT LIKE '${parameterBc.argumen_bc.sales_ret_series_prefix}'
       GROUP BY
         ${parameterBc.kolom_bc.ile_entry_no}
     ), shipment_doc AS (
@@ -429,17 +356,13 @@ export const diskonByILEPostDate = (
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.line_no} [Nomor Baris],
         ${parameterBc.kolom_bc.line_disc} / 100 [Diskon]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.sales_shipment_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.sales_shipment_437}]
     ), retur_doc AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.line_no} [Nomor Baris],
         ${parameterBc.kolom_bc.line_disc} / 100 [Diskon]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.ret_receipt_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.ret_receipt_437}]
     )
     SELECT DISTINCT
       ile.[No. Entri] [No. Entri],
@@ -447,27 +370,19 @@ export const diskonByILEPostDate = (
     FROM ile
     LEFT JOIN va_entry
       ON (
-        ile.[No. Dokumen] NOT LIKE '${
-          parameterBc.argumen_bc.sales_ship_series_prefix
-        }' AND
-        ile.[No. Dokumen] NOT LIKE '${
-          parameterBc.argumen_bc.sales_ret_series_prefix
-        }' AND
+        ile.[No. Dokumen] NOT LIKE '${parameterBc.argumen_bc.sales_ship_series_prefix}' AND
+        ile.[No. Dokumen] NOT LIKE '${parameterBc.argumen_bc.sales_ret_series_prefix}' AND
         ile.[No. Entri] = va_entry.[No. Entri]
       )
     LEFT JOIN shipment_doc
       ON (
-        ile.[No. Dokumen] LIKE '${
-          parameterBc.argumen_bc.sales_ship_series_prefix
-        }' AND
+        ile.[No. Dokumen] LIKE '${parameterBc.argumen_bc.sales_ship_series_prefix}' AND
         ile.[No. Dokumen] = shipment_doc.[No. Dokumen] AND
         ile.[Baris Dokumen] = shipment_doc.[Nomor Baris]
       )
     LEFT JOIN retur_doc
       ON (
-        ile.[No. Dokumen] LIKE '${
-          parameterBc.argumen_bc.sales_ret_series_prefix
-        }' AND
+        ile.[No. Dokumen] LIKE '${parameterBc.argumen_bc.sales_ret_series_prefix}' AND
         ile.[No. Dokumen] = retur_doc.[No. Dokumen] AND
         ile.[Baris Dokumen] = retur_doc.[Nomor Baris]
       )
@@ -485,21 +400,15 @@ export const dokumenLainnyaByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: setKueri = {
+  let setKueri: Kueri = {
     judul: "dokumenLainnyaByILEPostDate",
     kueri: `
     SELECT DISTINCT
         ile.${parameterBc.kolom_bc.no_entry} [No. Entri],
         va_entry.${parameterBc.kolom_bc.no_doc} [No. Dokumen 2]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.jurnal_item_437
-    }] AS ile
-      LEFT JOIN [${
-        compKueri
-      }${parameterBc.tabel_bc.va_entry_437}] AS va_entry
-        ON ile.${parameterBc.kolom_bc.no_entry} = va_entry.${
-      parameterBc.kolom_bc.ile_entry_no
-    }
+      FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}] AS ile
+      LEFT JOIN [${compKueri}${parameterBc.tabel_bc.va_entry_437}] AS va_entry
+        ON ile.${parameterBc.kolom_bc.no_entry} = va_entry.${parameterBc.kolom_bc.ile_entry_no}
       WHERE
         ile.${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
         ile.${parameterBc.kolom_bc.post_date} <= '${tglAkhir}'
@@ -516,25 +425,19 @@ export const quantityByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: setKueri = {
+  let setKueri: Kueri = {
     judul: "quantityByILEPostDate",
     kueri: `
     SELECT DISTINCT
         ${parameterBc.kolom_bc.no_entry} [No. Entri],
         SUM(${parameterBc.kolom_bc.quantity}) [Kuantitas]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.jurnal_item_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}]
       WHERE
         ${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
         ${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
-        ${parameterBc.kolom_bc.store_dim} LIKE '${
-      parameterBc.argumen_bc.sales_prefix
-    }' AND
+        ${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.sales_prefix}' AND
         ${parameterBc.kolom_bc.brand_dim} != '' AND
-        ${parameterBc.kolom_bc.oricode} NOT LIKE '${
-      parameterBc.argumen_bc.item_service_prefix
-    }'
+        ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
       GROUP BY
         ${parameterBc.kolom_bc.no_entry}
     `,
@@ -549,40 +452,28 @@ export const cppuByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: setKueri = {
+  let setKueri: Kueri = {
     judul: "cppuByILEPostDate",
     kueri: `
     WITH ile AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no_entry} [No. Entri]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.jurnal_item_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}]
     WHERE
     ${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
     ${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
-    ${parameterBc.kolom_bc.store_dim} LIKE '${
-      parameterBc.argumen_bc.sales_prefix
-    }' AND
+    ${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.sales_prefix}' AND
     ${parameterBc.kolom_bc.brand_dim} != '' AND
-    ${parameterBc.kolom_bc.oricode} NOT LIKE '${
-      parameterBc.argumen_bc.item_service_prefix
-    }'
+    ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
     GROUP BY
     ${parameterBc.kolom_bc.no_entry}
     ), va_entry AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.ile_entry_no} [No. Entri],
-        SUM(${parameterBc.kolom_bc.cost_amount_actual} + ${
-      parameterBc.kolom_bc.cost_amount_exp
-    }) /
+        SUM(${parameterBc.kolom_bc.cost_amount_actual} + ${parameterBc.kolom_bc.cost_amount_exp}) /
         SUM(${parameterBc.kolom_bc.ile_quantity}) [Cost per Unit],
-        SUM(${
-          parameterBc.kolom_bc.sales_amount_actual
-        }) [Total Sales at Retail Aft. VAT]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.va_entry_437
-    }]
+        SUM(${parameterBc.kolom_bc.sales_amount_actual}) [Total Sales at Retail Aft. VAT]
+      FROM [${compKueri}${parameterBc.tabel_bc.va_entry_437}]
       GROUP BY
         ${parameterBc.kolom_bc.ile_entry_no}
     )
@@ -607,7 +498,7 @@ export const rppuByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: setKueri = {
+  let setKueri: Kueri = {
     judul: "rppuByILEPostDate",
     kueri: `
     WITH ile AS (
@@ -618,19 +509,13 @@ export const rppuByILEPostDate = (
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.oricode} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran]
-    FROM [${compKueri}${
-      parameterBc.tabel_bc.jurnal_item_437
-    }]
+    FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}]
     WHERE
     ${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
     ${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
-    ${parameterBc.kolom_bc.store_dim} LIKE '${
-      parameterBc.argumen_bc.sales_prefix
-    }' AND
+    ${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.sales_prefix}' AND
     ${parameterBc.kolom_bc.brand_dim} != '' AND
-    ${parameterBc.kolom_bc.oricode} NOT LIKE '${
-      parameterBc.argumen_bc.item_service_prefix
-    }'
+    ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
     ), lsctse_stat AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.date} [Tanggal],
@@ -638,9 +523,7 @@ export const rppuByILEPostDate = (
         ${parameterBc.kolom_bc.trans_no} [No. Transaksi],
         ${parameterBc.kolom_bc.oricode} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.store_sales_stat_5ec
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.store_sales_stat_5ec}]
     ), lsctse AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.store_no} [Kode Toko],
@@ -648,27 +531,21 @@ export const rppuByILEPostDate = (
         ${parameterBc.kolom_bc.oricode} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran],
         ${parameterBc.kolom_bc.price} [Retail Price per Unit]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.store_sales_entry_5ec
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.store_sales_entry_5ec}]
     ), shipment AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.no} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran],
         ${parameterBc.kolom_bc.unit_price} [Retail Price per Unit]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.sales_shipment_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.sales_shipment_437}]
     ), retur AS (
       SELECT DISTINCT
         ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
         ${parameterBc.kolom_bc.no} [OriCode],
         ${parameterBc.kolom_bc.size} [Ukuran],
         ${parameterBc.kolom_bc.unit_price} [Retail Price per Unit]
-      FROM [${compKueri}${
-      parameterBc.tabel_bc.ret_receipt_437
-    }]
+      FROM [${compKueri}${parameterBc.tabel_bc.ret_receipt_437}]
     )
     SELECT DISTINCT
       ile.[No. Entri],
@@ -676,9 +553,7 @@ export const rppuByILEPostDate = (
     FROM ile
     LEFT JOIN lsctse_stat
       ON  (
-        ile.[No. Dokumen] NOT LIKE '${
-          parameterBc.argumen_bc.sales_ret_series_prefix
-        }' AND
+        ile.[No. Dokumen] NOT LIKE '${parameterBc.argumen_bc.sales_ret_series_prefix}' AND
         ile.[Tanggal] = lsctse_stat.[Tanggal] AND
         ile.[Kode Toko] = lsctse_stat.[Kode Toko] AND
         ile.[OriCode] = lsctse_stat.[OriCode] AND
@@ -693,22 +568,51 @@ export const rppuByILEPostDate = (
       )
     LEFT JOIN shipment
       ON (
-        ile.[No. Dokumen] NOT LIKE '${
-          parameterBc.argumen_bc.sales_ret_series_prefix
-        }' AND
+        ile.[No. Dokumen] NOT LIKE '${parameterBc.argumen_bc.sales_ret_series_prefix}' AND
         ile.[No. Dokumen] = shipment.[No. Dokumen] AND
         ile.[OriCode] = shipment.[OriCode] AND
         ile.[Ukuran] = shipment.[Ukuran]
       )
     LEFT JOIN retur
       ON (
-        ile.[No. Dokumen] LIKE '${
-          parameterBc.argumen_bc.sales_ret_series_prefix
-        }' AND
+        ile.[No. Dokumen] LIKE '${parameterBc.argumen_bc.sales_ret_series_prefix}' AND
         ile.[No. Dokumen] = retur.[No. Dokumen] AND
         ile.[OriCode] = retur.[OriCode] AND
         ile.[Ukuran] = retur.[Ukuran]
       )
+    `,
+  };
+  console.log(setKueri.kueri);
+  return setKueri;
+};
+
+export const klasifikasiByILEPostDate = (
+  parameterBc: { [key: string]: any },
+  tglAwal: string,
+  tglAkhir: string,
+  compKueri: string
+) => {
+  let setKueri: Kueri = {
+    judul: "klasifikasiByILEPostDate",
+    kueri: `
+    SELECT DISTINCT
+        ile.${parameterBc.kolom_bc.no_entry} [No. Entri],
+        dim_set.${parameterBc.kolom_bc.dim_val_code} [Klasifikasi]
+      FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}] ile
+      LEFT JOIN [${compKueri}${parameterBc.tabel_bc.dim_set_entry_437}] dim_set
+        ON (
+          ile.${parameterBc.kolom_bc.dim_set_id} = dim_set.${parameterBc.kolom_bc.dim_set_id} AND
+          dim_set.${parameterBc.kolom_bc.dim_code} = '${parameterBc.argumen_bc.classification}'
+        )
+      WHERE
+        ile.${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
+        ile.${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
+        ile.${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.sales_prefix}' AND
+        ile.${parameterBc.kolom_bc.brand_dim} != '' AND
+        ile.${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
+      GROUP BY
+        ile.${parameterBc.kolom_bc.no_entry},
+        dim_set.${parameterBc.kolom_bc.dim_val_code}
     `,
   };
   console.log(setKueri.kueri);
