@@ -53,14 +53,6 @@ const Penjualan = ({
       let compPRI: boolean;
       let tglAwal: string;
       let tglAkhir: string;
-      let brand: string[];
-      let prodDiv: string[];
-      let prodFrp: string[];
-      let prodCat: string[];
-      let sbu: string[];
-      let klasifikasi: string[];
-      let lokasi: string[];
-      let region: string[];
       let arrFilter: Filter;
       let arrKueri: Kueri[];
       let arrDimensi: Dimensi[];
