@@ -119,3 +119,42 @@ export interface Filter {
   klasifikasi?: string[];
   region?: string[];
 }
+
+export type DataPenjualan = {
+  no_entry: string;
+  post_date: Date;
+  system_created_at: Date;
+  sbu: string;
+  loc_code: string;
+  toko: string;
+  no_dokumen: string;
+  no_dokumen_oth: string;
+  source_no: string;
+  classification: string;
+  salesperson: string;
+  region: string;
+  brand_dim: string;
+  oricode: string;
+  ukuran: string;
+  deskripsi_produk: string;
+  warna: string;
+  prod_div: string;
+  prod_grp: string;
+  prod_cat: string;
+  period: string;
+  season: string;
+  ppn: number;
+  promo: string;
+  diskon: number;
+  kuantitas: number;
+  cost_price_per_unit: number;
+  retail_price_per_unit: number;
+  retail_price_per_unit_aft_disc: number;
+  retail_price_per_unit_aft_vat: number;
+  total_sales_at_retail: number;
+  total_sales_at_retail_aft_disc: number;
+  total_sales_at_retail_aft_vat: number;
+  total_sales_at_cost: number;
+  total_margin_aft_vat_rp: number;
+  total_margin_aft_vat_persen: number;
+};
