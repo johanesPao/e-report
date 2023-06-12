@@ -10,12 +10,13 @@ import {
   cppuByILEPostDate,
   diskonByILEPostDate,
   dokumenLainnyaByILEPostDate,
+  klasifikasiByILEPostDate,
   produkByILEPostDate,
   promoByILEPostDate,
   quantityByILEPostDate,
   rppuByILEPostDate,
   salespersonAndRegionByILEPostDate,
-  setKueri,
+  Kueri,
   tokoByILEPostDate,
   vatByILEPostDate,
 } from "../fungsi/kueri";
@@ -23,6 +24,7 @@ import { getParameterBc } from "../fitur_state/dataParam";
 import { getCompKueri, getCompPengguna } from "../fitur_state/pengguna";
 import {
   Dimensi,
+  Filter,
   dimensiBazaarOthers,
   dimensiECommerce,
   dimensiFisikFootball,
@@ -51,7 +53,16 @@ const Penjualan = ({
       let compPRI: boolean;
       let tglAwal: string;
       let tglAkhir: string;
-      let arrKueri: setKueri[];
+      let brand: string[];
+      let prodDiv: string[];
+      let prodFrp: string[];
+      let prodCat: string[];
+      let sbu: string[];
+      let klasifikasi: string[];
+      let lokasi: string[];
+      let region: string[];
+      let arrFilter: Filter;
+      let arrKueri: Kueri[];
       let arrDimensi: Dimensi[];
 
       if (!singleMode) {
@@ -71,6 +82,16 @@ const Penjualan = ({
       if (propsPenjualan.tglAwal !== null && propsPenjualan.tglAkhir !== null) {
         tglAwal = propsPenjualan.tglAwal.toISOString().split("T")[0];
         tglAkhir = propsPenjualan.tglAkhir.toISOString().split("T")[0];
+        arrFilter = {
+          brand: propsPenjualan.brand,
+          prod_div: propsPenjualan.prodDiv,
+          prod_grp: propsPenjualan.prodGrp,
+          prod_cat: propsPenjualan.prodCat,
+          sbu: compPRI ? propsPenjualan.SBU : [],
+          lokasi: compPRI ? propsPenjualan.lokasi : [],
+          klasifikasi: compPRI ? [] : propsPenjualan.klasifikasi,
+          region: compPRI ? [] : propsPenjualan.region,
+        };
         arrKueri = [
           ILEByPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
           salespersonAndRegionByILEPostDate(
@@ -93,6 +114,7 @@ const Penjualan = ({
           quantityByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
           cppuByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
           rppuByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+          klasifikasiByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
         ];
 
         arrDimensi = [
@@ -109,6 +131,7 @@ const Penjualan = ({
             setKueri: arrKueri,
             rppu: compPRI,
             setDimensi: arrDimensi,
+            filterData: arrFilter,
           });
           const hasil = JSON.parse(respon);
           console.log(hasil);

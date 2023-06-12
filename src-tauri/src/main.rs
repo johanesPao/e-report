@@ -73,6 +73,7 @@ async fn handle_data_penjualan(
     set_kueri: Vec<Kueri<'_>>,
     rppu: bool,
     set_dimensi: Vec<Dimensi<'_>>,
+    filter_data: Filter,
 ) -> Result<String, String> {
     // Konstruksi string contain untuk dimensi toko ke SBU
     let mut peta_dimensi_ecommerce: String = String::new();
@@ -93,10 +94,27 @@ async fn handle_data_penjualan(
         }
     }
 
+    // Konstruksi series penampung filter_data
+    let filter_brand = Series::new("filter_brand", filter_data.brand);
+    let filter_prod_div = Series::new("filter_brand", filter_data.prod_div);
+    let filter_prod_grp = Series::new("filter_brand", filter_data.prod_grp);
+    let filter_prod_cat = Series::new("filter_brand", filter_data.prod_cat);
+    let mut filter_sbu = Series::default();
+    let mut filter_lokasi = Series::default();
+    let mut filter_klasifikasi = Series::default();
+    let mut filter_region = Series::default();
+    if rppu {
+        filter_sbu = Series::new("filter_brand", filter_data.sbu);
+        filter_lokasi = Series::new("filter_brand", filter_data.lokasi);
+    } else {
+        filter_klasifikasi = Series::new("filter_brand", filter_data.klasifikasi);
+        filter_region = Series::new("filter_brand", filter_data.region);
+    }
+
+    // KUERI PENJUALAN
     let mut df_utama: DataFrame = DataFrame::default();
     let mut vektor_dataframe: Vec<DataFrame> = Vec::new();
     for kueri in set_kueri {
-        println!("Melakukan kueri {}", kueri.judul);
         match kueri_bc::kueri_penjualan(kueri).await {
             Ok(hasil) => match hasil {
                 HasilKueri::DataILEEnum(vektor_data) => {
@@ -106,14 +124,12 @@ async fn handle_data_penjualan(
                     let df_ile =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe ILE");
                     df_utama = df_ile;
-                    println!("{:?}", df_utama);
                 }
                 HasilKueri::DataSalespersonRegionILEEnum(vektor_data) => {
                     println!("Konversi DataSalespersonRegion ke polars");
                     let vektor_series = vektor_data.ke_series();
                     let df_salespersonregion = DataFrame::new(vektor_series)
                         .expect("Gagal membuat dataframe salespersonregion");
-                    println!("{:?}", df_salespersonregion);
                     vektor_dataframe.push(df_salespersonregion);
                 }
                 HasilKueri::DataTokoILEEnum(vektor_data) => {
@@ -121,7 +137,6 @@ async fn handle_data_penjualan(
                     let vektor_series = vektor_data.ke_series();
                     let df_toko =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe toko");
-                    println!("{:?}", df_toko);
                     vektor_dataframe.push(df_toko);
                 }
                 HasilKueri::DataProdukILEEnum(vektor_data) => {
@@ -129,7 +144,6 @@ async fn handle_data_penjualan(
                     let vektor_series = vektor_data.ke_series();
                     let df_produk =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe produk");
-                    println!("{:?}", df_produk);
                     vektor_dataframe.push(df_produk);
                 }
                 HasilKueri::DataVatILEEnum(vektor_data) => {
@@ -137,7 +151,6 @@ async fn handle_data_penjualan(
                     let vektor_series = vektor_data.ke_series();
                     let df_vat =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe VAT");
-                    println!("{:?}", df_vat);
                     vektor_dataframe.push(df_vat);
                 }
                 HasilKueri::DataPromoILEEnum(vektor_data) => {
@@ -145,7 +158,6 @@ async fn handle_data_penjualan(
                     let vektor_series = vektor_data.ke_series();
                     let df_promo =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe promo");
-                    println!("{:?}", df_promo);
                     vektor_dataframe.push(df_promo);
                 }
                 HasilKueri::DataDiskonILEEnum(vektor_data) => {
@@ -153,7 +165,6 @@ async fn handle_data_penjualan(
                     let vektor_series = vektor_data.ke_series();
                     let df_diskon =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe diskon");
-                    println!("{:?}", df_diskon);
                     vektor_dataframe.push(df_diskon);
                 }
                 HasilKueri::DataDokumenLainnyaILEEnum(vektor_data) => {
@@ -161,7 +172,6 @@ async fn handle_data_penjualan(
                     let vektor_series = vektor_data.ke_series();
                     let df_dok_lainnya = DataFrame::new(vektor_series)
                         .expect("Gagal membuat dataframe dokumen lainnya");
-                    println!("{:?}", df_dok_lainnya);
                     vektor_dataframe.push(df_dok_lainnya);
                 }
                 HasilKueri::DataKuantitasILEEnum(vektor_data) => {
@@ -169,7 +179,6 @@ async fn handle_data_penjualan(
                     let vektor_series = vektor_data.ke_series();
                     let df_kuantitas =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe kuantitas");
-                    println!("{:?}", df_kuantitas);
                     vektor_dataframe.push(df_kuantitas);
                 }
                 HasilKueri::DataCPPUILEEnum(vektor_data) => {
@@ -177,8 +186,14 @@ async fn handle_data_penjualan(
                     let vektor_series = vektor_data.ke_series();
                     let df_cppu =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe CPPU");
-                    println!("{:?}", df_cppu);
                     vektor_dataframe.push(df_cppu);
+                }
+                HasilKueri::DataKlasifikasiILEEnum(vektor_data) => {
+                    println!("Konversi DataKlasifikasi ke polars");
+                    let vektor_series = vektor_data.ke_series();
+                    let df_klasifikasi =
+                        DataFrame::new(vektor_series).expect("Gagal membuat dataframe klasifikasi");
+                    vektor_dataframe.push(df_klasifikasi);
                 }
                 HasilKueri::DataRPPUILEEnum(vektor_data) => {
                     println!("Konversi DataRPPU ke polars jika rppu true");
@@ -186,7 +201,6 @@ async fn handle_data_penjualan(
                         let vektor_series = vektor_data.ke_series();
                         let df_rppu =
                             DataFrame::new(vektor_series).expect("Gagal membuat dataframe RPPU");
-                        println!("{:?}", df_rppu);
                         vektor_dataframe.push(df_rppu);
                     };
                 }
@@ -196,9 +210,8 @@ async fn handle_data_penjualan(
             }
         }
     }
-    // join dataframe
-    println!("{:?}", df_utama);
-    println!("{:?}", vektor_dataframe);
+
+    // JOIN DATAFRAME
     // Inisiasi df_gabung dari df_utama dan df_salespersonregion (vektor_dataframe[0])
     let mut df_gabung = df_utama
         .left_join(&vektor_dataframe[0], ["no_entry"], ["no_entry"])
@@ -296,11 +309,37 @@ async fn handle_data_penjualan(
     df_gabung = df_gabung
         .left_join(&vektor_dataframe[8], ["no_entry"], ["no_entry"])
         .expect("Gagal join df_gabung dengan df_cppu");
+    // df_gabung dengan df_klasifkasi (vektor_dataframe[9]) [left_on "no_entry", right_on "no_entry"]
+    df_gabung = df_gabung
+        .left_join(&vektor_dataframe[9], ["no_entry"], ["no_entry"])
+        .expect("Gagal join df_gabung dengan df_klasifikasi");
+    // filter brand, prod_div, prod_grp, prod_cat
+    df_gabung = df_gabung
+        .lazy()
+        .filter(col("brand_dim").is_in(lit(filter_brand)))
+        .collect()
+        .unwrap();
+    df_gabung = df_gabung
+        .lazy()
+        .filter(col("prod_div").is_in(lit(filter_prod_div)))
+        .collect()
+        .unwrap();
+    df_gabung = df_gabung
+        .lazy()
+        .filter(col("prod_grp").is_in(lit(filter_prod_grp)))
+        .collect()
+        .unwrap();
+    df_gabung = df_gabung
+        .lazy()
+        .filter(col("prod_cat").is_in(lit(filter_prod_cat)))
+        .collect()
+        .unwrap();
     // jika rppu true (PRI)
-    // df_gabung dengan df_rppu (vektor_dataframe[9]) [left_on "no_entry", right_on "no_entry"]
+    // df_gabung dengan df_rppu (vektor_dataframe[10]) [left_on "no_entry", right_on "no_entry"]
+    // filter sbu dan kode_toko
     if rppu {
         df_gabung = df_gabung
-            .left_join(&vektor_dataframe[9], ["no_entry"], ["no_entry"])
+            .left_join(&vektor_dataframe[10], ["no_entry"], ["no_entry"])
             .expect("Gagal join df_gabung dengan df_rppu");
         // RETAIL PRICE PER UNIT AFT DISC
         df_gabung = df_gabung
@@ -346,7 +385,19 @@ async fn handle_data_penjualan(
             )
             .collect()
             .unwrap();
+        // filter sbu dan kode_toko (lokasi)
+        df_gabung = df_gabung
+            .lazy()
+            .filter(col("sbu").is_in(lit(filter_sbu)))
+            .collect()
+            .unwrap();
+        df_gabung = df_gabung
+            .lazy()
+            .filter(col("loc_code").is_in(lit(filter_lokasi)))
+            .collect()
+            .unwrap();
     // jika rppu false (PNT), deduksi mundur semua komponen sales at retail dari total_sales_at_retail_aft_ppn
+    // filter klasifikasi dan region
     } else {
         // TOTAL SALES AT RETAIL AFT DISC
         df_gabung = df_gabung
@@ -392,6 +443,17 @@ async fn handle_data_penjualan(
             )
             .collect()
             .unwrap();
+        // filter klasifikasi dan region
+        df_gabung = df_gabung
+            .lazy()
+            .filter(col("classification").is_in(lit(filter_klasifikasi)))
+            .collect()
+            .unwrap();
+        df_gabung = df_gabung
+            .lazy()
+            .filter(col("region").is_in(lit(filter_region)))
+            .collect()
+            .unwrap();
     }
     // TOTAL SALES AT COST
     df_gabung = df_gabung
@@ -419,9 +481,51 @@ async fn handle_data_penjualan(
         )
         .collect()
         .unwrap();
+
+    // HAPUS KOLOM store_dim
+    df_gabung = df_gabung.drop("store_dim").unwrap();
     // REORDER DATAFRAME
-    // &df_gabung.select([""]).unwrap();
-    println!("{:?}", df_gabung);
+    df_gabung = df_gabung
+        .select([
+            "no_entry",
+            "post_date",
+            "system_created_at",
+            "sbu",
+            "loc_code",
+            "toko",
+            "no_dokumen",
+            "no_dokumen_oth",
+            "source_no",
+            "classification",
+            "salesperson",
+            "region",
+            "brand_dim",
+            "oricode",
+            "ukuran",
+            "deskripsi_produk",
+            "warna",
+            "prod_div",
+            "prod_grp",
+            "prod_cat",
+            "period",
+            "season",
+            "ppn",
+            "promo",
+            "diskon",
+            "kuantitas",
+            "cost_price_per_unit",
+            "retail_price_per_unit",
+            "retail_price_per_unit_aft_disc",
+            "retail_price_per_unit_aft_vat",
+            "total_sales_at_retail",
+            "total_sales_at_retail_aft_disc",
+            "total_sales_at_retail_aft_vat",
+            "total_sales_at_cost",
+            "total_margin_aft_vat_rp",
+            "total_margin_aft_vat_persen",
+        ])
+        .unwrap();
+
     // let json = serde_json::Value(&df_gabung).unwrap();
     Ok(json!({"status": true, "konten": df_gabung}).to_string())
 }

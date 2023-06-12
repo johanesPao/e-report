@@ -106,6 +106,13 @@ pub struct DataRPPUByILE {
     pub retail_price_per_unit: Option<f32>,
 }
 
+#[derive(Clone, Debug, FieldNamesAsArray)]
+#[field_names_as_array(visibility = "pub")]
+pub struct DataKlasifikasiByILE {
+    pub no_entry: Option<i32>,
+    pub classification: Option<String>,
+}
+
 pub trait DataFrameSerial {
     fn ke_series(&self) -> Vec<Series>;
 }
@@ -581,6 +588,40 @@ impl DataFrameSerial for Vec<DataRPPUByILE> {
     }
 }
 
+impl DataFrameSerial for Vec<DataKlasifikasiByILE> {
+    fn ke_series(&self) -> Vec<Series> {
+        let mut vektor_no_entry = Vec::new();
+        let mut vektor_classification = Vec::new();
+
+        for baris in self {
+            for kolom in 0..DataKlasifikasiByILE::FIELD_NAMES_AS_ARRAY.len() {
+                match kolom {
+                    0 => vektor_no_entry.push(baris.no_entry),
+                    1 => vektor_classification.push(baris.classification.clone()),
+                    _ => println!("Nothing!"),
+                }
+            }
+        }
+
+        let mut vektor_series = Vec::new();
+        for hitung in 0..DataKlasifikasiByILE::FIELD_NAMES_AS_ARRAY.len() {
+            match hitung {
+                0 => vektor_series.push(Series::new(
+                    DataKlasifikasiByILE::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_no_entry.clone(),
+                )),
+                1 => vektor_series.push(Series::new(
+                    DataKlasifikasiByILE::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_classification.clone(),
+                )),
+                _ => println!("Nothing"),
+            }
+        }
+
+        return vektor_series;
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Kueri<'a> {
     pub judul: &'a str,
@@ -590,11 +631,24 @@ pub struct Kueri<'a> {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Dimensi<'a> {
     pub sbu: &'a str,
-    #[serde(deserialize_with = "deserialize_dimensi")]
+    #[serde(deserialize_with = "deserialize_vektor")]
     pub dimensi: Vec<String>,
 }
 
-fn deserialize_dimensi<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Filter {
+    #[serde(deserialize_with = "deserialize_vektor")]
+    pub brand: Vec<String>,
+    pub prod_div: Vec<String>,
+    pub prod_grp: Vec<String>,
+    pub prod_cat: Vec<String>,
+    pub sbu: Vec<String>,
+    pub lokasi: Vec<String>,
+    pub klasifikasi: Vec<String>,
+    pub region: Vec<String>,
+}
+
+fn deserialize_vektor<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -614,4 +668,5 @@ pub enum HasilKueri {
     DataKuantitasILEEnum(Vec<DataKuantitasByILE>),
     DataCPPUILEEnum(Vec<DataCPPUByILE>),
     DataRPPUILEEnum(Vec<DataRPPUByILE>),
+    DataKlasifikasiILEEnum(Vec<DataKlasifikasiByILE>),
 }
