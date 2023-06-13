@@ -119,84 +119,72 @@ async fn handle_data_penjualan(
             Ok(hasil) => match hasil {
                 HasilKueri::DataILEEnum(vektor_data) => {
                     // Konversi vektor struct hasil kueri ke dalam dataframe polars
-                    println!("Konversi DataILE ke polars");
                     let vektor_series = vektor_data.ke_series();
                     let df_ile =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe ILE");
                     df_utama = df_ile;
                 }
                 HasilKueri::DataSalespersonRegionILEEnum(vektor_data) => {
-                    println!("Konversi DataSalespersonRegion ke polars");
                     let vektor_series = vektor_data.ke_series();
                     let df_salespersonregion = DataFrame::new(vektor_series)
                         .expect("Gagal membuat dataframe salespersonregion");
                     vektor_dataframe.push(df_salespersonregion);
                 }
                 HasilKueri::DataTokoILEEnum(vektor_data) => {
-                    println!("Konversi DataToko ke polars");
                     let vektor_series = vektor_data.ke_series();
                     let df_toko =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe toko");
                     vektor_dataframe.push(df_toko);
                 }
                 HasilKueri::DataProdukILEEnum(vektor_data) => {
-                    println!("Konversi DataProduk ke polars");
                     let vektor_series = vektor_data.ke_series();
                     let df_produk =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe produk");
                     vektor_dataframe.push(df_produk);
                 }
                 HasilKueri::DataVatILEEnum(vektor_data) => {
-                    println!("Konversi DataVAT ke polars");
                     let vektor_series = vektor_data.ke_series();
                     let df_vat =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe VAT");
                     vektor_dataframe.push(df_vat);
                 }
                 HasilKueri::DataPromoILEEnum(vektor_data) => {
-                    println!("Konversi DataPromo ke polars");
                     let vektor_series = vektor_data.ke_series();
                     let df_promo =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe promo");
                     vektor_dataframe.push(df_promo);
                 }
                 HasilKueri::DataDiskonILEEnum(vektor_data) => {
-                    println!("Konversi DataDiskon ke polars");
                     let vektor_series = vektor_data.ke_series();
                     let df_diskon =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe diskon");
                     vektor_dataframe.push(df_diskon);
                 }
                 HasilKueri::DataDokumenLainnyaILEEnum(vektor_data) => {
-                    println!("Konversi DataDokumenLainnya ke polars");
                     let vektor_series = vektor_data.ke_series();
                     let df_dok_lainnya = DataFrame::new(vektor_series)
                         .expect("Gagal membuat dataframe dokumen lainnya");
                     vektor_dataframe.push(df_dok_lainnya);
                 }
                 HasilKueri::DataKuantitasILEEnum(vektor_data) => {
-                    println!("Konversi DataKuantitas ke polars");
                     let vektor_series = vektor_data.ke_series();
                     let df_kuantitas =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe kuantitas");
                     vektor_dataframe.push(df_kuantitas);
                 }
                 HasilKueri::DataCPPUILEEnum(vektor_data) => {
-                    println!("Konversi DataCPPU ke polars");
                     let vektor_series = vektor_data.ke_series();
                     let df_cppu =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe CPPU");
                     vektor_dataframe.push(df_cppu);
                 }
                 HasilKueri::DataKlasifikasiILEEnum(vektor_data) => {
-                    println!("Konversi DataKlasifikasi ke polars");
                     let vektor_series = vektor_data.ke_series();
                     let df_klasifikasi =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe klasifikasi");
                     vektor_dataframe.push(df_klasifikasi);
                 }
                 HasilKueri::DataRPPUILEEnum(vektor_data) => {
-                    println!("Konversi DataRPPU ke polars jika rppu true");
                     if rppu {
                         let vektor_series = vektor_data.ke_series();
                         let df_rppu =
