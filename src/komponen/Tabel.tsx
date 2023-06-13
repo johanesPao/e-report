@@ -1,35 +1,40 @@
-import { useMemo } from "react";
-import {
-  MRT_ColumnDef,
-  MantineReactTable,
-  type MantineReactTableProps,
-} from "mantine-react-table";
+import { Center, Text } from "@mantine/core";
+import { MRT_ColumnDef, MantineReactTable } from "mantine-react-table";
 
-interface Props {
-  arrKolom: MRT_ColumnDef<any>[];
-  arrData: any[];
-  onlyProps?: Set<keyof MantineReactTableProps>;
+interface Props<T extends Record<string, any>> {
+  arrKolom: MRT_ColumnDef<T>[];
+  arrData: T[];
+  memuatData: boolean;
 }
 
-export const Tabel = ({ arrKolom, arrData, onlyProps }: Props) => {
-  const columns = useMemo(() => arrKolom, []);
-  const data = useMemo(() => arrData, []);
-
+export const Tabel = <T extends Record<string, any>>({
+  arrKolom,
+  arrData,
+  memuatData,
+}: Props<T>) => {
   return (
-    <MantineReactTable
-      columns={columns}
-      data={data}
-      enableColumnFilterModes
-      enableColumnOrdering
-      enablePinning
-      enableGrouping
-      enableRowActions
-      enableRowSelection
-      initialState={{
-        showColumnFilters: true,
-        density: "xs",
-      }}
-      positionToolbarAlertBanner="bottom"
-    />
+    <div style={{ height: "100%" }}>
+      <MantineReactTable<T>
+        columns={arrKolom}
+        data={arrData}
+        enableColumnFilterModes
+        enableColumnOrdering
+        enablePinning
+        enableGrouping
+        enableRowActions
+        enableRowSelection
+        initialState={{
+          showColumnFilters: true,
+          density: "xs",
+        }}
+        positionToolbarAlertBanner="bottom"
+        renderEmptyRowsFallback={() => (
+          <Center>
+            <Text></Text>
+          </Center>
+        )}
+        state={{ isLoading: memuatData }}
+      />
+    </div>
   );
 };
