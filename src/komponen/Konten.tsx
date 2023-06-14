@@ -66,6 +66,7 @@ const Konten = () => {
           <Penjualan
             propsPenjualan={penjualan}
             propsMuatDataPenjualan={muatDataPenjualan}
+            setMuatDataPenjualan={setMuatDataPenjualan}
           />
         );
       case "penerimaanBarang":

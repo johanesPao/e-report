@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
+import { listen } from "@tauri-apps/api/event";
 
 import { useAppDispatch, useAppSelector } from "../state/hook";
 import { getIndeksData, getKonekKeBC } from "../fitur_state/event";
@@ -36,37 +37,47 @@ import {
 import { Tabel } from "../komponen/Tabel";
 import {
   definisiKolomPenjualan,
-  dataPenjualan,
   bacaDataPenjualan,
 } from "../fungsi/kolom_data";
 import { MRT_ColumnDef } from "mantine-react-table";
 import { Center, Title } from "@mantine/core";
+import { getDataPenjualan } from "../fitur_state/dataBank";
+import { notifications } from "@mantine/notifications";
 
 const Penjualan = ({
   propsPenjualan,
   propsMuatDataPenjualan,
+  setMuatDataPenjualan,
 }: {
   propsPenjualan: PropsPenjualan;
   propsMuatDataPenjualan: boolean;
+  setMuatDataPenjualan: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const dispatch = useAppDispatch();
   const konekKeBc = useAppSelector(getKonekKeBC);
   const parameterBc = useAppSelector(getParameterBc);
+  const dataPenjualan = useAppSelector(getDataPenjualan);
   const compPengguna = useAppSelector(getCompPengguna);
   let compKueri = useAppSelector(getCompKueri);
   const indeksData = useAppSelector(getIndeksData);
-  const [memuatData, setMemuatData] = useState(false);
 
   const definisiKolom = useMemo<MRT_ColumnDef<DataPenjualan>[]>(
     () => definisiKolomPenjualan,
     []
   );
 
-  const [data, setData] = useState(dataPenjualan);
+  useEffect(() => {
+    listen("data-penjualan", callbackNotifikasi);
+  }, []);
+
+  const callbackNotifikasi = useCallback((e: any) => {
+    console.log(e.payload);
+    notifications.show({ title: e.payload, message: e.payload });
+  }, []);
 
   useEffect(() => {
     async function tarik_data_penjualan() {
-      setMemuatData(true);
+      setMuatDataPenjualan(true);
       const singleMode: boolean = compPengguna.length === 1;
       let compPRI: boolean;
       let tglAwal: string;
@@ -144,13 +155,10 @@ const Penjualan = ({
             filterData: arrFilter,
           });
           const hasil = JSON.parse(respon);
-          console.log(hasil);
-          setData(bacaDataPenjualan(hasil.konten.columns));
-          console.log(data.length);
-          setMemuatData(false);
-          console.log(memuatData);
+          bacaDataPenjualan(dispatch, hasil.konten.columns);
+          setMuatDataPenjualan(false);
         } catch (e) {
-          setMemuatData(false);
+          setMuatDataPenjualan(false);
           console.log(e);
         }
       }
@@ -170,15 +178,15 @@ const Penjualan = ({
         warna="teal"
       />
       <div style={{ padding: "25px" }}>
-        {data.length === 0 && !memuatData ? (
+        {dataPenjualan.length === 0 && !propsMuatDataPenjualan ? (
           <Center sx={{ height: "100%", opacity: 0.5 }}>
             <Title>Tidak ada data yang dimuat</Title>
           </Center>
         ) : (
           <Tabel
             arrKolom={definisiKolom}
-            arrData={data}
-            memuatData={memuatData}
+            arrData={dataPenjualan}
+            memuatData={propsMuatDataPenjualan}
           />
         )}
       </div>

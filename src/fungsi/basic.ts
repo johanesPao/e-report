@@ -1,3 +1,4 @@
+import { setDataPenjualan } from "../fitur_state/dataBank";
 import {
   setParameterBc,
   setParameterBrand,
@@ -54,6 +55,7 @@ export const resetAplikasi = (dispatch: any) => {
   dispatch(setParameterLokasi([]));
   dispatch(setParameterKlasifikasi([]));
   dispatch(setParameterRegion([]));
+  dispatch(setDataPenjualan([]));
 };
 
 export interface Dimensi {
