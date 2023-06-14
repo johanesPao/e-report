@@ -1,5 +1,7 @@
 import { MRT_ColumnDef } from "mantine-react-table";
 import { DataPenjualan } from "./basic";
+import { useAppDispatch } from "../state/hook";
+import { setDataPenjualan } from "../fitur_state/dataBank";
 
 export const definisiKolomPenjualan = <MRT_ColumnDef<DataPenjualan>[]>[
   {
@@ -148,9 +150,7 @@ export const definisiKolomPenjualan = <MRT_ColumnDef<DataPenjualan>[]>[
   },
 ];
 
-export let dataPenjualan: DataPenjualan[] = [];
-
-export const bacaDataPenjualan = (data: any[]) => {
+export const bacaDataPenjualan = (dispatch: any, data: any[]) => {
   let arrDataPenjualan: DataPenjualan[] = [];
   let panjangArray = data[0]["values"].length;
   for (let hitung = 0; hitung < panjangArray; hitung++) {
@@ -193,5 +193,5 @@ export const bacaDataPenjualan = (data: any[]) => {
       total_margin_aft_vat_persen: data[35]["values"][hitung],
     });
   }
-  return arrDataPenjualan;
+  dispatch(setDataPenjualan(arrDataPenjualan));
 };

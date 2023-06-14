@@ -74,8 +74,12 @@ async fn handle_data_penjualan(
     rppu: bool,
     set_dimensi: Vec<Dimensi<'_>>,
     filter_data: Filter,
+    window: tauri::Window,
 ) -> Result<String, String> {
     // Konstruksi string contain untuk dimensi toko ke SBU
+    window
+        .emit("data-penjualan", "Membuat peta dimensi...")
+        .expect("Gagal emit notifikasi peta dimensi");
     let mut peta_dimensi_ecommerce: String = String::new();
     let mut peta_dimensi_fisik_sport: String = String::new();
     let mut peta_dimensi_fisik_football: String = String::new();
