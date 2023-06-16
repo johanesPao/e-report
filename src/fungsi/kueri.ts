@@ -3,6 +3,97 @@ export interface Kueri {
   kueri: string;
 }
 
+export const kueriBrandLabel = (parameterBc: any, comp: string) => {
+  return `
+      SELECT DISTINCT
+        a.${parameterBc.kolom_bc.brand_dim} AS [Brand],
+        b.${parameterBc.kolom_bc.name} AS [Label]
+      FROM [${comp}${parameterBc.tabel_bc.jurnal_item_437}] AS a
+      LEFT JOIN [${comp}${parameterBc.tabel_bc.dim_val_437}] AS b
+      ON
+        a.${parameterBc.kolom_bc.brand_dim} = b.${parameterBc.kolom_bc.code} AND
+        b.${parameterBc.kolom_bc.dim_code} = '${parameterBc.argumen_bc.brand}'
+      WHERE
+        a.${parameterBc.kolom_bc.brand_dim} != '' AND
+        a.${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
+    `;
+};
+
+export const kueriMCLabel = (parameterBc: any, comp: string) => {
+  return [
+    `
+    SELECT DISTINCT
+        a.${parameterBc.kolom_bc.prod_div} AS [Division Code],
+        b.${parameterBc.kolom_bc.name} AS [Division Desc]
+      FROM [${comp}${parameterBc.tabel_bc.jurnal_item_a21}] AS a
+      LEFT JOIN [${comp}${parameterBc.tabel_bc.dim_val_437}] AS b
+      ON
+        a.${parameterBc.kolom_bc.prod_div} = b.${parameterBc.kolom_bc.code} AND
+        b.${parameterBc.kolom_bc.dim_code} = '${parameterBc.argumen_bc.prod_div}'
+      WHERE
+        a.${parameterBc.kolom_bc.prod_div} != ''
+    `,
+    `
+    SELECT DISTINCT
+        a.${parameterBc.kolom_bc.prod_group} AS [Group Code],
+        b.${parameterBc.kolom_bc.name} AS [Group Desc]
+      FROM [${comp}${parameterBc.tabel_bc.jurnal_item_a21}] AS a
+      LEFT JOIN [${comp}${parameterBc.tabel_bc.dim_val_437}] AS b
+      ON
+        a.${parameterBc.kolom_bc.prod_group} = b.${parameterBc.kolom_bc.code} AND
+        b.${parameterBc.kolom_bc.dim_code} = '${parameterBc.argumen_bc.prod_group}'
+      WHERE
+        a.${parameterBc.kolom_bc.prod_group} != ''
+    `,
+    `
+    SELECT DISTINCT
+        a.${parameterBc.kolom_bc.prod_cat} AS [Category Code],
+        b.${parameterBc.kolom_bc.name} AS [Category Desc]
+      FROM [${comp}${parameterBc.tabel_bc.jurnal_item_a21}] AS a
+      LEFT JOIN [${comp}${parameterBc.tabel_bc.dim_val_437}] AS b
+      ON
+        a.${parameterBc.kolom_bc.prod_cat} = b.${parameterBc.kolom_bc.code} AND
+        b.${parameterBc.kolom_bc.dim_code} = '${parameterBc.argumen_bc.prod_cat}'
+      WHERE
+        a.${parameterBc.kolom_bc.prod_cat} != ''
+    `,
+  ];
+};
+
+export const kueriLokasiLabel = (parameterBc: any, comp: string) => {
+  return `
+  SELECT DISTINCT
+    ${parameterBc.kolom_bc.loc_code} AS [Kode Lokasi]
+  FROM [${comp}${parameterBc.tabel_bc.jurnal_item_437}]
+  WHERE
+    ${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.sales_prefix}' AND
+    ${parameterBc.kolom_bc.brand_dim} != '' AND
+    ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
+`;
+};
+
+export const kueriKlasifikasiLabel = (parameterBc: any, comp: string) => {
+  return `
+  SELECT DISTINCT
+    ${parameterBc.kolom_bc.code} AS [Kode Klasifikasi],
+    ${parameterBc.kolom_bc.name} AS [Deskripsi Klasifikasi]
+  FROM [${comp}${parameterBc.tabel_bc.dim_val_437}]
+  WHERE
+    ${parameterBc.kolom_bc.dim_code} = '${parameterBc.argumen_bc.classification}'
+`;
+};
+
+export const kueriRegionLabel = (parameterBc: any, comp: string) => {
+  return `
+  SELECT DISTINCT
+    ${parameterBc.kolom_bc.code} AS [Kode Region],
+    ${parameterBc.kolom_bc.name} AS [Deskripsi Region]
+  FROM [${comp}${parameterBc.tabel_bc.dim_val_437}]
+  WHERE
+    ${parameterBc.kolom_bc.dim_code} = '${parameterBc.argumen_bc.region}'
+`;
+};
+
 export const ILEByPostDate = (
   parameterBc: { [key: string]: any },
   tglAwal: string,
