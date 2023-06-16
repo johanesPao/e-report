@@ -71,15 +71,18 @@ async fn kueri_sederhana(kueri: String) -> Result<String, String> {
 #[tauri::command]
 async fn handle_data_penjualan(
     set_kueri: Vec<Kueri<'_>>,
-    rppu: bool,
+    comp_pri: bool,
     set_dimensi: Vec<Dimensi<'_>>,
     filter_data: Filter,
     window: tauri::Window,
 ) -> Result<String, String> {
     // Konstruksi string contain untuk dimensi toko ke SBU
     window
-        .emit("data-penjualan", "Membuat peta dimensi...")
-        .expect("Gagal emit notifikasi peta dimensi");
+        .emit(
+            "data-penjualan",
+            json!({"state": "start", "konten": "Parameter data diterima di Rust, pemetaan dimensi dilakukan"}),
+        )
+        .expect("Gagal emit notifikasi penerimaan parameter");
     let mut peta_dimensi_ecommerce: String = String::new();
     let mut peta_dimensi_fisik_sport: String = String::new();
     let mut peta_dimensi_fisik_football: String = String::new();
@@ -107,7 +110,7 @@ async fn handle_data_penjualan(
     let mut filter_lokasi = Series::default();
     let mut filter_klasifikasi = Series::default();
     let mut filter_region = Series::default();
-    if rppu {
+    if comp_pri {
         filter_sbu = Series::new("filter_brand", filter_data.sbu);
         filter_lokasi = Series::new("filter_brand", filter_data.lokasi);
     } else {
@@ -119,6 +122,14 @@ async fn handle_data_penjualan(
     let mut df_utama: DataFrame = DataFrame::default();
     let mut vektor_dataframe: Vec<DataFrame> = Vec::new();
     for kueri in set_kueri {
+        let konten = format!("Melakukan kueri dengan ID {}", kueri.judul);
+        let gagal_emit_notif = format!("Gagal emit notifikasi kueri ID {}", kueri.judul);
+        window
+            .emit(
+                "data-penjualan",
+                json!({"state": "update", "konten": &konten}),
+            )
+            .expect(&gagal_emit_notif);
         match kueri_bc::kueri_penjualan(kueri).await {
             Ok(hasil) => match hasil {
                 HasilKueri::DataILEEnum(vektor_data) => {
@@ -189,7 +200,7 @@ async fn handle_data_penjualan(
                     vektor_dataframe.push(df_klasifikasi);
                 }
                 HasilKueri::DataRPPUILEEnum(vektor_data) => {
-                    if rppu {
+                    if comp_pri {
                         let vektor_series = vektor_data.ke_series();
                         let df_rppu =
                             DataFrame::new(vektor_series).expect("Gagal membuat dataframe RPPU");
@@ -205,6 +216,15 @@ async fn handle_data_penjualan(
 
     // JOIN DATAFRAME
     // Inisiasi df_gabung dari df_utama dan df_salespersonregion (vektor_dataframe[0])
+    window
+        .emit(
+            "data-penjualan",
+            json!({
+                "state": "update",
+                "konten": "Mempersiapkan dataframe Polars..."
+            }),
+        )
+        .expect("Gagal emit notifikasi persiapan dataframe Polars");
     let mut df_gabung = df_utama
         .left_join(&vektor_dataframe[0], ["no_entry"], ["no_entry"])
         .expect("Gagal join df_ile dengan df_salespersonregion");
@@ -329,7 +349,16 @@ async fn handle_data_penjualan(
     // jika rppu true (PRI)
     // df_gabung dengan df_rppu (vektor_dataframe[10]) [left_on "no_entry", right_on "no_entry"]
     // filter sbu dan kode_toko
-    if rppu {
+    if comp_pri {
+        window
+            .emit(
+                "data-penjualan",
+                json!({
+                    "state": "update",
+                    "konten": "Melakukan kalkulasi retail price per unit, total sales serta filtering SBU dan Kode Toko pada dataframe Polars..."
+                })
+            )
+            .expect("Gagal emit notifikasi kalkulasi dataframe Polars");
         df_gabung = df_gabung
             .left_join(&vektor_dataframe[10], ["no_entry"], ["no_entry"])
             .expect("Gagal join df_gabung dengan df_rppu");
@@ -391,6 +420,15 @@ async fn handle_data_penjualan(
     // jika rppu false (PNT), deduksi mundur semua komponen sales at retail dari total_sales_at_retail_aft_ppn
     // filter klasifikasi dan region
     } else {
+        window
+            .emit(
+                "data-penjualan",
+            json!({
+                "state": "update",
+                "konten": "Mendeteksi comp non PRI, melakukan kalkulasi mundur Retail Price dari Total Sales at Retail Aft. VAT serta filtering Klasifikasi dan Region pada dataframe Polars..."
+            })
+        )
+        .expect("Gagal emit notifikasi kalkulasi mundur pada dataframe Polars");
         // TOTAL SALES AT RETAIL AFT DISC
         df_gabung = df_gabung
             .lazy()
@@ -447,6 +485,15 @@ async fn handle_data_penjualan(
             .collect()
             .unwrap();
     }
+    window
+        .emit(
+            "data-penjualan",
+            json!({
+                "state": "update",
+                "konten": "Melakukan kalkulasi Total Sales at Cost dan Margin pada dataframe Polars..."
+            })
+        )
+        .expect("Gagal emit notifikasi cost dan margin pada polars");
     // TOTAL SALES AT COST
     df_gabung = df_gabung
         .lazy()
@@ -474,6 +521,15 @@ async fn handle_data_penjualan(
         .collect()
         .unwrap();
 
+    window
+        .emit(
+            "data-penjualan",
+            json!({
+                "state": "update",
+                "konten": "Menghapus kolom store_dim dan reordering kolom pada dataframe Polars..."
+            }),
+        )
+        .expect("Gagal emit notifikasi hapus dan reorder kolom");
     // HAPUS KOLOM store_dim
     df_gabung = df_gabung.drop("store_dim").unwrap();
     // REORDER DATAFRAME
@@ -518,6 +574,13 @@ async fn handle_data_penjualan(
         ])
         .unwrap();
 
+    // emit selesai
+    window
+        .emit(
+            "data-penjualan", 
+            json!({"state": "finish", "konten": "Proses pengolahan data penjualan pada Rust selesai, data ditransfer ke React untuk proses pemetaan ke tabel. Mohon tunggu sebentar..."})
+        )
+        .expect("Gagal emit notifikasi pemrosesan data penjualan selesai");
     // let json = serde_json::Value(&df_gabung).unwrap();
     Ok(json!({"status": true, "konten": df_gabung}).to_string())
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from "@tauri-apps/api/event";
 
@@ -43,15 +43,20 @@ import { MRT_ColumnDef } from "mantine-react-table";
 import { Center, Title } from "@mantine/core";
 import { getDataPenjualan } from "../fitur_state/dataBank";
 import { notifications } from "@mantine/notifications";
+import { IconBrandRust, IconCheck } from "@tabler/icons-react";
 
 const Penjualan = ({
   propsPenjualan,
   propsMuatDataPenjualan,
   setMuatDataPenjualan,
+  setSBUListTabel,
+  SBUListTabel,
 }: {
   propsPenjualan: PropsPenjualan;
   propsMuatDataPenjualan: boolean;
   setMuatDataPenjualan: React.Dispatch<React.SetStateAction<boolean>>;
+  setSBUListTabel: React.Dispatch<React.SetStateAction<string[]>>;
+  SBUListTabel: string[];
 }) => {
   const dispatch = useAppDispatch();
   const konekKeBc = useAppSelector(getKonekKeBC);
@@ -62,17 +67,53 @@ const Penjualan = ({
   const indeksData = useAppSelector(getIndeksData);
 
   const definisiKolom = useMemo<MRT_ColumnDef<DataPenjualan>[]>(
-    () => definisiKolomPenjualan,
-    []
+    () => definisiKolomPenjualan(SBUListTabel),
+    [SBUListTabel]
   );
-
-  useEffect(() => {
-    listen("data-penjualan", callbackNotifikasi);
-  }, []);
 
   const callbackNotifikasi = useCallback((e: any) => {
     console.log(e.payload);
-    notifications.show({ title: e.payload, message: e.payload });
+    switch (e.payload.state) {
+      case "start": {
+        notifications.show({
+          id: e.event,
+          title: "Proses Penarikan Data Penjualan",
+          message: e.payload.konten,
+          autoClose: false,
+          color: "black",
+          icon: <IconBrandRust />,
+          withCloseButton: false,
+        });
+        break;
+      }
+      case "update": {
+        notifications.update({
+          id: e.event,
+          title: "Proses Penarikan Data Penjualan",
+          message: e.payload.konten,
+          autoClose: false,
+          color: "orange",
+          loading: true,
+          withCloseButton: false,
+        });
+        break;
+      }
+      case "finish": {
+        notifications.update({
+          id: e.event,
+          title: "Penarikan Data Selesai",
+          message: e.payload.konten,
+          autoClose: 3000,
+          color: "green",
+          icon: <IconCheck />,
+          withCloseButton: false,
+        });
+        break;
+      }
+      default: {
+        break;
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -80,8 +121,10 @@ const Penjualan = ({
       setMuatDataPenjualan(true);
       const singleMode: boolean = compPengguna.length === 1;
       let compPRI: boolean;
-      let tglAwal: string;
-      let tglAkhir: string;
+      let tglAwal: Date;
+      let tglAkhir: Date;
+      let tglAwalString: string;
+      let tglAkhirString: string;
       let arrFilter: Filter;
       let arrKueri: Kueri[];
       let arrDimensi: Dimensi[];
@@ -101,8 +144,12 @@ const Penjualan = ({
       }
 
       if (propsPenjualan.tglAwal !== null && propsPenjualan.tglAkhir !== null) {
-        tglAwal = propsPenjualan.tglAwal.toISOString().split("T")[0];
-        tglAkhir = propsPenjualan.tglAkhir.toISOString().split("T")[0];
+        tglAwal = new Date(propsPenjualan.tglAwal);
+        tglAkhir = new Date(propsPenjualan.tglAkhir);
+        tglAwal.setDate(tglAwal.getDate() + 1);
+        tglAkhir.setDate(tglAkhir.getDate() + 1);
+        tglAwalString = tglAwal.toISOString().split("T")[0];
+        tglAkhirString = tglAkhir.toISOString().split("T")[0];
         arrFilter = {
           brand: propsPenjualan.brand,
           prod_div: propsPenjualan.prodDiv,
@@ -114,28 +161,73 @@ const Penjualan = ({
           region: compPRI ? [] : propsPenjualan.region,
         };
         arrKueri = [
-          ILEByPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+          ILEByPostDate(parameterBc, tglAwalString, tglAkhirString, compKueri),
           salespersonAndRegionByILEPostDate(
             parameterBc,
-            tglAwal,
-            tglAkhir,
+            tglAwalString,
+            tglAkhirString,
             compKueri
           ),
-          tokoByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
-          produkByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
-          vatByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
-          promoByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
-          diskonByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+          tokoByILEPostDate(
+            parameterBc,
+            tglAwalString,
+            tglAkhirString,
+            compKueri
+          ),
+          produkByILEPostDate(
+            parameterBc,
+            tglAwalString,
+            tglAkhirString,
+            compKueri
+          ),
+          vatByILEPostDate(
+            parameterBc,
+            tglAwalString,
+            tglAkhirString,
+            compKueri
+          ),
+          promoByILEPostDate(
+            parameterBc,
+            tglAwalString,
+            tglAkhirString,
+            compKueri
+          ),
+          diskonByILEPostDate(
+            parameterBc,
+            tglAwalString,
+            tglAkhirString,
+            compKueri
+          ),
           dokumenLainnyaByILEPostDate(
             parameterBc,
-            tglAwal,
-            tglAkhir,
+            tglAwalString,
+            tglAkhirString,
             compKueri
           ),
-          quantityByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
-          cppuByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
-          rppuByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
-          klasifikasiByILEPostDate(parameterBc, tglAwal, tglAkhir, compKueri),
+          quantityByILEPostDate(
+            parameterBc,
+            tglAwalString,
+            tglAkhirString,
+            compKueri
+          ),
+          cppuByILEPostDate(
+            parameterBc,
+            tglAwalString,
+            tglAkhirString,
+            compKueri
+          ),
+          rppuByILEPostDate(
+            parameterBc,
+            tglAwalString,
+            tglAkhirString,
+            compKueri
+          ),
+          klasifikasiByILEPostDate(
+            parameterBc,
+            tglAwalString,
+            tglAkhirString,
+            compKueri
+          ),
         ];
 
         arrDimensi = [
@@ -150,11 +242,14 @@ const Penjualan = ({
         try {
           const respon: string = await invoke("handle_data_penjualan", {
             setKueri: arrKueri,
-            rppu: compPRI,
+            compPri: compPRI,
             setDimensi: arrDimensi,
             filterData: arrFilter,
           });
           const hasil = JSON.parse(respon);
+          setSBUListTabel([
+            ...new Set<string>(hasil.konten.columns[3]["values"]),
+          ]);
           bacaDataPenjualan(dispatch, hasil.konten.columns);
           setMuatDataPenjualan(false);
         } catch (e) {
@@ -165,7 +260,11 @@ const Penjualan = ({
     }
 
     if (propsMuatDataPenjualan) {
+      const unlisten = listen("data-penjualan", callbackNotifikasi);
       tarik_data_penjualan();
+      return () => {
+        unlisten.then((f) => f());
+      };
     }
   }, [propsPenjualan]);
 

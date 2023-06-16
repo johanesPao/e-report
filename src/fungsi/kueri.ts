@@ -41,7 +41,6 @@ export const ILEByPostDate = (
     ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}' ${eksklusi}
     `,
   };
-  console.log(setKueri.kueri);
   return setKueri;
 };
 
@@ -95,7 +94,6 @@ export const salespersonAndRegionByILEPostDate = (
       )
       `,
   };
-  console.log(setKueri.kueri);
   return setKueri;
 };
 
@@ -132,7 +130,6 @@ export const tokoByILEPostDate = (
         ON ile.[Dimensi Toko] = toko.[Kode Toko]
     `,
   };
-  console.log(setKueri.kueri);
   return setKueri;
 };
 
@@ -187,7 +184,6 @@ export const produkByILEPostDate = (
       ON ile.[OriCode] = mc.[OriCode]
       `,
   };
-  console.log(setKueri.kueri);
   return setKueri;
 };
 
@@ -267,7 +263,6 @@ export const vatByILEPostDate = (
       )
     `,
   };
-  console.log(setKueri.kueri);
   return setKueri;
 };
 
@@ -311,7 +306,6 @@ export const promoByILEPostDate = (
       ON ile5ec.[Kode Promo] = promo.[Kode Promo]
     `,
   };
-  console.log(setKueri.kueri);
   return setKueri;
 };
 
@@ -366,12 +360,10 @@ export const diskonByILEPostDate = (
     )
     SELECT DISTINCT
       ile.[No. Entri] [No. Entri],
-      COALESCE(SUM(va_entry.[Diskon]), SUM(shipment_doc.[Diskon]), SUM(retur_doc.[Diskon])) [Diskon]
+      COALESCE(va_entry.[Diskon], shipment_doc.[Diskon], retur_doc.[Diskon]) [Diskon]
     FROM ile
     LEFT JOIN va_entry
       ON (
-        ile.[No. Dokumen] NOT LIKE '${parameterBc.argumen_bc.sales_ship_series_prefix}' AND
-        ile.[No. Dokumen] NOT LIKE '${parameterBc.argumen_bc.sales_ret_series_prefix}' AND
         ile.[No. Entri] = va_entry.[No. Entri]
       )
     LEFT JOIN shipment_doc
@@ -387,10 +379,12 @@ export const diskonByILEPostDate = (
         ile.[Baris Dokumen] = retur_doc.[Nomor Baris]
       )
     GROUP BY
-        ile.[No. Entri]
+        ile.[No. Entri],
+        va_entry.[Diskon],
+        shipment_doc.[Diskon],
+        retur_doc.[Diskon]
     `,
   };
-  console.log(setKueri.kueri);
   return setKueri;
 };
 
@@ -408,7 +402,15 @@ export const dokumenLainnyaByILEPostDate = (
         va_entry.${parameterBc.kolom_bc.no_doc} [No. Dokumen 2]
       FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}] AS ile
       LEFT JOIN [${compKueri}${parameterBc.tabel_bc.va_entry_437}] AS va_entry
-        ON ile.${parameterBc.kolom_bc.no_entry} = va_entry.${parameterBc.kolom_bc.ile_entry_no}
+        ON va_entry.${parameterBc.kolom_bc.no_entry} = (
+          SELECT TOP 1
+            ${parameterBc.kolom_bc.no_entry}
+          FROM [${compKueri}${parameterBc.tabel_bc.va_entry_437}]
+          WHERE
+            ${parameterBc.kolom_bc.ile_entry_no} = ile.${parameterBc.kolom_bc.no_entry}
+          ORDER BY
+            ${parameterBc.kolom_bc.no_doc}
+        )
       WHERE
         ile.${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
         ile.${parameterBc.kolom_bc.post_date} <= '${tglAkhir}'
@@ -442,7 +444,6 @@ export const quantityByILEPostDate = (
         ${parameterBc.kolom_bc.no_entry}
     `,
   };
-  console.log(setKueri.kueri);
   return setKueri;
 };
 
@@ -488,7 +489,6 @@ export const cppuByILEPostDate = (
       ile.[No. Entri]
     `,
   };
-  console.log(setKueri.kueri);
   return setKueri;
 };
 
@@ -582,7 +582,6 @@ export const rppuByILEPostDate = (
       )
     `,
   };
-  console.log(setKueri.kueri);
   return setKueri;
 };
 
@@ -615,6 +614,5 @@ export const klasifikasiByILEPostDate = (
         dim_set.${parameterBc.kolom_bc.dim_val_code}
     `,
   };
-  console.log(setKueri.kueri);
   return setKueri;
 };

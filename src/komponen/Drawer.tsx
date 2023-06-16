@@ -13,7 +13,7 @@ import InputStok from "./kontenDrawer/InputStok";
 import InputKetersediaanStok from "./kontenDrawer/InputKetersediaanStok";
 import InputBuyingProposal from "./kontenDrawer/InputBuyingProposal";
 import InputLabaRugiToko from "./kontenDrawer/InputLabaRugiToko";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PropsPenjualan } from "./Konten";
 
 interface DrawerInputProps {
@@ -56,29 +56,29 @@ const DrawerInput = ({
     }
   }, [halaman]);
 
-  const renderInput = () => {
+  const renderInput = useMemo(() => {
     switch (halaman) {
       case "penjualan":
-        return (
+        return () => (
           <InputPenjualan
             setPenjualan={setPenjualan}
             setMuatDataPenjualan={setMuatDataPenjualan}
           />
         );
       case "penerimaanBarang":
-        return <InputPenerimaanBarang />;
+        return () => <InputPenerimaanBarang />;
       case "stok":
-        return <InputStok />;
+        return () => <InputStok />;
       case "ketersediaanStok":
-        return <InputKetersediaanStok />;
+        return () => <InputKetersediaanStok />;
       case "buyingProposal":
-        return <InputBuyingProposal />;
+        return () => <InputBuyingProposal />;
       case "labaRugiToko":
-        return <InputLabaRugiToko />;
+        return () => <InputLabaRugiToko />;
       default:
-        return;
+        return () => null;
     }
-  };
+  }, [halaman]);
 
   return (
     <Drawer

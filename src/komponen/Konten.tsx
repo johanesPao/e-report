@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import DrawerInput from "./Drawer";
@@ -47,6 +47,7 @@ const Konten = () => {
     klasifikasi: [],
     region: [],
   });
+  const [SBUListTabel, setSBUListTabel] = useState<string[]>([]);
   const [muatDataPenjualan, setMuatDataPenjualan] = useState(false);
 
   useEffect(() => {
@@ -59,32 +60,34 @@ const Konten = () => {
     dispatch(setHalaman(halamanBaru));
   };
 
-  const renderKonten = () => {
+  const renderKonten = useMemo(() => {
     switch (halaman) {
       case "penjualan":
-        return (
+        return () => (
           <Penjualan
             propsPenjualan={penjualan}
             propsMuatDataPenjualan={muatDataPenjualan}
             setMuatDataPenjualan={setMuatDataPenjualan}
+            setSBUListTabel={setSBUListTabel}
+            SBUListTabel={SBUListTabel}
           />
         );
       case "penerimaanBarang":
-        return <PenerimaanBarang />;
+        return () => <PenerimaanBarang />;
       case "stok":
-        return <Stok />;
+        return () => <Stok />;
       case "ketersediaanStok":
-        return <KetersediaanStok />;
+        return () => <KetersediaanStok />;
       case "buyingProposal":
-        return <BuyingProposal />;
+        return () => <BuyingProposal />;
       case "labaRugiToko":
-        return <LabaRugiToko />;
+        return () => <LabaRugiToko />;
       case "kelayakanTokoBaru":
-        return <KelayakanTokoBaru />;
+        return () => <KelayakanTokoBaru />;
       default:
-        return <Dashboard />;
+        return () => <Dashboard />;
     }
-  };
+  }, [halaman]);
 
   return (
     <Layout onNavbarLinkClick={handleNavlinkClick}>

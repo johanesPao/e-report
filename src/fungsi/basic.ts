@@ -11,6 +11,7 @@ import {
   setParameterSBU,
 } from "../fitur_state/dataParam";
 import {
+  setDrawerTerbuka,
   setHalaman,
   setIndeksData,
   setKonekKeBC,
@@ -56,6 +57,7 @@ export const resetAplikasi = (dispatch: any) => {
   dispatch(setParameterKlasifikasi([]));
   dispatch(setParameterRegion([]));
   dispatch(setDataPenjualan([]));
+  dispatch(setDrawerTerbuka(false));
 };
 
 export interface Dimensi {
@@ -123,9 +125,9 @@ export interface Filter {
 }
 
 export type DataPenjualan = {
-  no_entry: string;
-  post_date: Date;
-  system_created_at: Date;
+  no_entry: number;
+  post_date: string;
+  system_created_at: string;
   sbu: string;
   loc_code: string;
   toko: string;
@@ -145,7 +147,7 @@ export type DataPenjualan = {
   prod_cat: string;
   period: string;
   season: string;
-  ppn: number;
+  ppn: string;
   promo: string;
   diskon: number;
   kuantitas: number;
