@@ -10,6 +10,7 @@ import { getIndeksData, setDrawerTerbuka } from "../../fitur_state/event";
 import MultiBrand from "../MultiBrand";
 import MultiMC from "../MultiMC";
 import {
+  DataMultiSelect,
   getParameterBc,
   getParameterBrand,
   getParameterCat,
@@ -48,10 +49,18 @@ const InputPenjualan = ({
   const parameterKlasifikasi = useAppSelector(getParameterKlasifikasi);
   const parameterRegion = useAppSelector(getParameterRegion);
   const indeksData = useAppSelector(getIndeksData);
-  const defaultBrand = parameterBrand[indeksData].map((item) => item.value);
-  const defaultDiv = parameterDiv[indeksData].map((item) => item.value);
-  const defaultGroup = parameterGroup[indeksData].map((item) => item.value);
-  const defaultCat = parameterCat[indeksData].map((item) => item.value);
+  const defaultBrand = parameterBrand[indeksData].map(
+    (item: DataMultiSelect) => item.value
+  );
+  const defaultDiv = parameterDiv[indeksData].map(
+    (item: DataMultiSelect) => item.value
+  );
+  const defaultGroup = parameterGroup[indeksData].map(
+    (item: DataMultiSelect) => item.value
+  );
+  const defaultCat = parameterCat[indeksData].map(
+    (item: DataMultiSelect) => item.value
+  );
   const [rangeTanggal, setRangeTanggal] = useState<[Date | null, Date | null]>([
     null,
     null,
@@ -78,14 +87,20 @@ const InputPenjualan = ({
     (compPengguna.length === 1 && compPengguna[0] === parameterBc.comp.pri) ||
     (compPengguna.length === 2 && indeksData === 0)
   ) {
-    const defaultLokasi = parameterLokasi.map((item) => item.value);
+    const defaultLokasi = parameterLokasi.map(
+      (item: DataMultiSelect) => item.value
+    );
     [nilaiLokasi, setNilaiLokasi] = useState(defaultLokasi);
-    const defaultSBU = parameterSBU.map((item) => item.value);
+    const defaultSBU = parameterSBU.map((item: DataMultiSelect) => item.value);
     [nilaiSBU, setNilaiSBU] = useState(defaultSBU);
   } else {
-    const defaultKlasifikasi = parameterKlasifikasi.map((item) => item.value);
+    const defaultKlasifikasi = parameterKlasifikasi.map(
+      (item: DataMultiSelect) => item.value
+    );
     [nilaiKlasifikasi, setNilaiKlasifikasi] = useState(defaultKlasifikasi);
-    const defaultRegion = parameterRegion.map((item) => item.value);
+    const defaultRegion = parameterRegion.map(
+      (item: DataMultiSelect) => item.value
+    );
     [nilaiRegion, setNilaiRegion] = useState(defaultRegion);
   }
 
@@ -111,6 +126,7 @@ const InputPenjualan = ({
       });
       return;
     }
+    dispatch(setDrawerTerbuka(false));
     setPenjualan({
       tglAwal: rangeTanggal[0],
       tglAkhir: rangeTanggal[1],
@@ -144,7 +160,6 @@ const InputPenjualan = ({
           : [],
     });
     setMuatDataPenjualan(true);
-    dispatch(setDrawerTerbuka(false));
   };
 
   return (

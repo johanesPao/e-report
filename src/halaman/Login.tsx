@@ -258,7 +258,7 @@ const Login = () => {
 
   useEffect(() => {
     // reset semua state
-    resetAplikasi(dispatch);
+    // resetAplikasi(dispatch);
     bc_tersedia();
   }, []);
 

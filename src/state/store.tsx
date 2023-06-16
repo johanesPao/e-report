@@ -1,5 +1,4 @@
 import { persistReducer, persistStore } from "redux-persist";
-import localforage from "localforage";
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
 // Import Slice
@@ -7,10 +6,11 @@ import eventSlice from "../fitur_state/event";
 import penggunaSlice from "../fitur_state/pengguna";
 import dataParamSlice from "../fitur_state/dataParam";
 import dataSlice from "../fitur_state/dataBank";
+import localStorage from "redux-persist/es/storage";
 
 const persistConfig = {
   key: "root",
-  storage: localforage,
+  storage: localStorage,
   whitelist: ["event", "pengguna", "dataParam", "data"],
 };
 
