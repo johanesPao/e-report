@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import DrawerInput from "./Drawer";
@@ -35,6 +35,8 @@ const Konten = () => {
   const dispatch = useAppDispatch();
   const sesiAktif = useAppSelector(getSesiAktif);
   const halaman = useAppSelector(getHalaman);
+
+  // PENJUALAN
   const [penjualan, setPenjualan] = useState<PropsPenjualan>({
     tglAwal: null,
     tglAkhir: null,
@@ -48,6 +50,25 @@ const Konten = () => {
     region: [],
   });
   const [SBUListTabel, setSBUListTabel] = useState<string[]>([]);
+  const [kodeTokoListTabel, setKodeTokoListTabel] = useState<string[]>([]);
+  const [tokoListTabel, setTokoListTabel] = useState<string[]>([]);
+  const [customerListTabel, setCustomerListTabel] = useState<string[]>([]);
+  const [klasifikasiListTabel, setKlasifikasiListTabel] = useState<string[]>(
+    []
+  );
+  const [salespersonListTabel, setSalespersonListTabel] = useState<string[]>(
+    []
+  );
+  const [regionListTabel, setRegionListTabel] = useState<string[]>([]);
+  const [brandListTabel, setBrandListTabel] = useState<string[]>([]);
+  const [oricodeListTabel, setOricodeListTabel] = useState<string[]>([]);
+  const [ukuranListTabel, setUkuranListTabel] = useState<string[]>([]);
+  const [prodDivListTabel, setProdDivListTabel] = useState<string[]>([]);
+  const [prodGrpListTabel, setKProdGrpListTabel] = useState<string[]>([]);
+  const [prodCatListTabel, setProdCatListTabel] = useState<string[]>([]);
+  const [periodListTabel, setPeriodListTabel] = useState<string[]>([]);
+  const [seasonListTabel, setSeasonListTabel] = useState<string[]>([]);
+  const [promoListTabel, setPromoListTabel] = useState<string[]>([]);
   const [muatDataPenjualan, setMuatDataPenjualan] = useState(false);
 
   useEffect(() => {
@@ -69,7 +90,37 @@ const Konten = () => {
             propsMuatDataPenjualan={muatDataPenjualan}
             setMuatDataPenjualan={setMuatDataPenjualan}
             setSBUListTabel={setSBUListTabel}
+            setKodeTokoListTabel={setKodeTokoListTabel}
+            setTokoListTabel={setTokoListTabel}
+            setCustomerListTabel={setCustomerListTabel}
+            setKlasifikasiListTabel={setKlasifikasiListTabel}
+            setSalespersonListTabel={setSalespersonListTabel}
+            setRegionListTabel={setRegionListTabel}
+            setBrandListTabel={setBrandListTabel}
+            setOricodeListTabel={setOricodeListTabel}
+            setUkuranListTabel={setUkuranListTabel}
+            setProdDivListTabel={setProdDivListTabel}
+            setProdGrpListTabel={setKProdGrpListTabel}
+            setProdCatListTabel={setProdCatListTabel}
+            setPeriodListTabel={setPeriodListTabel}
+            setSeasonListTabel={setSeasonListTabel}
+            setPromoListTabel={setPromoListTabel}
             SBUListTabel={SBUListTabel}
+            kodeTokoListTabel={kodeTokoListTabel}
+            tokoListTabel={tokoListTabel}
+            customerListTabel={customerListTabel}
+            klasifikasiListTabel={klasifikasiListTabel}
+            salespersonListTabel={salespersonListTabel}
+            regionListTabel={regionListTabel}
+            brandListTabel={brandListTabel}
+            oricodeListTabel={oricodeListTabel}
+            ukuranListTabel={ukuranListTabel}
+            prodDivListTabel={prodDivListTabel}
+            prodGrpListTabel={prodGrpListTabel}
+            prodCatListTabel={prodCatListTabel}
+            periodListTabel={periodListTabel}
+            seasonListTabel={seasonListTabel}
+            promoListTabel={promoListTabel}
           />
         );
       case "penerimaanBarang":
