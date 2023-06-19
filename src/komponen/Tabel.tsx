@@ -1,3 +1,5 @@
+import { Box, Button } from "@mantine/core";
+import { IconDownload } from "@tabler/icons-react";
 import {
   MRT_ColumnDef,
   MRT_ShowHideColumnsButton,
@@ -6,6 +8,7 @@ import {
 } from "mantine-react-table";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
+import { unduhKeExcel } from "../fungsi/basic";
 
 interface Props<T extends Record<string, any>> {
   arrKolom: MRT_ColumnDef<T>[];
@@ -34,7 +37,7 @@ export const Tabel = <T extends Record<string, any>>({
           enableDensityToggle={false}
           memoMode="cells"
           // enableRowActions
-          enableRowSelection
+          // enableRowSelection
           mantineTableContainerProps={{
             sx: { height: "100%" },
           }}
@@ -47,6 +50,25 @@ export const Tabel = <T extends Record<string, any>>({
             density: "xs",
           }}
           positionToolbarAlertBanner="bottom"
+          renderTopToolbarCustomActions={() => (
+            <Box
+              sx={{
+                display: "flex",
+                gap: "16px",
+                padding: "8px",
+                flexWrap: "wrap",
+              }}
+            >
+              <Button
+                color="green"
+                onClick={() => unduhKeExcel(arrData)}
+                leftIcon={<IconDownload />}
+                variant="filled"
+              >
+                Unduh ke Excel
+              </Button>
+            </Box>
+          )}
           renderToolbarInternalActions={({ table }) => {
             return (
               <>
