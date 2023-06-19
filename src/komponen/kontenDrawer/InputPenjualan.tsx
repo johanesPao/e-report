@@ -45,7 +45,6 @@ const InputPenjualan = ({
   setMuatDataPenjualan,
 }: InputPenjualanProps) => {
   const dispatch = useAppDispatch();
-  // resetAplikasi(dispatch);
   const compPengguna = useAppSelector(getCompPengguna);
   const parameterBc = useAppSelector(getParameterBc);
   const parameterBrand = useAppSelector(getParameterBrand);

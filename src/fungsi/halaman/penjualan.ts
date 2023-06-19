@@ -1,7 +1,7 @@
 import React from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import { notifications } from "@mantine/notifications";
-import { IconX } from "@tabler/icons-react";
+import { IconBrandRust, IconCheck, IconX } from "@tabler/icons-react";
 
 import { PropsPenjualan } from "../../komponen/Konten";
 import {
@@ -43,7 +43,22 @@ export const tarik_data_penjualan = async (
   indeksData: number,
   compKueri: string,
   propsPenjualan: PropsPenjualan,
-  setSBUListTabel: React.Dispatch<React.SetStateAction<string[]>>
+  setSBUListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setKodeTokoListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setTokoListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setCustomerListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setKlasifikasiListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setSalespersonListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setRegionListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setBrandListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setOricodeListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setUkuranListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setProdDivListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setProdGrpListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setProdCatListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setPeriodListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setSeasonListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setPromoListTabel: React.Dispatch<React.SetStateAction<string[]>>
 ) => {
   const singleMode: boolean = compPengguna.length === 1;
   const compPRI: boolean = !singleMode
@@ -171,7 +186,25 @@ export const tarik_data_penjualan = async (
         filterData: arrFilter,
       });
       const hasil = JSON.parse(respon);
-      setSBUListTabel([...new Set<string>(hasil.konten.columns[3]["values"])]);
+      setFilterDataPenjualan(
+        setSBUListTabel,
+        setKodeTokoListTabel,
+        setTokoListTabel,
+        setCustomerListTabel,
+        setKlasifikasiListTabel,
+        setSalespersonListTabel,
+        setRegionListTabel,
+        setBrandListTabel,
+        setOricodeListTabel,
+        setUkuranListTabel,
+        setProdDivListTabel,
+        setProdGrpListTabel,
+        setProdCatListTabel,
+        setPeriodListTabel,
+        setSeasonListTabel,
+        setPromoListTabel,
+        hasil.konten.columns
+      );
       bacaDataPenjualan(dispatch, hasil.konten.columns);
       setMuatDataPenjualan(false);
     } catch (e) {
@@ -181,6 +214,107 @@ export const tarik_data_penjualan = async (
   }
 };
 
+const setFilterDataPenjualan = (
+  setSBUListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setKodeTokoListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setTokoListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setCustomerListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setKlasifikasiListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setSalespersonListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setRegionListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setBrandListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setOricodeListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setUkuranListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setProdDivListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setProdGrpListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setProdCatListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setPeriodListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setSeasonListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setPromoListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  kolom: any
+) => {
+  setSBUListTabel(
+    [...new Set<string>(kolom[3]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+  setKodeTokoListTabel(
+    [...new Set<string>(kolom[4]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+  setTokoListTabel(
+    [...new Set<string>(kolom[5]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+  setCustomerListTabel(
+    [...new Set<string>(kolom[8]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+  setKlasifikasiListTabel(
+    [...new Set<string>(kolom[9]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+  setSalespersonListTabel(
+    [...new Set<string>(kolom[10]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+  setRegionListTabel(
+    [...new Set<string>(kolom[11]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+  setBrandListTabel(
+    [...new Set<string>(kolom[12]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+  setOricodeListTabel(
+    [...new Set<string>(kolom[13]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+  setUkuranListTabel(
+    [...new Set<string>(kolom[14]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+  setProdDivListTabel(
+    [...new Set<string>(kolom[17]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+  setProdGrpListTabel(
+    [...new Set<string>(kolom[18]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+  setProdCatListTabel(
+    [...new Set<string>(kolom[19]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+  setPeriodListTabel(
+    [...new Set<string>(kolom[20]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+  setSeasonListTabel(
+    [...new Set<string>(kolom[21]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+  setPromoListTabel(
+    [...new Set<string>(kolom[23]["values"])].map((item: any) =>
+      item !== null ? item : ""
+    )
+  );
+};
+
 const bacaDataPenjualan = (dispatch: any, data: any[]) => {
   let arrDataPenjualan: DataPenjualan[] = [];
   let panjangArray = data[0]["values"].length;
@@ -188,9 +322,12 @@ const bacaDataPenjualan = (dispatch: any, data: any[]) => {
     let postDate = new Date(data[1]["values"][hitung]);
     let systemCreatedAt = new Date(data[2]["values"][hitung]);
     arrDataPenjualan.push({
-      no_entry: data[0]["values"][hitung],
+      no_entry: data[0]["values"][hitung].toLocaleString(),
       post_date: postDate.toISOString().split("T")[0],
-      system_created_at: systemCreatedAt.toISOString().split("T")[1],
+      system_created_at: systemCreatedAt
+        .toISOString()
+        .split("T")[1]
+        .split(".")[0],
       sbu: data[3]["values"][hitung],
       loc_code: data[4]["values"][hitung],
       toko: data[5]["values"][hitung],
@@ -214,25 +351,86 @@ const bacaDataPenjualan = (dispatch: any, data: any[]) => {
         data[22]["values"][hitung] !== null
           ? data[22]["values"][hitung].toLocaleString("id-ID", {
               style: "percent",
-              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
             })
           : "0.00%",
       promo: data[23]["values"][hitung],
-      diskon: data[24]["values"][hitung],
-      kuantitas: data[25]["values"][hitung],
-      cost_price_per_unit: data[26]["values"][hitung],
-      retail_price_per_unit: data[27]["values"][hitung],
-      retail_price_per_unit_aft_disc: data[28]["values"][hitung],
-      retail_price_per_unit_aft_vat: data[29]["values"][hitung],
-      total_sales_at_retail: data[30]["values"][hitung],
-      total_sales_at_retail_aft_disc: data[31]["values"][hitung],
-      total_sales_at_retail_aft_vat: data[32]["values"][hitung],
-      total_sales_at_cost: data[33]["values"][hitung],
-      total_margin_aft_vat_rp: data[34]["values"][hitung],
-      total_margin_aft_vat_persen: data[35]["values"][hitung],
+      diskon:
+        data[24]["values"][hitung] !== null
+          ? data[24]["values"][hitung].toLocaleString("id-ID", {
+              style: "percent",
+              maximumFractionDigits: 2,
+            })
+          : "0.00%",
+      kuantitas:
+        data[25]["values"][hitung] !== null
+          ? data[25]["values"][hitung].toLocaleString("id-ID", {
+              maximumFractionDigits: 0,
+            })
+          : "0",
+      cost_price_per_unit:
+        data[26]["values"][hitung] !== null
+          ? data[26]["values"][hitung].toLocaleString("id-ID", {
+              maximumFractionDigits: 0,
+            })
+          : "0",
+      retail_price_per_unit:
+        data[27]["values"][hitung] !== null
+          ? data[27]["values"][hitung].toLocaleString("id-ID", {
+              maximumFractionDigits: 0,
+            })
+          : "0",
+      retail_price_per_unit_aft_disc:
+        data[28]["values"][hitung] !== null
+          ? data[28]["values"][hitung].toLocaleString("id-ID", {
+              maximumFractionDigits: 0,
+            })
+          : "0",
+      retail_price_per_unit_aft_vat:
+        data[29]["values"][hitung] !== null
+          ? data[29]["values"][hitung].toLocaleString("id-ID", {
+              maximumFractionDigits: 0,
+            })
+          : "0",
+      total_sales_at_retail:
+        data[30]["values"][hitung] !== null
+          ? data[30]["values"][hitung].toLocaleString("id-ID", {
+              maximumFractionDigits: 0,
+            })
+          : "0",
+      total_sales_at_retail_aft_disc:
+        data[31]["values"][hitung] !== null
+          ? data[31]["values"][hitung].toLocaleString("id-ID", {
+              maximumFractionDigits: 0,
+            })
+          : "0",
+      total_sales_at_retail_aft_vat:
+        data[32]["values"][hitung] !== null
+          ? data[32]["values"][hitung].toLocaleString("id-ID", {
+              maximumFractionDigits: 0,
+            })
+          : "0",
+      total_sales_at_cost:
+        data[33]["values"][hitung] !== null
+          ? data[33]["values"][hitung].toLocaleString("id-ID", {
+              maximumFractionDigits: 0,
+            })
+          : "0",
+      total_margin_aft_vat_rp:
+        data[34]["values"][hitung] !== null
+          ? data[34]["values"][hitung].toLocaleString("id-ID", {
+              maximumFractionDigits: 0,
+            })
+          : "0",
+      total_margin_aft_vat_persen:
+        data[35]["values"][hitung] !== null
+          ? data[35]["values"][hitung].toLocaleString("id-ID", {
+              style: "percent",
+              maximumFractionDigits: 2,
+            })
+          : "0.00%",
     });
   }
-  console.log(arrDataPenjualan);
   dispatch(setDataPenjualan(arrDataPenjualan));
 };
 
@@ -304,4 +502,48 @@ export const prosesInput = (
   });
   dispatch(setDrawerTerbuka(false));
   setMuatDataPenjualan(true);
+};
+
+export const callbackNotifikasiPenjualan = (e: any) => {
+  switch (e.payload.state) {
+    case "start": {
+      notifications.show({
+        id: e.event,
+        title: "Proses Penarikan Data Penjualan",
+        message: e.payload.konten,
+        autoClose: false,
+        color: "black",
+        icon: React.createElement(IconBrandRust),
+        withCloseButton: false,
+      });
+      break;
+    }
+    case "update": {
+      notifications.update({
+        id: e.event,
+        title: "Proses Penarikan Data Penjualan",
+        message: e.payload.konten,
+        autoClose: false,
+        color: "orange",
+        loading: true,
+        withCloseButton: false,
+      });
+      break;
+    }
+    case "finish": {
+      notifications.update({
+        id: e.event,
+        title: "Penarikan Data Selesai",
+        message: e.payload.konten,
+        autoClose: 3000,
+        color: "green",
+        icon: React.createElement(IconCheck),
+        withCloseButton: false,
+      });
+      break;
+    }
+    default: {
+      break;
+    }
+  }
 };
