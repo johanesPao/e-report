@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Button, Center, Grid, Space } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import { DatePicker } from "@mantine/dates";
-import { IconDatabase, IconX } from "@tabler/icons-react";
+import { IconDatabase } from "@tabler/icons-react";
 
 import { useAppDispatch, useAppSelector } from "../../state/hook";
 import { getIndeksData, setDrawerTerbuka } from "../../fitur_state/event";
@@ -10,7 +9,12 @@ import { getIndeksData, setDrawerTerbuka } from "../../fitur_state/event";
 import MultiBrand from "../MultiBrand";
 import MultiMC from "../MultiMC";
 import {
-  DataMultiSelect,
+  getBrandInput,
+  getCatInput,
+  getDivInput,
+  getGrpInput,
+  getKlasifikasiInput,
+  getLokasiInput,
   getParameterBc,
   getParameterBrand,
   getParameterCat,
@@ -20,6 +24,8 @@ import {
   getParameterLokasi,
   getParameterRegion,
   getParameterSBU,
+  getRegionInput,
+  getSBUInput,
 } from "../../fitur_state/dataParam";
 import { getCompPengguna } from "../../fitur_state/pengguna";
 import MultiLokasi from "../MultiLokasi";
@@ -27,6 +33,7 @@ import MultiSBU from "../MultiSBU";
 import MultiKlasifikasi from "../MultiKlasifikasi";
 import MultiRegion from "../MultiRegion";
 import { PropsPenjualan } from "../Konten";
+import { prosesInput } from "../../fungsi/halaman/penjualan";
 
 interface InputPenjualanProps {
   setPenjualan: React.Dispatch<React.SetStateAction<PropsPenjualan>>;
@@ -38,6 +45,7 @@ const InputPenjualan = ({
   setMuatDataPenjualan,
 }: InputPenjualanProps) => {
   const dispatch = useAppDispatch();
+  // resetAplikasi(dispatch);
   const compPengguna = useAppSelector(getCompPengguna);
   const parameterBc = useAppSelector(getParameterBc);
   const parameterBrand = useAppSelector(getParameterBrand);
@@ -48,119 +56,28 @@ const InputPenjualan = ({
   const parameterLokasi = useAppSelector(getParameterLokasi);
   const parameterKlasifikasi = useAppSelector(getParameterKlasifikasi);
   const parameterRegion = useAppSelector(getParameterRegion);
+  const brandInput = useAppSelector(getBrandInput);
   const indeksData = useAppSelector(getIndeksData);
-  const defaultBrand = parameterBrand[indeksData].map(
-    (item: DataMultiSelect) => item.value
-  );
-  const defaultDiv = parameterDiv[indeksData].map(
-    (item: DataMultiSelect) => item.value
-  );
-  const defaultGroup = parameterGroup[indeksData].map(
-    (item: DataMultiSelect) => item.value
-  );
-  const defaultCat = parameterCat[indeksData].map(
-    (item: DataMultiSelect) => item.value
-  );
+  const divInput = useAppSelector(getDivInput);
+  const grpInput = useAppSelector(getGrpInput);
+  const catInput = useAppSelector(getCatInput);
+  const sbuInput = useAppSelector(getSBUInput);
+  const lokasiInput = useAppSelector(getLokasiInput);
+  const klasifikasiInput = useAppSelector(getKlasifikasiInput);
+  const regionInput = useAppSelector(getRegionInput);
+
   const [rangeTanggal, setRangeTanggal] = useState<[Date | null, Date | null]>([
     null,
     null,
   ]);
-  const [nilaiBrand, setNilaiInputBrand] = useState(defaultBrand);
-  const [nilaiDiv, setNilaiDiv] = useState(defaultDiv);
-  const [nilaiGroup, setNilaiGroup] = useState(defaultGroup);
-  const [nilaiCat, setNilaiCat] = useState(defaultCat);
-  let nilaiLokasi: string[] = [];
-  let setNilaiLokasi:
-    | React.Dispatch<React.SetStateAction<string[]>>
-    | undefined;
-  let nilaiSBU: string[] = [];
-  let setNilaiSBU: React.Dispatch<React.SetStateAction<string[]>> | undefined;
-  let nilaiKlasifikasi: string[] = [];
-  let setNilaiKlasifikasi:
-    | React.Dispatch<React.SetStateAction<string[]>>
-    | undefined;
-  let nilaiRegion: string[] = [];
-  let setNilaiRegion:
-    | React.Dispatch<React.SetStateAction<string[]>>
-    | undefined;
-  if (
-    (compPengguna.length === 1 && compPengguna[0] === parameterBc.comp.pri) ||
-    (compPengguna.length === 2 && indeksData === 0)
-  ) {
-    const defaultLokasi = parameterLokasi.map(
-      (item: DataMultiSelect) => item.value
-    );
-    [nilaiLokasi, setNilaiLokasi] = useState(defaultLokasi);
-    const defaultSBU = parameterSBU.map((item: DataMultiSelect) => item.value);
-    [nilaiSBU, setNilaiSBU] = useState(defaultSBU);
-  } else {
-    const defaultKlasifikasi = parameterKlasifikasi.map(
-      (item: DataMultiSelect) => item.value
-    );
-    [nilaiKlasifikasi, setNilaiKlasifikasi] = useState(defaultKlasifikasi);
-    const defaultRegion = parameterRegion.map(
-      (item: DataMultiSelect) => item.value
-    );
-    [nilaiRegion, setNilaiRegion] = useState(defaultRegion);
-  }
-
-  const prosesInput = () => {
-    if (rangeTanggal[0] === null || rangeTanggal[1] === null) {
-      notifications.show({
-        title: "Periode Tanggal Kosong",
-        message: "Harap pilih periode tanggal penarikan data penjualan",
-        autoClose: 3000,
-        color: "red",
-        icon: <IconX size="1.1rem" />,
-        withCloseButton: false,
-      });
-      return;
-    } else if (rangeTanggal[0].toISOString() > rangeTanggal[1].toISOString()) {
-      notifications.show({
-        title: "Periode Tanggal Invalid",
-        message: "Tanggal awal tidak bisa lebih kecil dari tanggal akhir",
-        autoClose: 3000,
-        color: "red",
-        icon: <IconX size="1.1rem" />,
-        withCloseButton: false,
-      });
-      return;
-    }
-    dispatch(setDrawerTerbuka(false));
-    setPenjualan({
-      tglAwal: rangeTanggal[0],
-      tglAkhir: rangeTanggal[1],
-      brand: nilaiBrand,
-      prodDiv: nilaiDiv,
-      prodGrp: nilaiGroup,
-      prodCat: nilaiCat,
-      SBU:
-        (compPengguna.length === 1 &&
-          compPengguna[0] === parameterBc.comp.pri) ||
-        (compPengguna.length === 2 && indeksData === 0)
-          ? nilaiSBU
-          : [],
-      lokasi:
-        (compPengguna.length === 1 &&
-          compPengguna[0] === parameterBc.comp.pri) ||
-        (compPengguna.length === 2 && indeksData === 0)
-          ? nilaiLokasi
-          : [],
-      klasifikasi:
-        (compPengguna.length === 1 &&
-          compPengguna[0] === parameterBc.comp.pnt) ||
-        (compPengguna.length === 2 && indeksData === 1)
-          ? nilaiKlasifikasi
-          : [],
-      region:
-        (compPengguna.length === 1 &&
-          compPengguna[0] === parameterBc.comp.pnt) ||
-        (compPengguna.length === 2 && indeksData === 1)
-          ? nilaiRegion
-          : [],
-    });
-    setMuatDataPenjualan(true);
-  };
+  const [nilaiBrand, setNilaiInputBrand] = useState(brandInput[indeksData]);
+  const [nilaiDiv, setNilaiDiv] = useState(divInput[indeksData]);
+  const [nilaiGroup, setNilaiGroup] = useState(grpInput[indeksData]);
+  const [nilaiCat, setNilaiCat] = useState(catInput[indeksData]);
+  const [nilaiLokasi, setNilaiLokasi] = useState(lokasiInput);
+  const [nilaiSBU, setNilaiSBU] = useState(sbuInput);
+  const [nilaiKlasifikasi, setNilaiKlasifikasi] = useState(klasifikasiInput);
+  const [nilaiRegion, setNilaiRegion] = useState(regionInput);
 
   return (
     <>
@@ -266,7 +183,25 @@ const InputPenjualan = ({
             <Button
               color="teal"
               leftIcon={<IconDatabase size={24} />}
-              onClick={() => prosesInput()}
+              onClick={() =>
+                prosesInput(
+                  dispatch,
+                  rangeTanggal,
+                  setPenjualan,
+                  nilaiBrand,
+                  nilaiDiv,
+                  nilaiGroup,
+                  nilaiCat,
+                  nilaiSBU,
+                  nilaiLokasi,
+                  nilaiKlasifikasi,
+                  nilaiRegion,
+                  compPengguna,
+                  indeksData,
+                  parameterBc,
+                  setMuatDataPenjualan
+                )
+              }
             >
               Tarik Data Penjualan
             </Button>

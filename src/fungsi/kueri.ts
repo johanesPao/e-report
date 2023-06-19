@@ -508,7 +508,6 @@ export const dokumenLainnyaByILEPostDate = (
       ORDER BY va_entry.${parameterBc.kolom_bc.no_doc}
     `,
   };
-  console.log(setKueri.kueri);
   return setKueri;
 };
 

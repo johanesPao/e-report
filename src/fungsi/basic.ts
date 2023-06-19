@@ -1,5 +1,11 @@
 import { setDataPenjualan } from "../fitur_state/dataBank";
 import {
+  setBrandInput,
+  setCatInput,
+  setDivInput,
+  setGrpInput,
+  setKlasifikasiInput,
+  setLokasiInput,
   setParameterBc,
   setParameterBrand,
   setParameterCat,
@@ -9,6 +15,8 @@ import {
   setParameterLokasi,
   setParameterRegion,
   setParameterSBU,
+  setRegionInput,
+  setSBUInput,
 } from "../fitur_state/dataParam";
 import {
   setDrawerTerbuka,
@@ -58,6 +66,14 @@ export const resetAplikasi = (dispatch: any) => {
   dispatch(setParameterRegion([]));
   dispatch(setDataPenjualan([]));
   dispatch(setDrawerTerbuka(false));
+  dispatch(setBrandInput([]));
+  dispatch(setDivInput([]));
+  dispatch(setGrpInput([]));
+  dispatch(setCatInput([]));
+  dispatch(setSBUInput([]));
+  dispatch(setLokasiInput([]));
+  dispatch(setKlasifikasiInput([]));
+  dispatch(setRegionInput([]));
 };
 
 export interface Dimensi {
