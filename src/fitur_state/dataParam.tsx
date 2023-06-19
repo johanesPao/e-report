@@ -18,6 +18,14 @@ export interface dataParamState {
   parameterLokasi: DataMultiSelect[];
   parameterKlasifikasi: DataMultiSelect[];
   parameterRegion: DataMultiSelect[];
+  brandInput: string[][];
+  divInput: string[][];
+  grpInput: string[][];
+  catInput: string[][];
+  sbuInput: string[];
+  lokasiInput: string[];
+  klasifikasiInput: string[];
+  regionInput: string[];
   // ...
 }
 
@@ -31,6 +39,14 @@ const initialState: dataParamState = {
   parameterLokasi: [],
   parameterKlasifikasi: [],
   parameterRegion: [],
+  brandInput: [],
+  divInput: [],
+  grpInput: [],
+  catInput: [],
+  sbuInput: [],
+  lokasiInput: [],
+  klasifikasiInput: [],
+  regionInput: [],
   // ...
 };
 
@@ -68,6 +84,30 @@ const dataParamSlice = createSlice({
     setParameterRegion: (state, action: PayloadAction<DataMultiSelect[]>) => {
       state.parameterRegion = action.payload;
     },
+    setBrandInput: (state, action: PayloadAction<string[][]>) => {
+      state.brandInput = action.payload;
+    },
+    setDivInput: (state, action: PayloadAction<string[][]>) => {
+      state.divInput = action.payload;
+    },
+    setGrpInput: (state, action: PayloadAction<string[][]>) => {
+      state.grpInput = action.payload;
+    },
+    setCatInput: (state, action: PayloadAction<string[][]>) => {
+      state.catInput = action.payload;
+    },
+    setSBUInput: (state, action: PayloadAction<string[]>) => {
+      state.sbuInput = action.payload;
+    },
+    setLokasiInput: (state, action: PayloadAction<string[]>) => {
+      state.lokasiInput = action.payload;
+    },
+    setKlasifikasiInput: (state, action: PayloadAction<string[]>) => {
+      state.klasifikasiInput = action.payload;
+    },
+    setRegionInput: (state, action: PayloadAction<string[]>) => {
+      state.regionInput = action.payload;
+    },
     // ...
   },
 });
@@ -82,6 +122,14 @@ export const {
   setParameterLokasi,
   setParameterKlasifikasi,
   setParameterRegion,
+  setBrandInput,
+  setDivInput,
+  setGrpInput,
+  setCatInput,
+  setSBUInput,
+  setLokasiInput,
+  setKlasifikasiInput,
+  setRegionInput,
   // ...
 } = dataParamSlice.actions;
 
@@ -102,5 +150,14 @@ export const getParameterKlasifikasi = (state: RootState) =>
   state.dataParam.parameterKlasifikasi;
 export const getParameterRegion = (state: RootState) =>
   state.dataParam.parameterRegion;
+export const getBrandInput = (state: RootState) => state.dataParam.brandInput;
+export const getDivInput = (state: RootState) => state.dataParam.divInput;
+export const getGrpInput = (state: RootState) => state.dataParam.grpInput;
+export const getCatInput = (state: RootState) => state.dataParam.catInput;
+export const getSBUInput = (state: RootState) => state.dataParam.sbuInput;
+export const getLokasiInput = (state: RootState) => state.dataParam.lokasiInput;
+export const getKlasifikasiInput = (state: RootState) =>
+  state.dataParam.klasifikasiInput;
+export const getRegionInput = (state: RootState) => state.dataParam.regionInput;
 
 export default dataParamSlice;
