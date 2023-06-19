@@ -12,10 +12,19 @@ import {
   setParameterRegion,
   setParameterBc,
   setParameterSBU,
+  setBrandInput,
+  setDivInput,
+  setGrpInput,
+  setCatInput,
+  setLokasiInput,
+  setKlasifikasiInput,
+  setRegionInput,
+  setSBUInput,
 } from "../../fitur_state/dataParam";
 import { resetAplikasi, toTitle } from "../basic";
 import {
   kueriBrandLabel,
+  kueriKlasifikasiLabel,
   kueriLokasiLabel,
   kueriMCLabel,
   kueriRegionLabel,
@@ -135,7 +144,7 @@ const klasifikasiLabel = async (parameterBc: any, comp: string) => {
   // tarik data klasifikasi
   try {
     const respon: string = await invoke("kueri_sederhana", {
-      kueri: kueriLokasiLabel(parameterBc, comp),
+      kueri: kueriKlasifikasiLabel(parameterBc, comp),
     });
     const hasil = JSON.parse(respon);
     if (hasil["status"]) {
@@ -183,6 +192,8 @@ const muatBrand = async (
     if (respon !== undefined && respon.length !== 0) {
       arrayBrandLabel.push(respon);
       dispatch(setParameterBrand(arrayBrandLabel));
+      console.log([respon.map((item) => item.value)]);
+      dispatch(setBrandInput([respon.map((item) => item.value)]));
     }
   } else {
     const brandLabelPromises = compPengguna.map(async (comp) => {
@@ -201,6 +212,14 @@ const muatBrand = async (
     );
     arrayBrandLabel.push(...brandLabelValid);
     dispatch(setParameterBrand(arrayBrandLabel));
+    let arrBrandComp: string[][] = [];
+    for (var indeks in arrayBrandLabel) {
+      const arrBrand: string[] = arrayBrandLabel[indeks].map(
+        (brand: DataMultiSelect) => brand.value
+      );
+      arrBrandComp.push(arrBrand);
+    }
+    dispatch(setBrandInput(arrBrandComp));
   }
 };
 
@@ -218,6 +237,15 @@ const muatMC = async (
       dispatch(setParameterDiv([respon[0][0]]));
       dispatch(setParameterGroup([respon[0][1]]));
       dispatch(setParameterCat([respon[0][2]]));
+      dispatch(
+        setDivInput([respon[0][0].map((item: DataMultiSelect) => item.value)])
+      );
+      dispatch(
+        setGrpInput([respon[0][1].map((item: DataMultiSelect) => item.value)])
+      );
+      dispatch(
+        setCatInput([respon[0][2].map((item: DataMultiSelect) => item.value)])
+      );
     }
   } else {
     const mcLabelPromises = compPengguna.map(async (comp) => {
@@ -237,6 +265,23 @@ const muatMC = async (
     dispatch(setParameterDiv([mcLabelValid[0][0][0], mcLabelValid[1][0][0]]));
     dispatch(setParameterGroup([mcLabelValid[0][0][1], mcLabelValid[1][0][1]]));
     dispatch(setParameterCat([mcLabelValid[0][0][2], mcLabelValid[1][0][2]]));
+    let arrDivComp: string[][] = [];
+    let arrGrpComp: string[][] = [];
+    let arrCatComp: string[][] = [];
+    for (var indeks in mcLabelValid) {
+      arrDivComp.push(
+        mcLabelValid[indeks][0][0].map((item: DataMultiSelect) => item.value)
+      );
+      arrGrpComp.push(
+        mcLabelValid[indeks][0][1].map((item: DataMultiSelect) => item.value)
+      );
+      arrCatComp.push(
+        mcLabelValid[indeks][0][2].map((item: DataMultiSelect) => item.value)
+      );
+    }
+    dispatch(setDivInput(arrDivComp));
+    dispatch(setGrpInput(arrGrpComp));
+    dispatch(setCatInput(arrCatComp));
   }
 };
 
@@ -259,6 +304,7 @@ const muatLokasi = async (
   );
   if (respon !== undefined && respon.length !== 0) {
     dispatch(setParameterLokasi(respon));
+    dispatch(setLokasiInput(respon.map((item: DataMultiSelect) => item.value)));
   }
 };
 
@@ -281,6 +327,9 @@ const muatKlasifikasi = async (
   );
   if (respon !== undefined && respon.length !== 0) {
     dispatch(setParameterKlasifikasi(respon));
+    dispatch(
+      setKlasifikasiInput(respon.map((item: DataMultiSelect) => item.value))
+    );
   }
 };
 
@@ -303,6 +352,7 @@ const muatRegion = async (
   );
   if (respon !== undefined && respon.length !== 0) {
     dispatch(setParameterRegion(respon));
+    dispatch(setRegionInput(respon.map((item: DataMultiSelect) => item.value)));
   }
 };
 
@@ -329,21 +379,8 @@ export const handleKeyDown = (
   }
 };
 
-export const handleTutupAplikasi = async (
-  dispatch: any,
-  konekKeBC: boolean
-) => {
-  dispatch(setAuthGagal(false));
-  dispatch(setProsesAuth(false));
-  dispatch(setNamaPengguna(""));
-  dispatch(setEmailPengguna(""));
-  dispatch(setDepartemenPengguna(""));
-  dispatch(setPeranPengguna(""));
-  dispatch(setCompPengguna([]));
-  if (konekKeBC) {
-    dispatch(setKonekKeBC(false));
-    dispatch(setParameterBc({}));
-  }
+export const handleTutupAplikasi = async (dispatch: any) => {
+  resetAplikasi(dispatch);
   appWindow.close();
 };
 
@@ -437,6 +474,9 @@ export const prosesLogin = async (
                 arraySBU.push({ label: sbu, value: sbu });
               });
               dispatch(setParameterSBU(arraySBU));
+              dispatch(
+                setSBUInput(arraySBU.map((item: DataMultiSelect) => item.value))
+              );
               await muatLokasi(hasil.comp, parameterBc.konten, dispatch);
             }
             // inisiasi data Klasifikasi & Region jika PNT
@@ -460,7 +500,7 @@ export const prosesLogin = async (
             });
           }
         } else {
-          console.log("Gagal menyimpan parameter BC ke dalam redux.");
+          console.log("Tidak terhubung ke BC.");
           return;
         }
       } catch (e) {

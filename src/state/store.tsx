@@ -6,11 +6,12 @@ import eventSlice from "../fitur_state/event";
 import penggunaSlice from "../fitur_state/pengguna";
 import dataParamSlice from "../fitur_state/dataParam";
 import dataSlice from "../fitur_state/dataBank";
-import localStorage from "redux-persist/es/storage";
+// import localStorage from "redux-persist/es/storage";
+import localForage from "localforage";
 
 const persistConfig = {
   key: "root",
-  storage: localStorage,
+  storage: localForage,
   whitelist: ["event", "pengguna", "dataParam", "data"],
 };
 
