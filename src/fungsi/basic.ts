@@ -1,3 +1,5 @@
+import { utils, writeFile } from "xlsx";
+
 import { setDataPenjualan } from "../fitur_state/dataBank";
 import {
   setBrandInput,
@@ -177,4 +179,11 @@ export type DataPenjualan = {
   total_sales_at_cost: number;
   total_margin_aft_vat_rp: number;
   total_margin_aft_vat_persen: number;
+};
+
+export const unduhKeExcel = (data: any[]) => {
+  const worksheet = utils.json_to_sheet(data);
+  const workbook = utils.book_new();
+  utils.book_append_sheet(workbook, worksheet, "Data");
+  writeFile(workbook, "DataPenjualan.xlsx");
 };

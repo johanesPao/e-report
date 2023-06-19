@@ -547,3 +547,5 @@ export const callbackNotifikasiPenjualan = (e: any) => {
     }
   }
 };
+
+export const unduhExcel = () => {};
