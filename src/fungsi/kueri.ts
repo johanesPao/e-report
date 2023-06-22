@@ -109,7 +109,7 @@ export const ILEByPostDate = (
   `
       : ``;
 
-  let setKueri: Kueri = {
+  const setKueri: Kueri = {
     judul: "ILEByPostDate",
     kueri: `
     SELECT DISTINCT
@@ -141,7 +141,7 @@ export const salespersonAndRegionByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: Kueri = {
+  const setKueri: Kueri = {
     judul: "salespersonAndRegionByILEPostDate",
     kueri: `
     WITH ile AS (
@@ -194,7 +194,7 @@ export const tokoByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: Kueri = {
+  const setKueri: Kueri = {
     judul: "tokoByILEPostDate",
     kueri: `
     WITH ile AS (
@@ -230,7 +230,7 @@ export const produkByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: Kueri = {
+  const setKueri: Kueri = {
     judul: "produkByILEPostDate",
     kueri: `
     WITH ile AS (
@@ -284,7 +284,7 @@ export const vatByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: Kueri = {
+  const setKueri: Kueri = {
     judul: "vatByILEPostDate",
     kueri: `
     WITH ile AS (
@@ -363,7 +363,7 @@ export const promoByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: Kueri = {
+  const setKueri: Kueri = {
     judul: "promoByILEPostDate",
     kueri: `
     WITH ile AS (
@@ -406,7 +406,7 @@ export const diskonByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: Kueri = {
+  const setKueri: Kueri = {
     judul: "diskonByILEPostDate",
     kueri: `
     WITH ile AS (
@@ -485,7 +485,7 @@ export const dokumenLainnyaByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: Kueri = {
+  const setKueri: Kueri = {
     judul: "dokumenLainnyaByILEPostDate",
     kueri: `
     SELECT DISTINCT
@@ -517,7 +517,7 @@ export const quantityByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: Kueri = {
+  const setKueri: Kueri = {
     judul: "quantityByILEPostDate",
     kueri: `
     SELECT DISTINCT
@@ -543,7 +543,7 @@ export const cppuByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: Kueri = {
+  const setKueri: Kueri = {
     judul: "cppuByILEPostDate",
     kueri: `
     WITH ile AS (
@@ -588,7 +588,7 @@ export const rppuByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: Kueri = {
+  const setKueri: Kueri = {
     judul: "rppuByILEPostDate",
     kueri: `
     WITH ile AS (
@@ -681,7 +681,7 @@ export const klasifikasiByILEPostDate = (
   tglAkhir: string,
   compKueri: string
 ) => {
-  let setKueri: Kueri = {
+  const setKueri: Kueri = {
     judul: "klasifikasiByILEPostDate",
     kueri: `
     SELECT DISTINCT
@@ -702,6 +702,378 @@ export const klasifikasiByILEPostDate = (
       GROUP BY
         ile.${parameterBc.kolom_bc.no_entry},
         dim_set.${parameterBc.kolom_bc.dim_val_code}
+    `,
+  };
+  return setKueri;
+};
+
+export const penerimaanBarangByILEPostDate = (
+  parameterBc: { [key: string]: any },
+  tglAwal: string,
+  tglAkhir: string,
+  compKueri: string
+) => {
+  const setKueri: Kueri = {
+    judul: "penerimaanBarangByILEPostDate",
+    kueri: `
+    WITH ile AS (
+      SELECT DISTINCT
+          ile.${parameterBc.kolom_bc.no_entry} [No. Entri],
+          ile.${parameterBc.kolom_bc.post_date} [Tanggal],
+          ile.${parameterBc.kolom_bc.no_doc} [No. Dokumen PR],
+          ile.${parameterBc.kolom_bc.loc_code} [Lokasi],
+          ile.${parameterBc.kolom_bc.brand_dim} [Brand],
+          ile.${parameterBc.kolom_bc.oricode} [OriCode],
+          ile.${parameterBc.kolom_bc.size} [Ukuran],
+          deskripsi.${parameterBc.kolom_bc.desc} [Deskripsi Produk],
+          deskripsi.${parameterBc.kolom_bc.color_desc} [Deskripsi Warna],
+          deskripsi.${parameterBc.kolom_bc.unit_price} [Retail Price per Unit],
+          mc.${parameterBc.kolom_bc.prod_div} [Divisi Produk],
+          mc.${parameterBc.kolom_bc.prod_group} [Grup Produk],
+          mc.${parameterBc.kolom_bc.prod_cat} [Kategori Produk],
+          SUM(ile.${parameterBc.kolom_bc.quantity}) [Goods Received Quantity]
+      FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}] AS ile
+      LEFT JOIN [${compKueri}${parameterBc.tabel_bc.master_item_437}] AS deskripsi
+      ON (
+        deskripsi.${parameterBc.kolom_bc.no} = ile.${parameterBc.kolom_bc.oricode}
+      )
+      LEFT JOIN [${compKueri}${parameterBc.tabel_bc.master_item_a21}] AS mc
+      ON (
+        mc.${parameterBc.kolom_bc.no} = ile.${parameterBc.kolom_bc.oricode}
+      )
+      WHERE (
+        ile.${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
+        ile.${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
+        ile.${parameterBc.kolom_bc.no_doc} LIKE '${parameterBc.argumen_bc.goods_rec_doc_prefix}' AND
+        ile.${parameterBc.kolom_bc.brand_dim} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}' AND
+        ile.${parameterBc.kolom_bc.brand_dim} != ''
+    )
+      GROUP BY
+          ile.${parameterBc.kolom_bc.no_entry},
+          ile.${parameterBc.kolom_bc.post_date},
+          ile.${parameterBc.kolom_bc.no_doc},
+          ile.${parameterBc.kolom_bc.loc_code},
+          ile.${parameterBc.kolom_bc.brand_dim},
+          ile.${parameterBc.kolom_bc.oricode},
+          ile.${parameterBc.kolom_bc.size},
+          deskripsi.${parameterBc.kolom_bc.desc},
+          deskripsi.${parameterBc.kolom_bc.color_desc},
+          deskripsi.${parameterBc.kolom_bc.unit_price},
+          mc.${parameterBc.kolom_bc.prod_div},
+          mc.${parameterBc.kolom_bc.prod_group},
+          mc.${parameterBc.kolom_bc.prod_cat}
+  ), posted_whse_rec AS (
+      SELECT DISTINCT
+          ${parameterBc.kolom_bc.post_source_no} [No. Dokumen PR],
+          ${parameterBc.kolom_bc.no} [No. Dokumen WR],
+          ${parameterBc.kolom_bc.source_no} [No. Dokumen PO]
+      FROM [${compKueri}${parameterBc.tabel_bc.post_whse_rec_437}]
+  ), va_entry AS (
+      SELECT DISTINCT
+          ${parameterBc.kolom_bc.ile_entry_no} [No. Entri ILE],
+          SUM(${parameterBc.kolom_bc.cost_amount_actual} + ${parameterBc.kolom_bc.cost_amount_exp}) [Goods Received Cost]
+      FROM [${compKueri}${parameterBc.tabel_bc.va_entry_437}]
+      GROUP BY
+          ${parameterBc.kolom_bc.ile_entry_no}
+  )
+  SELECT DISTINCT
+      ile.[No. Entri] [No. Entri],
+      ile.[Tanggal] [Tanggal],
+      ile.[No. Dokumen PR] [No. Dokumen PR],
+      posted_whse_rec.[No. Dokumen WR] [No. Dokumen WR],
+      posted_whse_rec.[No. Dokumen PO] [No. Dokumen PO],
+      ile.[Lokasi] [Lokasi],
+      ile.[Brand] [Brand],
+      ile.[OriCode] [OriCode],
+      ile.[Deskripsi Produk] [Deskripsi Produk],
+      ile.[Deskripsi Warna] [Deskripsi Warna],
+      ile.[Ukuran] [Ukuran],
+      ile.[Divisi Produk] [Divisi Produk],
+      ile.[Grup Produk] [Grup Produk],
+      ile.[Kategori Produk] [Kategori Produk],
+      ile.[Retail Price per Unit] [Retail Price per Unit],
+      SUM(ile.[Goods Received Quantity]) [Goods Received Quantity],
+      SUM(va_entry.[Goods Received Cost]) [Goods Received Cost]
+  FROM ile
+  LEFT JOIN posted_whse_rec
+      ON ile.[No. Dokumen PR] = posted_whse_rec.[No. Dokumen PR]
+  LEFT JOIN va_entry
+      ON ile.[No. Entri] = va_entry.[No. Entri ILE]
+  GROUP BY
+      ile.[No. Entri],
+      ile.[Tanggal],
+      ile.[No. Dokumen PR],
+      posted_whse_rec.[No. Dokumen WR],
+      posted_whse_rec.[No. Dokumen PO],
+      ile.[Lokasi],
+      ile.[Brand],
+      ile.[OriCode],
+      ile.[Deskripsi Produk],
+      ile.[Deskripsi Warna],
+      ile.[Ukuran],
+      ile.[Divisi Produk],
+      ile.[Grup Produk],
+      ile.[Kategori Produk],
+      ile.[Retail Price per Unit]
+    `,
+  };
+  return setKueri;
+};
+
+export const endingStokByILE = (
+  parameterBc: { [key: string]: any },
+  tglAkhir: string,
+  compKueri: string
+) => {
+  const setKueri: Kueri = {
+    judul: "endingStokByILE",
+    kueri: `
+    WITH ile AS (
+      SELECT DISTINCT
+          ile.${parameterBc.kolom_bc.no_entry} [No. Entri],
+          ile.${parameterBc.kolom_bc.post_date} [Tanggal],
+          ile.${parameterBc.kolom_bc.brand_dim} [Brand],
+          ile.${parameterBc.kolom_bc.loc_code} [Lokasi],
+          ile.${parameterBc.kolom_bc.oricode} [OriCode],
+          ile.${parameterBc.kolom_bc.size} [Ukuran],
+          deskripsi.${parameterBc.kolom_bc.desc} [Deskripsi Produk],
+          deskripsi.${parameterBc.kolom_bc.color_desc} [Deskripsi Warna],
+          deskripsi.${parameterBc.kolom_bc.unit_price} [Unit Price],
+          mc.${parameterBc.kolom_bc.prod_div} [Divisi Produk],
+          mc.${parameterBc.kolom_bc.prod_group} [Grup Produk],
+          mc.${parameterBc.kolom_bc.prod_cat} [Kategori Produk],
+          mc.${parameterBc.kolom_bc.season} [Season],
+          mc.${parameterBc.kolom_bc.period} [Period],
+          SUM(ile.${parameterBc.kolom_bc.quantity}) [Stock Quantity]
+      FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}] AS ile
+      LEFT JOIN [${compKueri}${parameterBc.tabel_bc.master_item_437}] as deskripsi
+      ON (
+        deskripsi.${parameterBc.kolom_bc.no} = ile.${parameterBc.kolom_bc.oricode}
+      )
+      LEFT JOIN [${compKueri}${parameterBc.tabel_bc.master_item_a21}] as mc
+      ON (
+        mc.${parameterBc.kolom_bc.no} = ile.${parameterBc.kolom_bc.oricode}
+      )
+      WHERE (
+          ile.${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
+          ile.${parameterBc.kolom_bc.brand_dim} != '' AND
+          ile.${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
+      )
+      GROUP BY
+          ile.${parameterBc.kolom_bc.no_entry},
+          ile.${parameterBc.kolom_bc.post_date},
+          ile.${parameterBc.kolom_bc.brand_dim},
+          ile.${parameterBc.kolom_bc.loc_code},
+          ile.${parameterBc.kolom_bc.oricode},
+          ile.${parameterBc.kolom_bc.size},
+          deskripsi.${parameterBc.kolom_bc.desc},
+          deskripsi.${parameterBc.kolom_bc.color_desc},
+          deskripsi.${parameterBc.kolom_bc.unit_price},
+          mc.${parameterBc.kolom_bc.prod_div},
+          mc.${parameterBc.kolom_bc.prod_group},
+          mc.${parameterBc.kolom_bc.prod_cat},
+          mc.${parameterBc.kolom_bc.season},
+          mc.${parameterBc.kolom_bc.period}
+  ), va_entry AS (
+      SELECT DISTINCT
+          ${parameterBc.kolom_bc.ile_entry_no} [No. Entri ILE],
+          SUM(${parameterBc.kolom_bc.cost_amount_actual} + ${parameterBc.kolom_bc.cost_amount_exp}) [Stock Cost]
+      FROM [${compKueri}${parameterBc.tabel_bc.va_entry_437}]
+      GROUP BY
+          ${parameterBc.kolom_bc.no_entri_ile}
+  ) 
+  SELECT DISTINCT
+      ile.[Lokasi] [Lokasi],
+      ile.[Brand] [Brand],
+      ile.[OriCode] [OriCode],
+      ile.[Deskripsi Produk] [Deskripsi Produk],
+      ile.[Deskripsi Warna] [Deskripsi Warna],
+      ile.[Ukuran] [Ukuran],
+      ile.[Season] [Season],
+      ile.[Period] [Period],
+      ile.[Divisi Produk] [Divisi Produk],
+      ile.[Grup Produk] [Grup Produk],
+      ile.[Kategori Produk] [Kategori Produk],
+      ile.[Unit Price],
+      SUM(ile.[Stock Quantity]) [Stock Quantity],
+      SUM(va_entry.[Stock Cost]) [Stock Cost]
+  FROM ile
+  LEFT JOIN va_entry
+      ON ile.[No. Entri] = va_entry.[No. Entri ILE]
+  GROUP BY
+      ile.[Lokasi],
+      ile.[Brand],
+      ile.[OriCode],
+      ile.[Deskripsi Produk],
+      ile.[Deskripsi Warna],
+      ile.[Ukuran],
+      ile.[Season],
+      ile.[Period],
+      ile.[Divisi Produk],
+      ile.[Grup Produk],
+      ile.[Kategori Produk],
+      ile.[Unit Price]
+    `,
+  };
+  return setKueri;
+};
+
+export const ketersediaanStokByILE = (
+  parameterBc: { [key: string]: any },
+  compKueri: string
+) => {
+  const setKueri: Kueri = {
+    judul: "ketersediaanStokByILE",
+    kueri: `
+    WITH ile AS (
+      SELECT DISTINCT
+          --- Dasar baris data menggunakan Lokasi, OriCode, Ukuran, Quantity, Remaining Quantity (?), Invoiced Quantity (?)
+          ile.${parameterBc.kolom_bc.loc_code} [Lokasi],
+          ile.${parameterBc.kolom_bc.brand_dim} [Brand],
+          ile.${parameterBc.kolom_bc.oricode} [OriCode],
+          ile.${parameterBc.kolom_bc.size} [Ukuran],
+          deskripsi.${parameterBc.kolom_bc.desc} [Deskripsi Produk],
+          deskripsi.${parameterBc.kolom_bc.color_desc} [Deskripsi Warna],
+          deskripsi.${parameterBc.kolom_bc.item_disc_group} [Item Discount Group],
+          deskripsi.${parameterBc.kolom_bc.unit_price} [Retail Price],
+          mc.${parameterBc.kolom_bc.prod_div} [Product Division],
+          mc.${parameterBc.kolom_bc.prod_group} [Product Group],
+          mc.${parameterBc.kolom_bc.prod_cat} [Product Category],
+          mc.${parameterBc.kolom_bc.season} [Season],
+          mc.${parameterBc.kolom_bc.period} [Period],
+          SUM(ile.${parameterBc.kolom_bc.quantity}) [Quantity]
+      FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}] AS ile
+      LEFT JOIN [${compKueri}${parameterBc.tabel_bc.master_item_437}] AS deskripsi
+      ON (
+        deskripsi.${parameterBc.kolom_bc.no} = ile.${parameterBc.kolom_bc.oricode}
+      )
+      LEFT JOIN [${compKueri}${parameterBc.tabel_bc.master_item_a21}] AS mc
+      ON (
+        mc.${parameterBc.kolom_bc.no} = ile.${parameterBc.kolom_bc.oricode}
+      )
+      GROUP BY
+          ile.${parameterBc.kolom_bc.loc_code},
+          ile.${parameterBc.kolom_bc.brand_dim},
+          ile.${parameterBc.kolom_bc.oricode},
+          ile.${parameterBc.kolom_bc.ukuran},
+          deskripsi.${parameterBc.kolom_bc.desc},
+          deskripsi.${parameterBc.kolom_bc.color_desc},
+          deskripsi.${parameterBc.kolom_bc.item_disc_group},
+          deskripsi.${parameterBc.kolom_bc.unit_price},
+          mc.${parameterBc.kolom_bc.prod_div},
+          mc.${parameterBc.kolom_bc.prod_group},
+          mc.${parameterBc.kolom_bc.prod_cat},
+          mc.${parameterBc.kolom_bc.season},
+          mc.${parameterBc.kolom_bc.period}
+  ), va_entry AS (
+      SELECT DISTINCT
+          ${parameterBc.kolom_bc.loc_code} [Lokasi],
+          ${parameterBc.kolom_bc.oricode} [OriCode],
+          ${parameterBc.kolom_bc.size} [Ukuran],
+          SUM(${parameterBc.kolom_bc.cost_amount_actual} + ${parameterBc.kolom_bc.cost_amount_exp}) [Cost Amount]
+      FROM [${compKueri}${parameterBc.tabel_bc.va_entry_437}]
+      GROUP BY
+          ${parameterBc.kolom_bc.loc_code},
+          ${parameterBc.kolom_bc.oricode},
+          ${parameterBc.kolom_bc.size}
+  ), to_ship AS (
+      SELECT DISTINCT
+          --- Common Table Expression untuk jumlah Quantity yang sudah diorder namun belum memotong persediaan pada ILE
+          ${parameterBc.kolom_bc.loc_code} [Lokasi],
+          ${parameterBc.kolom_bc.no} [OriCode],
+          ${parameterBc.kolom_bc.size} [Ukuran],
+          SUM(${parameterBc.kolom_bc.outstdg_qty}) [Sales Order Outstanding Quantity]
+      FROM [${compKueri}${parameterBc.tabel_bc.sales_line_437}]
+      WHERE 
+          --- Sales order harus memiliki lokasi artikel yang ingin dipesan
+          ${parameterBc.kolom_bc.loc_code} != '' AND
+          --- Saat sales order terbuat, outstanding = kuantitas. 
+          --- Saat sales order tersebut sudah shipped, outstanding diupdate menjadi 0 atau sisa jumlah artikel yang masih perlu dikirim.
+          --- Hal ini bisa dikonfirmasi dengan melihat pergerakan artikel tersebut yang tercatat - (minus) di ILE jika outstanding berkurang
+          --- Secara implisit order untuk kuantitas artikel tersebut sudah dibuat, namun outstanding pada Sales Order menunjukkan jumlah yang belum mengurangi
+          --- Stock on Hand
+          ${parameterBc.kolom_bc.qty_shipped} < ${parameterBc.kolom_bc.quantity}
+      GROUP BY
+          ${parameterBc.kolom_bc.loc_code},
+          ${parameterBc.kolom_bc.no},
+          ${parameterBc.kolom_bc.size}
+  ), purchase AS (
+      SELECT DISTINCT
+          --- Common Table Expression untuk jumlah Quantity yang sudah dibuatkan PO dan belum diterima
+          ${parameterBc.kolom_bc.loc_code} [Lokasi],
+          ${parameterBc.kolom_bc.no} [OriCode],
+          ${parameterBc.kolom_bc.size} [Ukuran],
+          SUM(${parameterBc.kolom_bc.outstdg_qty}) [Outstanding Quantity PO]
+      FROM [${compKueri}${parameterBc.tabel_bc.purc_line_437}]
+      WHERE
+          --- Memiliki Lokasi
+          ${parameterBc.kolom_bc.loc_code} != '' AND
+          --- Bukan Item as a Service
+          ${parameterBc.kolom_bc.no} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}' AND
+          --- Jumlah diterima masih lebih kecil dari jumlah PO
+          ${parameterBc.kolom_bc.qty_received} < ${parameterBc.kolom_bc.quantity}
+      GROUP BY
+          ${parameterBc.kolom_bc.loc_code},
+          ${parameterBc.kolom_bc.no},
+          ${parameterBc.kolom_bc.size}
+  )
+  SELECT 
+      ile.[Lokasi] [Lokasi],
+      ile.[Brand] [Brand],
+      ile.[OriCode] [OriCode],
+      ile.[Ukuran] [Ukuran],
+      ile.[Season] [Season],
+      ile.[Period] [Period],
+      ile.[Deskripsi Produk] [Deskripsi Produk],
+      ile.[Deskripsi Warna] [Deskripsi Warna],
+      ile.[Product Division] [Product Division],
+      ile.[Product Group] [Product Group],
+      ile.[Product Category] [Product Category],
+      ile.[Item Discount Group] [Item Discount Group],
+      ile.[Retail Price] [Retail Price],
+      COALESCE(SUM(ile.[Quantity]),0) [Stock on Hand],
+      COALESCE(SUM(va_entry.[Cost Amount]), 0) [Total Cost],
+      COALESCE(SUM(purchase.[Outstanding Quantity PO]), 0) [Purchase Order Outstanding Quantity],
+      COALESCE(SUM(to_ship.[Sales Order Outstanding Quantity]), 0) [Sales Order Outstanding Quantity],
+      SUM(COALESCE(ile.[Quantity], 0) + COALESCE(purchase.[Outstanding Quantity PO], 0)) [Projected Stock Intake],
+      SUM(COALESCE(ile.[Quantity], 0) + COALESCE(purchase.[Outstanding Quantity PO], 0) - COALESCE(to_ship.[Sales Order Outstanding Quantity], 0)) [Projected Stock After SO]
+  FROM ile
+  LEFT JOIN va_entry
+      ON (
+      ile.[Lokasi] = va_entry.[Lokasi] AND
+      ile.[OriCode] = va_entry.[OriCode] AND
+      ile.[Ukuran] = va_entry.[Ukuran]
+      )
+  FULL OUTER JOIN to_ship
+      ON (
+          ile.[Lokasi] = to_ship.[Lokasi] AND
+          ile.[OriCode] = to_ship.[OriCode] AND
+          ile.[Ukuran] = to_ship.[Ukuran]
+      )	
+  FULL OUTER JOIN purchase
+      ON (
+          ile.[Lokasi] = purchase.[Lokasi] AND
+          ile.[OriCode] = purchase.[OriCode] AND
+          ile.[Ukuran] = purchase.[Ukuran]
+      )
+  WHERE 
+      --- Semua item kecuali item service
+      ile.[OriCode] NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
+  GROUP BY
+      ile.[Lokasi],
+      ile.[Brand],
+      ile.[OriCode],
+      ile.[Ukuran],
+      ile.[Season],
+      ile.[Period],
+      ile.[Deskripsi Produk],
+      ile.[Deskripsi Warna],
+      ile.[Product Division],
+      ile.[Product Group],
+      ile.[Product Category],
+      ile.[Item Discount Group],
+      ile.[Retail Price]
+  ORDER BY SUM(COALESCE(ile.[Quantity], 0) + COALESCE(purchase.[Outstanding Quantity PO], 0) - COALESCE(to_ship.[Sales Order Outstanding Quantity], 0)) ASC
     `,
   };
   return setKueri;

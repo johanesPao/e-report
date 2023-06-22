@@ -1,3 +1,4 @@
+import React from "react";
 import { useAppDispatch, useAppSelector } from "../state/hook";
 import { Drawer } from "@mantine/core";
 
@@ -14,17 +15,28 @@ import InputKetersediaanStok from "./kontenDrawer/InputKetersediaanStok";
 import InputBuyingProposal from "./kontenDrawer/InputBuyingProposal";
 import InputLabaRugiToko from "./kontenDrawer/InputLabaRugiToko";
 import { useEffect, useMemo, useState } from "react";
-import { PropsPenjualan } from "./Konten";
+import { StatePenjualan } from "../fungsi/halaman/penjualan";
+import { StatePenerimaanBarang } from "../fungsi/halaman/penerimaanBarang";
+import { StateStok } from "../fungsi/halaman/stok";
+import { StateKetersediaanStok } from "../fungsi/halaman/ketersediaanStok";
 
-interface DrawerInputProps {
-  setPenjualan: React.Dispatch<React.SetStateAction<PropsPenjualan>>;
-  setMuatDataPenjualan: React.Dispatch<React.SetStateAction<boolean>>;
+interface PropsDrawer {
+  setPropsPenjualan?: React.Dispatch<React.SetStateAction<StatePenjualan>>;
+  setPropsPenerimaanBarang?: React.Dispatch<
+    React.SetStateAction<StatePenerimaanBarang>
+  >;
+  setPropsStok?: React.Dispatch<React.SetStateAction<StateStok>>;
+  setPropsKetersediaanStok?: React.Dispatch<
+    React.SetStateAction<StateKetersediaanStok>
+  >;
 }
 
 const DrawerInput = ({
-  setPenjualan,
-  setMuatDataPenjualan,
-}: DrawerInputProps) => {
+  setPropsPenjualan,
+  setPropsPenerimaanBarang,
+  setPropsStok,
+  setPropsKetersediaanStok,
+}: PropsDrawer) => {
   const halaman = useAppSelector(getHalaman);
   const drawerTerbuka = useAppSelector(getDrawerTerbuka);
   const dispatch = useAppDispatch();
@@ -59,18 +71,29 @@ const DrawerInput = ({
   const renderInput = useMemo(() => {
     switch (halaman) {
       case "penjualan":
-        return () => (
-          <InputPenjualan
-            setPenjualan={setPenjualan}
-            setMuatDataPenjualan={setMuatDataPenjualan}
-          />
-        );
+        if (setPropsPenjualan) {
+          return () => <InputPenjualan setProps={setPropsPenjualan} />;
+        }
+        return () => null;
       case "penerimaanBarang":
-        return () => <InputPenerimaanBarang />;
+        if (setPropsPenerimaanBarang) {
+          return () => (
+            <InputPenerimaanBarang setProps={setPropsPenerimaanBarang} />
+          );
+        }
+        return () => null;
       case "stok":
-        return () => <InputStok />;
+        if (setPropsStok) {
+          return () => <InputStok setProps={setPropsStok} />;
+        }
+        return () => null;
       case "ketersediaanStok":
-        return () => <InputKetersediaanStok />;
+        if (setPropsKetersediaanStok) {
+          return () => (
+            <InputKetersediaanStok setProps={setPropsKetersediaanStok} />
+          );
+        }
+        return () => null;
       case "buyingProposal":
         return () => <InputBuyingProposal />;
       case "labaRugiToko":

@@ -15,7 +15,7 @@ export interface dataParamState {
   parameterGroup: DataMultiSelect[][];
   parameterCat: DataMultiSelect[][];
   parameterSBU: DataMultiSelect[];
-  parameterLokasi: DataMultiSelect[];
+  parameterLokasi: DataMultiSelect[][];
   parameterKlasifikasi: DataMultiSelect[];
   parameterRegion: DataMultiSelect[];
   brandInput: string[][];
@@ -23,7 +23,7 @@ export interface dataParamState {
   grpInput: string[][];
   catInput: string[][];
   sbuInput: string[];
-  lokasiInput: string[];
+  lokasiInput: string[][];
   klasifikasiInput: string[];
   regionInput: string[];
   // ...
@@ -72,7 +72,7 @@ const dataParamSlice = createSlice({
     setParameterSBU: (state, action: PayloadAction<DataMultiSelect[]>) => {
       state.parameterSBU = action.payload;
     },
-    setParameterLokasi: (state, action: PayloadAction<DataMultiSelect[]>) => {
+    setParameterLokasi: (state, action: PayloadAction<DataMultiSelect[][]>) => {
       state.parameterLokasi = action.payload;
     },
     setParameterKlasifikasi: (
@@ -99,7 +99,7 @@ const dataParamSlice = createSlice({
     setSBUInput: (state, action: PayloadAction<string[]>) => {
       state.sbuInput = action.payload;
     },
-    setLokasiInput: (state, action: PayloadAction<string[]>) => {
+    setLokasiInput: (state, action: PayloadAction<string[][]>) => {
       state.lokasiInput = action.payload;
     },
     setKlasifikasiInput: (state, action: PayloadAction<string[]>) => {

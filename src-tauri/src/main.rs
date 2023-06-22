@@ -103,19 +103,19 @@ async fn handle_data_penjualan(
 
     // Konstruksi series penampung filter_data
     let filter_brand = Series::new("filter_brand", filter_data.brand);
-    let filter_prod_div = Series::new("filter_brand", filter_data.prod_div);
-    let filter_prod_grp = Series::new("filter_brand", filter_data.prod_grp);
-    let filter_prod_cat = Series::new("filter_brand", filter_data.prod_cat);
+    let filter_prod_div = Series::new("filter_prod_div", filter_data.prod_div);
+    let filter_prod_grp = Series::new("filter_prod_grp", filter_data.prod_grp);
+    let filter_prod_cat = Series::new("filter_prod_cat", filter_data.prod_cat);
     let mut filter_sbu = Series::default();
     let mut filter_lokasi = Series::default();
     let mut filter_klasifikasi = Series::default();
     let mut filter_region = Series::default();
     if comp_pri {
-        filter_sbu = Series::new("filter_brand", filter_data.sbu);
-        filter_lokasi = Series::new("filter_brand", filter_data.lokasi);
+        filter_sbu = Series::new("filter_sbu", filter_data.sbu.unwrap());
+        filter_lokasi = Series::new("filter_lokasi", filter_data.lokasi.unwrap());
     } else {
-        filter_klasifikasi = Series::new("filter_brand", filter_data.klasifikasi);
-        filter_region = Series::new("filter_brand", filter_data.region);
+        filter_klasifikasi = Series::new("filter_klasifikasi", filter_data.klasifikasi.unwrap());
+        filter_region = Series::new("filter_region", filter_data.region.unwrap());
     }
 
     // KUERI PENJUALAN
@@ -132,74 +132,74 @@ async fn handle_data_penjualan(
             .expect(&gagal_emit_notif);
         match kueri_bc::kueri_penjualan(kueri).await {
             Ok(hasil) => match hasil {
-                HasilKueri::DataILEEnum(vektor_data) => {
+                HasilKueriDataPenjualan::DataILEEnum(vektor_data) => {
                     // Konversi vektor struct hasil kueri ke dalam dataframe polars
                     let vektor_series = vektor_data.ke_series();
                     let df_ile =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe ILE");
                     df_utama = df_ile;
                 }
-                HasilKueri::DataSalespersonRegionILEEnum(vektor_data) => {
+                HasilKueriDataPenjualan::DataSalespersonRegionILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_salespersonregion = DataFrame::new(vektor_series)
                         .expect("Gagal membuat dataframe salespersonregion");
                     vektor_dataframe.push(df_salespersonregion);
                 }
-                HasilKueri::DataTokoILEEnum(vektor_data) => {
+                HasilKueriDataPenjualan::DataTokoILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_toko =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe toko");
                     vektor_dataframe.push(df_toko);
                 }
-                HasilKueri::DataProdukILEEnum(vektor_data) => {
+                HasilKueriDataPenjualan::DataProdukILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_produk =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe produk");
                     vektor_dataframe.push(df_produk);
                 }
-                HasilKueri::DataVatILEEnum(vektor_data) => {
+                HasilKueriDataPenjualan::DataVatILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_vat =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe VAT");
                     vektor_dataframe.push(df_vat);
                 }
-                HasilKueri::DataPromoILEEnum(vektor_data) => {
+                HasilKueriDataPenjualan::DataPromoILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_promo =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe promo");
                     vektor_dataframe.push(df_promo);
                 }
-                HasilKueri::DataDiskonILEEnum(vektor_data) => {
+                HasilKueriDataPenjualan::DataDiskonILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_diskon =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe diskon");
                     vektor_dataframe.push(df_diskon);
                 }
-                HasilKueri::DataDokumenLainnyaILEEnum(vektor_data) => {
+                HasilKueriDataPenjualan::DataDokumenLainnyaILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_dok_lainnya = DataFrame::new(vektor_series)
                         .expect("Gagal membuat dataframe dokumen lainnya");
                     vektor_dataframe.push(df_dok_lainnya);
                 }
-                HasilKueri::DataKuantitasILEEnum(vektor_data) => {
+                HasilKueriDataPenjualan::DataKuantitasILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_kuantitas =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe kuantitas");
                     vektor_dataframe.push(df_kuantitas);
                 }
-                HasilKueri::DataCPPUILEEnum(vektor_data) => {
+                HasilKueriDataPenjualan::DataCPPUILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_cppu =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe CPPU");
                     vektor_dataframe.push(df_cppu);
                 }
-                HasilKueri::DataKlasifikasiILEEnum(vektor_data) => {
+                HasilKueriDataPenjualan::DataKlasifikasiILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_klasifikasi =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe klasifikasi");
                     vektor_dataframe.push(df_klasifikasi);
                 }
-                HasilKueri::DataRPPUILEEnum(vektor_data) => {
+                HasilKueriDataPenjualan::DataRPPUILEEnum(vektor_data) => {
                     if comp_pri {
                         let vektor_series = vektor_data.ke_series();
                         let df_rppu =
@@ -585,6 +585,98 @@ async fn handle_data_penjualan(
     Ok(json!({"status": true, "konten": df_gabung}).to_string())
 }
 
+#[tauri::command]
+async fn handle_data_penerimaan_barang(
+    set_kueri: Vec<Kueri<'_>>,
+    filter_data: Filter,
+    window: tauri::Window,
+) -> Result<String, String> {
+    // Konstruksi series untuk penampung filter_data
+    window
+        .emit(
+            "data-penerimaan-barang",
+            json!({"state": "start", "konten": "Parameter data diterima di Rust, rekonstruksi filter dilakukan"})
+        )
+        .expect("Gagal emit notifikasi penerimaan parameter");
+    let filter_brand = Series::new("filter_brand", filter_data.brand);
+    let filter_prod_div = Series::new("filter_prod_div", filter_data.prod_div);
+    let filter_prod_grp = Series::new("filter_prod_grp", filter_data.prod_grp);
+    let filter_prod_cat = Series::new("filter_prod_cat", filter_data.prod_cat);
+    let filter_lokasi = Series::new("filter_lokasi", filter_data.lokasi.unwrap());
+
+    // KUERI PENERIMAAN BARANG
+    let mut df_utama: DataFrame = DataFrame::default();
+    for kueri in set_kueri {
+        let konten = format!("Melakukan kueri dengan ID {}", kueri.judul);
+        let gagal_emit_notif = format!("Gagal emit notifikasi kueri ID {}", kueri.judul);
+        window
+            .emit(
+                "data-penerimaan-barang",
+                json!({"state": "update", "konten": &konten}),
+            )
+            .expect(&gagal_emit_notif);
+        match kueri_bc::kueri_penerimaan_barang(kueri).await {
+            Ok(hasil) => match hasil {
+                HasilKueriDataPenerimaanBarang::DataPenerimaanBarangEnum(vektor_data) => {
+                    // Konversi vektor struct hasil kueri ke dalam dataframe polars
+                    let vektor_series = vektor_data.ke_series();
+                    df_utama = DataFrame::new(vektor_series)
+                        .expect("Gagal membuat dataframe utama penerimaan barang");
+                }
+            },
+            Err(_) => {
+                let _ = json!({"status": false, "konten": "Kesalahan dalam matching Enum dengan hasil kueri"}).to_string();
+            }
+        }
+    }
+
+    // FILTER DATAFRAME
+    window
+        .emit(
+            "data-penerimaan-barang",
+            json!({
+                "state": "update",
+                "konten": "Melakukan filtering pada dataframe polars"
+            }),
+        )
+        .expect("Gagal emit notifikasi filtering dataframe polars penerimaan barang");
+    df_utama = df_utama
+        .lazy()
+        .filter(col("brand_dim").is_in(lit(filter_brand)))
+        .collect()
+        .unwrap();
+    df_utama = df_utama
+        .lazy()
+        .filter(col("prod_div").is_in(lit(filter_prod_div)))
+        .collect()
+        .unwrap();
+    df_utama = df_utama
+        .lazy()
+        .filter(col("prod_grp").is_in(lit(filter_prod_grp)))
+        .collect()
+        .unwrap();
+    df_utama = df_utama
+        .lazy()
+        .filter(col("prod_cat").is_in(lit(filter_prod_cat)))
+        .collect()
+        .unwrap();
+    df_utama = df_utama
+        .lazy()
+        .filter(col("loc_code").is_in(lit(filter_lokasi)))
+        .collect()
+        .unwrap();
+    window
+        .emit(
+            "data-penerimaan-barang",
+            json!({
+                "state": "finish",
+                "konten": "Proses penarikan data penerimaan barang pada Rust selesai, data ditransfer ke React untuk proses pemetaan ke tabel. Mohon tunggu sebentar..."
+            })
+        )
+        .expect("Gagal emit notifikasi penarikan data penerimaan barang selesai");
+    Ok(json!({"status": true, "konten": df_utama}).to_string())
+}
+
 #[tokio::main]
 async fn main() {
     tauri::Builder::default()
@@ -593,7 +685,8 @@ async fn main() {
             cek_koneksi_bc,
             inisiasi_bc_ereport,
             kueri_sederhana,
-            handle_data_penjualan
+            handle_data_penjualan,
+            handle_data_penerimaan_barang
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

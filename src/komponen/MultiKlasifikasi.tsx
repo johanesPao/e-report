@@ -1,17 +1,17 @@
 import { MultiSelect } from "@mantine/core";
 import { DataMultiSelect } from "../fitur_state/dataParam";
-import { Dispatch, SetStateAction } from "react";
+import { StateInputDrawerPenjualan } from "../fungsi/halaman/penjualan";
 
 interface MultiKlasifikasiProps {
   arrayKlasifikasiLabel: DataMultiSelect[];
-  stateNilai: string[];
-  setNilai: Dispatch<SetStateAction<string[]>>;
+  props: StateInputDrawerPenjualan;
+  setProps: React.Dispatch<React.SetStateAction<StateInputDrawerPenjualan>>;
 }
 
 const MultiKlasifikasi = ({
   arrayKlasifikasiLabel,
-  stateNilai,
-  setNilai,
+  props,
+  setProps,
 }: MultiKlasifikasiProps) => {
   return (
     <MultiSelect
@@ -19,8 +19,13 @@ const MultiKlasifikasi = ({
       limit={10}
       searchable
       nothingFound="Tidak ada klasifikasi ditemukan"
-      value={stateNilai}
-      onChange={setNilai}
+      value={props.nilaiKlasifikasi}
+      onChange={(nilai) =>
+        setProps((stateSebelumnya) => ({
+          ...stateSebelumnya,
+          nilaiKlasifikasi: nilai,
+        }))
+      }
       placeholder="Pilih Klasifikasi"
       label="Klasifikasi"
       clearable

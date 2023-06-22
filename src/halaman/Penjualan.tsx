@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { MRT_ColumnDef } from "mantine-react-table";
 import { Center, Title } from "@mantine/core";
@@ -6,7 +6,7 @@ import { Center, Title } from "@mantine/core";
 import { useAppDispatch, useAppSelector } from "../state/hook";
 import { getIndeksData, getKonekKeBC } from "../fitur_state/event";
 import { TombolDrawer } from "../komponen/TombolDrawer";
-import { PropsPenjualan } from "../komponen/Konten";
+import { StatePenjualan } from "../fungsi/halaman/penjualan";
 import { getParameterBc } from "../fitur_state/dataParam";
 import { getCompKueri, getCompPengguna } from "../fitur_state/pengguna";
 import { DataPenjualan } from "../fungsi/basic";
@@ -19,123 +19,39 @@ import {
 } from "../fungsi/halaman/penjualan";
 
 const Penjualan = ({
-  propsPenjualan,
-  propsMuatDataPenjualan,
-  setMuatDataPenjualan,
-  setSBUListTabel,
-  setKodeTokoListTabel,
-  setTokoListTabel,
-  setCustomerListTabel,
-  setKlasifikasiListTabel,
-  setSalespersonListTabel,
-  setRegionListTabel,
-  setBrandListTabel,
-  setOricodeListTabel,
-  setUkuranListTabel,
-  setProdDivListTabel,
-  setProdGrpListTabel,
-  setProdCatListTabel,
-  setPeriodListTabel,
-  setSeasonListTabel,
-  setPromoListTabel,
-  SBUListTabel,
-  kodeTokoListTabel,
-  tokoListTabel,
-  customerListTabel,
-  klasifikasiListTabel,
-  salespersonListTabel,
-  regionListTabel,
-  brandListTabel,
-  oricodeListTabel,
-  ukuranListTabel,
-  prodDivListTabel,
-  prodGrpListTabel,
-  prodCatListTabel,
-  periodListTabel,
-  seasonListTabel,
-  promoListTabel,
+  props,
+  setProps,
 }: {
-  propsPenjualan: PropsPenjualan;
-  propsMuatDataPenjualan: boolean;
-  setMuatDataPenjualan: React.Dispatch<React.SetStateAction<boolean>>;
-  setSBUListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  setKodeTokoListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  setTokoListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  setCustomerListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  setKlasifikasiListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  setSalespersonListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  setRegionListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  setBrandListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  setOricodeListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  setUkuranListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  setProdDivListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  setProdGrpListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  setProdCatListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  setPeriodListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  setSeasonListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  setPromoListTabel: React.Dispatch<React.SetStateAction<string[]>>;
-  SBUListTabel: string[];
-  kodeTokoListTabel: string[];
-  tokoListTabel: string[];
-  customerListTabel: string[];
-  klasifikasiListTabel: string[];
-  salespersonListTabel: string[];
-  regionListTabel: string[];
-  brandListTabel: string[];
-  oricodeListTabel: string[];
-  ukuranListTabel: string[];
-  prodDivListTabel: string[];
-  prodGrpListTabel: string[];
-  prodCatListTabel: string[];
-  periodListTabel: string[];
-  seasonListTabel: string[];
-  promoListTabel: string[];
+  props: StatePenjualan;
+  setProps: React.Dispatch<React.SetStateAction<StatePenjualan>>;
 }) => {
   const dispatch = useAppDispatch();
   const konekKeBc = useAppSelector(getKonekKeBC);
   const parameterBc = useAppSelector(getParameterBc);
   const dataPenjualan = useAppSelector(getDataPenjualan);
   const compPengguna = useAppSelector(getCompPengguna);
-  let compKueri = useAppSelector(getCompKueri);
+  const compKueri = useAppSelector(getCompKueri);
   const indeksData = useAppSelector(getIndeksData);
 
   const definisiKolom = useMemo<MRT_ColumnDef<DataPenjualan>[]>(
-    () =>
-      definisiKolomPenjualan(
-        SBUListTabel,
-        kodeTokoListTabel,
-        tokoListTabel,
-        customerListTabel,
-        klasifikasiListTabel,
-        salespersonListTabel,
-        regionListTabel,
-        brandListTabel,
-        oricodeListTabel,
-        ukuranListTabel,
-        prodDivListTabel,
-        prodGrpListTabel,
-        prodCatListTabel,
-        periodListTabel,
-        seasonListTabel,
-        promoListTabel
-      ),
+    () => definisiKolomPenjualan(props),
     [
-      SBUListTabel,
-      kodeTokoListTabel,
-      tokoListTabel,
-      customerListTabel,
-      klasifikasiListTabel,
-      salespersonListTabel,
-      regionListTabel,
-      brandListTabel,
-      oricodeListTabel,
-      ukuranListTabel,
-      prodDivListTabel,
-      prodGrpListTabel,
-      prodCatListTabel,
-      periodListTabel,
-      seasonListTabel,
-      promoListTabel,
+      props.SBUListTabel,
+      props.kodeTokoListTabel,
+      props.tokoListTabel,
+      props.customerListTabel,
+      props.klasifikasiListTabel,
+      props.salespersonListTabel,
+      props.regionListTabel,
+      props.brandListTabel,
+      props.oricodeListTabel,
+      props.ukuranListTabel,
+      props.prodDivListTabel,
+      props.prodGrpListTabel,
+      props.prodCatListTabel,
+      props.periodListTabel,
+      props.seasonListTabel,
+      props.promoListTabel,
     ]
   );
 
@@ -144,49 +60,33 @@ const Penjualan = ({
   }, []);
 
   useEffect(() => {
-    if (propsMuatDataPenjualan) {
+    if (props.muatDataPenjualan) {
       const unlisten = listen("data-penjualan", callbackNotifikasi);
       tarik_data_penjualan(
         dispatch,
-        setMuatDataPenjualan,
+        props,
+        setProps,
         parameterBc,
         compPengguna,
         indeksData,
-        compKueri,
-        propsPenjualan,
-        setSBUListTabel,
-        setKodeTokoListTabel,
-        setTokoListTabel,
-        setCustomerListTabel,
-        setKlasifikasiListTabel,
-        setSalespersonListTabel,
-        setRegionListTabel,
-        setBrandListTabel,
-        setOricodeListTabel,
-        setUkuranListTabel,
-        setProdDivListTabel,
-        setProdGrpListTabel,
-        setProdCatListTabel,
-        setPeriodListTabel,
-        setSeasonListTabel,
-        setPromoListTabel
+        compKueri
       );
       return () => {
         unlisten.then((f) => f());
       };
     }
-  }, [propsPenjualan]);
+  }, [props.penjualan]);
 
   return (
     <>
       <TombolDrawer
-        label="Input Parameter Penjualan"
+        label="Input Parameter Data Penjualan"
         nonAktif={konekKeBc}
         aksiRedux={dispatch}
         warna="teal"
       />
       <div style={{ padding: "25px" }}>
-        {dataPenjualan.length === 0 && !propsMuatDataPenjualan ? (
+        {dataPenjualan.length === 0 && !props.muatDataPenjualan ? (
           <Center sx={{ height: "100%", opacity: 0.5 }}>
             <Title>Tidak ada data yang dimuat</Title>
           </Center>
@@ -194,7 +94,7 @@ const Penjualan = ({
           <Tabel
             arrKolom={definisiKolom}
             arrData={dataPenjualan}
-            memuatData={propsMuatDataPenjualan}
+            memuatData={props.muatDataPenjualan}
           />
         )}
       </div>

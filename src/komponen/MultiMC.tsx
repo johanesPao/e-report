@@ -1,29 +1,24 @@
 import { MultiSelect } from "@mantine/core";
 import { DataMultiSelect } from "../fitur_state/dataParam";
-import { Dispatch, SetStateAction } from "react";
+import { StateInputDrawerPenjualan } from "../fungsi/halaman/penjualan";
+import { StateInputDrawerPenerimaanBarang } from "../fungsi/halaman/penerimaanBarang";
 
 interface MultiMCProps {
   arrayDivLabel: DataMultiSelect[];
   arrayGroupLabel: DataMultiSelect[];
   arrayCatLabel: DataMultiSelect[];
-  stateDiv: string[];
-  stateGroup: string[];
-  stateCat: string[];
-  setDiv: Dispatch<SetStateAction<string[]>>;
-  setGroup: Dispatch<SetStateAction<string[]>>;
-  setCat: Dispatch<SetStateAction<string[]>>;
+  props: StateInputDrawerPenjualan | StateInputDrawerPenerimaanBarang;
+  setProps:
+    | React.Dispatch<React.SetStateAction<StateInputDrawerPenjualan>>
+    | React.Dispatch<React.SetStateAction<StateInputDrawerPenerimaanBarang>>;
 }
 
 const MultiMC = ({
   arrayDivLabel,
   arrayGroupLabel,
   arrayCatLabel,
-  stateDiv,
-  stateGroup,
-  stateCat,
-  setDiv,
-  setGroup,
-  setCat,
+  props,
+  setProps,
 }: MultiMCProps) => {
   return (
     <>
@@ -32,8 +27,13 @@ const MultiMC = ({
         limit={10}
         searchable
         nothingFound="Tidak ada product division ditemukan"
-        value={stateDiv}
-        onChange={setDiv}
+        value={props.nilaiDiv}
+        onChange={(nilai) =>
+          setProps((stateSebelumnya: any) => ({
+            ...stateSebelumnya,
+            nilaiDiv: nilai,
+          }))
+        }
         placeholder="Pilih Product Division"
         label="Prod. Division"
         clearable
@@ -50,8 +50,13 @@ const MultiMC = ({
         limit={10}
         searchable
         nothingFound="Tidak ada product group ditemukan"
-        value={stateGroup}
-        onChange={setGroup}
+        value={props.nilaiGrp}
+        onChange={(nilai) =>
+          setProps((stateSebelumnya: any) => ({
+            ...stateSebelumnya,
+            nilaiGrp: nilai,
+          }))
+        }
         placeholder="Pilih Product Group"
         label="Prod. Group"
         clearable
@@ -68,8 +73,13 @@ const MultiMC = ({
         limit={10}
         searchable
         nothingFound="Tidak ada product category ditemukan"
-        value={stateCat}
-        onChange={setCat}
+        value={props.nilaiCat}
+        onChange={(nilai) =>
+          setProps((stateSebelumnya: any) => ({
+            ...stateSebelumnya,
+            nilaiCat: nilai,
+          }))
+        }
         placeholder="Pilih Product Category"
         label="Prod. Category"
         clearable

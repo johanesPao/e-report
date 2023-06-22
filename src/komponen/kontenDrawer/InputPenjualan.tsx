@@ -32,18 +32,17 @@ import MultiLokasi from "../MultiLokasi";
 import MultiSBU from "../MultiSBU";
 import MultiKlasifikasi from "../MultiKlasifikasi";
 import MultiRegion from "../MultiRegion";
-import { PropsPenjualan } from "../Konten";
+import {
+  StateInputDrawerPenjualan,
+  StatePenjualan,
+} from "../../fungsi/halaman/penjualan";
 import { prosesInput } from "../../fungsi/halaman/penjualan";
 
-interface InputPenjualanProps {
-  setPenjualan: React.Dispatch<React.SetStateAction<PropsPenjualan>>;
-  setMuatDataPenjualan: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
 const InputPenjualan = ({
-  setPenjualan,
-  setMuatDataPenjualan,
-}: InputPenjualanProps) => {
+  setProps,
+}: {
+  setProps: React.Dispatch<React.SetStateAction<StatePenjualan>>;
+}) => {
   const dispatch = useAppDispatch();
   const compPengguna = useAppSelector(getCompPengguna);
   const parameterBc = useAppSelector(getParameterBc);
@@ -65,18 +64,21 @@ const InputPenjualan = ({
   const klasifikasiInput = useAppSelector(getKlasifikasiInput);
   const regionInput = useAppSelector(getRegionInput);
 
-  const [rangeTanggal, setRangeTanggal] = useState<[Date | null, Date | null]>([
-    null,
-    null,
-  ]);
-  const [nilaiBrand, setNilaiInputBrand] = useState(brandInput[indeksData]);
-  const [nilaiDiv, setNilaiDiv] = useState(divInput[indeksData]);
-  const [nilaiGroup, setNilaiGroup] = useState(grpInput[indeksData]);
-  const [nilaiCat, setNilaiCat] = useState(catInput[indeksData]);
-  const [nilaiLokasi, setNilaiLokasi] = useState(lokasiInput);
-  const [nilaiSBU, setNilaiSBU] = useState(sbuInput);
-  const [nilaiKlasifikasi, setNilaiKlasifikasi] = useState(klasifikasiInput);
-  const [nilaiRegion, setNilaiRegion] = useState(regionInput);
+  const intialStateInputDrawerPenjualan: StateInputDrawerPenjualan = {
+    rangeTanggal: [null, null],
+    nilaiBrand: brandInput[indeksData],
+    nilaiDiv: divInput[indeksData],
+    nilaiGrp: grpInput[indeksData],
+    nilaiCat: catInput[indeksData],
+    nilaiSBU: sbuInput,
+    nilaiLokasi: lokasiInput[indeksData],
+    nilaiKlasifikasi: klasifikasiInput,
+    nilaiRegion: regionInput,
+  };
+
+  const [stateInputPenjualan, setStateInputPenjualan] = useState(
+    intialStateInputDrawerPenjualan
+  );
 
   return (
     <>
@@ -84,19 +86,15 @@ const InputPenjualan = ({
         <Grid.Col span={8}>
           <MultiBrand
             arrayBrandLabel={parameterBrand[indeksData]}
-            stateNilai={nilaiBrand}
-            setNilai={setNilaiInputBrand}
+            props={stateInputPenjualan}
+            setProps={setStateInputPenjualan}
           />
           <MultiMC
             arrayDivLabel={parameterDiv[indeksData]}
-            stateDiv={nilaiDiv}
-            setDiv={setNilaiDiv}
             arrayGroupLabel={parameterGroup[indeksData]}
-            stateGroup={nilaiGroup}
-            setGroup={setNilaiGroup}
             arrayCatLabel={parameterCat[indeksData]}
-            stateCat={nilaiCat}
-            setCat={setNilaiCat}
+            props={stateInputPenjualan}
+            setProps={setStateInputPenjualan}
           />
         </Grid.Col>
         <Grid.Col span={4}>
@@ -104,8 +102,13 @@ const InputPenjualan = ({
           <DatePicker
             size="md"
             type="range"
-            value={rangeTanggal}
-            onChange={setRangeTanggal}
+            value={stateInputPenjualan.rangeTanggal}
+            onChange={(nilai) =>
+              setStateInputPenjualan((stateSebelumnya: any) => ({
+                ...stateSebelumnya,
+                rangeTanggal: nilai,
+              }))
+            }
             allowSingleDateInRange
             numberOfColumns={2}
             pr={0}
@@ -119,21 +122,15 @@ const InputPenjualan = ({
             <Grid.Col span={12}>
               <MultiSBU
                 arraySBULabel={parameterSBU}
-                stateNilai={nilaiSBU}
-                setNilai={
-                  setNilaiSBU as React.Dispatch<React.SetStateAction<string[]>>
-                }
+                props={stateInputPenjualan}
+                setProps={setStateInputPenjualan}
               />
             </Grid.Col>
             <Grid.Col span={12}>
               <MultiLokasi
-                arrayLokasiLabel={parameterLokasi}
-                stateNilai={nilaiLokasi}
-                setNilai={
-                  setNilaiLokasi as React.Dispatch<
-                    React.SetStateAction<string[]>
-                  >
-                }
+                arrayLokasiLabel={parameterLokasi[indeksData]}
+                props={stateInputPenjualan}
+                setProps={setStateInputPenjualan}
               />
             </Grid.Col>
           </>
@@ -145,23 +142,15 @@ const InputPenjualan = ({
             <Grid.Col span={12}>
               <MultiKlasifikasi
                 arrayKlasifikasiLabel={parameterKlasifikasi}
-                stateNilai={nilaiKlasifikasi}
-                setNilai={
-                  setNilaiKlasifikasi as React.Dispatch<
-                    React.SetStateAction<string[]>
-                  >
-                }
+                props={stateInputPenjualan}
+                setProps={setStateInputPenjualan}
               />
             </Grid.Col>
             <Grid.Col span={12}>
               <MultiRegion
                 arrayRegionLabel={parameterRegion}
-                stateNilai={nilaiRegion}
-                setNilai={
-                  setNilaiRegion as React.Dispatch<
-                    React.SetStateAction<string[]>
-                  >
-                }
+                props={stateInputPenjualan}
+                setProps={setStateInputPenjualan}
               />
             </Grid.Col>
           </>
@@ -185,20 +174,11 @@ const InputPenjualan = ({
               onClick={() =>
                 prosesInput(
                   dispatch,
-                  rangeTanggal,
-                  setPenjualan,
-                  nilaiBrand,
-                  nilaiDiv,
-                  nilaiGroup,
-                  nilaiCat,
-                  nilaiSBU,
-                  nilaiLokasi,
-                  nilaiKlasifikasi,
-                  nilaiRegion,
+                  stateInputPenjualan,
                   compPengguna,
                   indeksData,
                   parameterBc,
-                  setMuatDataPenjualan
+                  setProps
                 )
               }
             >
