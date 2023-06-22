@@ -3,11 +3,12 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { notifications } from "@mantine/notifications";
 import { IconBrandRust, IconCheck, IconX } from "@tabler/icons-react";
 
-import { PropsPenjualan } from "../../komponen/Konten";
 import {
   DataPenjualan,
   Dimensi,
   Filter,
+  PropsInput,
+  StateInputDrawer,
   dimensiBazaarOthers,
   dimensiECommerce,
   dimensiFisikFootball,
@@ -33,32 +34,54 @@ import {
 import { setDataPenjualan } from "../../fitur_state/dataBank";
 import { setDrawerTerbuka } from "../../fitur_state/event";
 
+export interface PropsInputPenjualan extends PropsInput {
+  tglAwal: Date | null;
+  tglAkhir: Date | null;
+  SBU?: string[];
+  lokasi?: string[];
+  klasifikasi?: string[];
+  region?: string[];
+}
+
+export interface StatePenjualan {
+  penjualan: PropsInputPenjualan;
+  SBUListTabel: string[];
+  kodeTokoListTabel: string[];
+  tokoListTabel: string[];
+  customerListTabel: string[];
+  klasifikasiListTabel: string[];
+  salespersonListTabel: string[];
+  regionListTabel: string[];
+  brandListTabel: string[];
+  oricodeListTabel: string[];
+  ukuranListTabel: string[];
+  prodDivListTabel: string[];
+  prodGrpListTabel: string[];
+  prodCatListTabel: string[];
+  periodListTabel: string[];
+  seasonListTabel: string[];
+  promoListTabel: string[];
+  muatDataPenjualan: boolean;
+}
+
+export interface StateInputDrawerPenjualan extends StateInputDrawer {
+  rangeTanggal: [Date | null, Date | null];
+  nilaiSBU: string[];
+  nilaiLokasi: string[];
+  nilaiKlasifikasi: string[];
+  nilaiRegion: string[];
+}
+
 export const tarik_data_penjualan = async (
   dispatch: any,
-  setMuatDataPenjualan: React.Dispatch<React.SetStateAction<boolean>>,
+  props: StatePenjualan,
+  setProps: React.Dispatch<React.SetStateAction<StatePenjualan>>,
   parameterBc: {
     [key: string]: any;
   },
   compPengguna: string[],
   indeksData: number,
-  compKueri: string,
-  propsPenjualan: PropsPenjualan,
-  setSBUListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setKodeTokoListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setTokoListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setCustomerListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setKlasifikasiListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setSalespersonListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setRegionListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setBrandListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setOricodeListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setUkuranListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setProdDivListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setProdGrpListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setProdCatListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setPeriodListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setSeasonListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setPromoListTabel: React.Dispatch<React.SetStateAction<string[]>>
+  compKueri: string
 ) => {
   const singleMode: boolean = compPengguna.length === 1;
   const compPRI: boolean = !singleMode
@@ -81,22 +104,22 @@ export const tarik_data_penjualan = async (
   let arrFilter: Filter;
   let arrKueri: Kueri[];
   let arrDimensi: Dimensi[];
-  if (propsPenjualan.tglAwal !== null && propsPenjualan.tglAkhir !== null) {
-    tglAwal = new Date(propsPenjualan.tglAwal);
+  if (props.penjualan.tglAwal !== null && props.penjualan.tglAkhir !== null) {
+    tglAwal = new Date(props.penjualan.tglAwal);
     tglAwal.setDate(tglAwal.getDate() + 1);
-    tglAkhir = new Date(propsPenjualan.tglAkhir);
+    tglAkhir = new Date(props.penjualan.tglAkhir);
     tglAkhir.setDate(tglAkhir.getDate() + 1);
     tglAwalString = tglAwal.toISOString().split("T")[0];
     tglAkhirString = tglAkhir.toISOString().split("T")[0];
     arrFilter = {
-      brand: propsPenjualan.brand,
-      prod_div: propsPenjualan.prodDiv,
-      prod_grp: propsPenjualan.prodGrp,
-      prod_cat: propsPenjualan.prodCat,
-      sbu: compPRI ? propsPenjualan.SBU : [],
-      lokasi: compPRI ? propsPenjualan.lokasi : [],
-      klasifikasi: compPRI ? [] : propsPenjualan.klasifikasi,
-      region: compPRI ? [] : propsPenjualan.region,
+      brand: props.penjualan.brand,
+      prod_div: props.penjualan.prodDiv,
+      prod_grp: props.penjualan.prodGrp,
+      prod_cat: props.penjualan.prodCat,
+      sbu: compPRI ? props.penjualan.SBU : [],
+      lokasi: compPRI ? props.penjualan.lokasi : [],
+      klasifikasi: compPRI ? [] : props.penjualan.klasifikasi,
+      region: compPRI ? [] : props.penjualan.region,
     };
     arrKueri = [
       ILEByPostDate(parameterBc, tglAwalString, tglAkhirString, compKueriFinal),
@@ -178,7 +201,10 @@ export const tarik_data_penjualan = async (
     ];
 
     try {
-      setMuatDataPenjualan(true);
+      setProps((statePenjualan) => ({
+        ...statePenjualan,
+        muatDataPenjualan: true,
+      }));
       const respon: string = await invoke("handle_data_penjualan", {
         setKueri: arrKueri,
         compPri: compPRI,
@@ -186,133 +212,77 @@ export const tarik_data_penjualan = async (
         filterData: arrFilter,
       });
       const hasil = JSON.parse(respon);
-      setFilterDataPenjualan(
-        setSBUListTabel,
-        setKodeTokoListTabel,
-        setTokoListTabel,
-        setCustomerListTabel,
-        setKlasifikasiListTabel,
-        setSalespersonListTabel,
-        setRegionListTabel,
-        setBrandListTabel,
-        setOricodeListTabel,
-        setUkuranListTabel,
-        setProdDivListTabel,
-        setProdGrpListTabel,
-        setProdCatListTabel,
-        setPeriodListTabel,
-        setSeasonListTabel,
-        setPromoListTabel,
-        hasil.konten.columns
-      );
+      setFilterDataPenjualan(setProps, hasil.konten.columns);
       bacaDataPenjualan(dispatch, hasil.konten.columns);
-      setMuatDataPenjualan(false);
+      setProps((statePenjualan) => ({
+        ...statePenjualan,
+        muatDataPenjualan: false,
+      }));
     } catch (e) {
-      setMuatDataPenjualan(false);
+      setProps((statePenjualan) => ({
+        ...statePenjualan,
+        muatDataPenjualan: false,
+      }));
       console.log(e);
     }
   }
 };
 
 const setFilterDataPenjualan = (
-  setSBUListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setKodeTokoListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setTokoListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setCustomerListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setKlasifikasiListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setSalespersonListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setRegionListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setBrandListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setOricodeListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setUkuranListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setProdDivListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setProdGrpListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setProdCatListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setPeriodListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setSeasonListTabel: React.Dispatch<React.SetStateAction<string[]>>,
-  setPromoListTabel: React.Dispatch<React.SetStateAction<string[]>>,
+  setProps: React.Dispatch<React.SetStateAction<StatePenjualan>>,
   kolom: any
 ) => {
-  setSBUListTabel(
-    [...new Set<string>(kolom[3]["values"])].map((item: any) =>
+  setProps((statePenjualan) => ({
+    ...statePenjualan,
+    SBUListTabel: [...new Set<string>(kolom[3]["values"])].map((item: any) =>
       item !== null ? item : ""
-    )
-  );
-  setKodeTokoListTabel(
-    [...new Set<string>(kolom[4]["values"])].map((item: any) =>
+    ),
+    kodeTokoListTabel: [...new Set<string>(kolom[4]["values"])].map(
+      (item: any) => (item !== null ? item : "")
+    ),
+    tokoListTabel: [...new Set<string>(kolom[5]["values"])].map((item: any) =>
       item !== null ? item : ""
-    )
-  );
-  setTokoListTabel(
-    [...new Set<string>(kolom[5]["values"])].map((item: any) =>
+    ),
+    customerListTabel: [...new Set<string>(kolom[8]["values"])].map(
+      (item: any) => (item !== null ? item : "")
+    ),
+    klasifikasiListTabel: [...new Set<string>(kolom[9]["values"])].map(
+      (item: any) => (item !== null ? item : "")
+    ),
+    salespersonListTabel: [...new Set<string>(kolom[10]["values"])].map(
+      (item: any) => (item !== null ? item : "")
+    ),
+    regionListTabel: [...new Set<string>(kolom[11]["values"])].map(
+      (item: any) => (item !== null ? item : "")
+    ),
+    brandListTabel: [...new Set<string>(kolom[12]["values"])].map((item: any) =>
       item !== null ? item : ""
-    )
-  );
-  setCustomerListTabel(
-    [...new Set<string>(kolom[8]["values"])].map((item: any) =>
+    ),
+    oricodeListTabel: [...new Set<string>(kolom[13]["values"])].map(
+      (item: any) => (item !== null ? item : "")
+    ),
+    ukuranListTabel: [...new Set<string>(kolom[14]["values"])].map(
+      (item: any) => (item !== null ? item : "")
+    ),
+    prodDivListTabel: [...new Set<string>(kolom[17]["values"])].map(
+      (item: any) => (item !== null ? item : "")
+    ),
+    prodGrpListTabel: [...new Set<string>(kolom[18]["values"])].map(
+      (item: any) => (item !== null ? item : "")
+    ),
+    prodCatListTabel: [...new Set<string>(kolom[19]["values"])].map(
+      (item: any) => (item !== null ? item : "")
+    ),
+    periodListTabel: [...new Set<string>(kolom[20]["values"])].map(
+      (item: any) => (item !== null ? item : "")
+    ),
+    seasonListTabel: [...new Set<string>(kolom[21]["values"])].map(
+      (item: any) => (item !== null ? item : "")
+    ),
+    promoListTabel: [...new Set<string>(kolom[23]["values"])].map((item: any) =>
       item !== null ? item : ""
-    )
-  );
-  setKlasifikasiListTabel(
-    [...new Set<string>(kolom[9]["values"])].map((item: any) =>
-      item !== null ? item : ""
-    )
-  );
-  setSalespersonListTabel(
-    [...new Set<string>(kolom[10]["values"])].map((item: any) =>
-      item !== null ? item : ""
-    )
-  );
-  setRegionListTabel(
-    [...new Set<string>(kolom[11]["values"])].map((item: any) =>
-      item !== null ? item : ""
-    )
-  );
-  setBrandListTabel(
-    [...new Set<string>(kolom[12]["values"])].map((item: any) =>
-      item !== null ? item : ""
-    )
-  );
-  setOricodeListTabel(
-    [...new Set<string>(kolom[13]["values"])].map((item: any) =>
-      item !== null ? item : ""
-    )
-  );
-  setUkuranListTabel(
-    [...new Set<string>(kolom[14]["values"])].map((item: any) =>
-      item !== null ? item : ""
-    )
-  );
-  setProdDivListTabel(
-    [...new Set<string>(kolom[17]["values"])].map((item: any) =>
-      item !== null ? item : ""
-    )
-  );
-  setProdGrpListTabel(
-    [...new Set<string>(kolom[18]["values"])].map((item: any) =>
-      item !== null ? item : ""
-    )
-  );
-  setProdCatListTabel(
-    [...new Set<string>(kolom[19]["values"])].map((item: any) =>
-      item !== null ? item : ""
-    )
-  );
-  setPeriodListTabel(
-    [...new Set<string>(kolom[20]["values"])].map((item: any) =>
-      item !== null ? item : ""
-    )
-  );
-  setSeasonListTabel(
-    [...new Set<string>(kolom[21]["values"])].map((item: any) =>
-      item !== null ? item : ""
-    )
-  );
-  setPromoListTabel(
-    [...new Set<string>(kolom[23]["values"])].map((item: any) =>
-      item !== null ? item : ""
-    )
-  );
+    ),
+  }));
 };
 
 const bacaDataPenjualan = (dispatch: any, data: any[]) => {
@@ -436,22 +406,13 @@ const bacaDataPenjualan = (dispatch: any, data: any[]) => {
 
 export const prosesInput = (
   dispatch: any,
-  rangeTanggal: [Date | null, Date | null],
-  setPenjualan: React.Dispatch<React.SetStateAction<PropsPenjualan>>,
-  nilaiBrand: string[],
-  nilaiDiv: string[],
-  nilaiGroup: string[],
-  nilaiCat: string[],
-  nilaiSBU: string[],
-  nilaiLokasi: string[],
-  nilaiKlasifikasi: string[],
-  nilaiRegion: string[],
+  props: StateInputDrawerPenjualan,
   compPengguna: string[],
   indeksData: number,
   parameterBc: { [key: string]: any },
-  setMuatDataPenjualan: React.Dispatch<React.SetStateAction<boolean>>
+  setProps: React.Dispatch<React.SetStateAction<StatePenjualan>>
 ) => {
-  if (rangeTanggal[0] === null || rangeTanggal[1] === null) {
+  if (props.rangeTanggal[0] === null || props.rangeTanggal[1] === null) {
     notifications.show({
       title: "Periode Tanggal Kosong",
       message: "Harap pilih periode tanggal penarikan data penjualan",
@@ -461,7 +422,9 @@ export const prosesInput = (
       withCloseButton: false,
     });
     return;
-  } else if (rangeTanggal[0].toISOString() > rangeTanggal[1].toISOString()) {
+  } else if (
+    props.rangeTanggal[0].toISOString() > props.rangeTanggal[1].toISOString()
+  ) {
     notifications.show({
       title: "Periode Tanggal Invalid",
       message: "Tanggal awal tidak bisa lebih kecil dari tanggal akhir",
@@ -472,36 +435,46 @@ export const prosesInput = (
     });
     return;
   }
-  setPenjualan({
-    tglAwal: rangeTanggal[0],
-    tglAkhir: rangeTanggal[1],
-    brand: nilaiBrand,
-    prodDiv: nilaiDiv,
-    prodGrp: nilaiGroup,
-    prodCat: nilaiCat,
-    SBU:
-      (compPengguna.length === 1 && compPengguna[0] === parameterBc.comp.pri) ||
-      (compPengguna.length === 2 && indeksData === 0)
-        ? nilaiSBU
-        : [],
-    lokasi:
-      (compPengguna.length === 1 && compPengguna[0] === parameterBc.comp.pri) ||
-      (compPengguna.length === 2 && indeksData === 0)
-        ? nilaiLokasi
-        : [],
-    klasifikasi:
-      (compPengguna.length === 1 && compPengguna[0] === parameterBc.comp.pnt) ||
-      (compPengguna.length === 2 && indeksData === 1)
-        ? nilaiKlasifikasi
-        : [],
-    region:
-      (compPengguna.length === 1 && compPengguna[0] === parameterBc.comp.pnt) ||
-      (compPengguna.length === 2 && indeksData === 1)
-        ? nilaiRegion
-        : [],
-  });
+  setProps((statePenjualan) => ({
+    ...statePenjualan,
+    penjualan: {
+      tglAwal: props.rangeTanggal[0],
+      tglAkhir: props.rangeTanggal[1],
+      brand: props.nilaiBrand,
+      prodDiv: props.nilaiDiv,
+      prodGrp: props.nilaiGrp,
+      prodCat: props.nilaiCat,
+      SBU:
+        (compPengguna.length === 1 &&
+          compPengguna[0] === parameterBc.comp.pri) ||
+        (compPengguna.length === 2 && indeksData === 0)
+          ? props.nilaiSBU
+          : [],
+      lokasi:
+        (compPengguna.length === 1 &&
+          compPengguna[0] === parameterBc.comp.pri) ||
+        (compPengguna.length === 2 && indeksData === 0)
+          ? props.nilaiLokasi
+          : [],
+      klasifikasi:
+        (compPengguna.length === 1 &&
+          compPengguna[0] === parameterBc.comp.pnt) ||
+        (compPengguna.length === 2 && indeksData === 1)
+          ? props.nilaiKlasifikasi
+          : [],
+      region:
+        (compPengguna.length === 1 &&
+          compPengguna[0] === parameterBc.comp.pnt) ||
+        (compPengguna.length === 2 && indeksData === 1)
+          ? props.nilaiRegion
+          : [],
+    },
+  }));
   dispatch(setDrawerTerbuka(false));
-  setMuatDataPenjualan(true);
+  setProps((statePenjualan) => ({
+    ...statePenjualan,
+    muatDataPenjualan: true,
+  }));
 };
 
 export const callbackNotifikasiPenjualan = (e: any) => {

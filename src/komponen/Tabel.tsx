@@ -9,6 +9,8 @@ import {
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 import { unduhKeExcel } from "../fungsi/basic";
+import { useAppSelector } from "../state/hook";
+import { getHalaman } from "../fitur_state/event";
 
 interface Props<T extends Record<string, any>> {
   arrKolom: MRT_ColumnDef<T>[];
@@ -21,6 +23,7 @@ export const Tabel = <T extends Record<string, any>>({
   arrData,
   memuatData,
 }: Props<T>) => {
+  const halaman = useAppSelector(getHalaman);
   return (
     <div style={{ height: "100%" }}>
       <SimpleBar style={{ height: "100vh" }}>
@@ -61,7 +64,7 @@ export const Tabel = <T extends Record<string, any>>({
             >
               <Button
                 color="green"
-                onClick={() => unduhKeExcel(arrData)}
+                onClick={() => unduhKeExcel(arrData, halaman)}
                 leftIcon={<IconDownload />}
                 variant="filled"
               >

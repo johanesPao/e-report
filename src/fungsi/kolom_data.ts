@@ -1,24 +1,9 @@
 import { MRT_ColumnDef } from "mantine-react-table";
-import { DataPenjualan } from "./basic";
+import { DataPenerimaanBarang, DataPenjualan } from "./basic";
+import { StatePenjualan } from "./halaman/penjualan";
+import { StatePenerimaanBarang } from "./halaman/penerimaanBarang";
 
-export const definisiKolomPenjualan = (
-  SBUList: string[],
-  kodeTokoList: string[],
-  tokoList: string[],
-  customerList: string[],
-  klasifikasiList: string[],
-  salespersonList: string[],
-  regionList: string[],
-  brandList: string[],
-  oricodeList: string[],
-  ukuranList: string[],
-  prodDivList: string[],
-  prodGrpList: string[],
-  prodCatList: string[],
-  periodList: string[],
-  seasonList: string[],
-  promoList: string[]
-) => {
+export const definisiKolomPenjualan = (props: StatePenjualan) => {
   const kolomDef: MRT_ColumnDef<DataPenjualan>[] = [
     {
       accessorKey: "no_entry",
@@ -41,7 +26,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: SBUList as any,
+        data: props.SBUListTabel as any,
       },
     },
     {
@@ -50,7 +35,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: kodeTokoList as any,
+        data: props.kodeTokoListTabel as any,
       },
     },
     {
@@ -59,7 +44,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: tokoList as any,
+        data: props.tokoListTabel as any,
       },
     },
     {
@@ -78,7 +63,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: customerList as any,
+        data: props.customerListTabel as any,
       },
     },
     {
@@ -87,7 +72,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: klasifikasiList as any,
+        data: props.klasifikasiListTabel as any,
       },
     },
     {
@@ -96,7 +81,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: salespersonList as any,
+        data: props.salespersonListTabel as any,
       },
     },
     {
@@ -105,7 +90,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: regionList as any,
+        data: props.regionListTabel as any,
       },
     },
     {
@@ -114,7 +99,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: brandList as any,
+        data: props.brandListTabel as any,
       },
     },
     {
@@ -123,7 +108,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: oricodeList as any,
+        data: props.oricodeListTabel as any,
       },
     },
     {
@@ -132,7 +117,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: ukuranList as any,
+        data: props.ukuranListTabel as any,
       },
     },
     {
@@ -151,7 +136,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: prodDivList as any,
+        data: props.prodDivListTabel as any,
       },
     },
     {
@@ -160,7 +145,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: prodGrpList as any,
+        data: props.prodGrpListTabel as any,
       },
     },
     {
@@ -169,7 +154,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: prodCatList as any,
+        data: props.prodCatListTabel as any,
       },
     },
     {
@@ -178,7 +163,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: periodList as any,
+        data: props.periodListTabel as any,
       },
     },
     {
@@ -187,7 +172,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: seasonList as any,
+        data: props.seasonListTabel as any,
       },
     },
     {
@@ -201,7 +186,7 @@ export const definisiKolomPenjualan = (
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
-        data: promoList as any,
+        data: props.promoListTabel as any,
       },
     },
     {
@@ -262,6 +247,125 @@ export const definisiKolomPenjualan = (
     {
       accessorKey: "total_margin_aft_vat_persen",
       header: "Total Margin Aft. VAT (%)",
+      filterFn: "between",
+    },
+  ];
+  return kolomDef;
+};
+
+export const definisiKolomPenerimaanBarang = (props: StatePenerimaanBarang) => {
+  const kolomDef: MRT_ColumnDef<DataPenerimaanBarang>[] = [
+    {
+      accessorKey: "no_entry",
+      header: "No. Entri ILE",
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "post_date",
+      header: "Tanggal",
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "no_dokumen_pr",
+      header: "No. Dokumen PR",
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "no_dokumen_wr",
+      header: "No. Dokumen WR",
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "no_dokumen_po",
+      header: "No. Dokumen PO",
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "loc_code",
+      header: "Kode Lokasi",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.lokasiListTabel as any,
+      },
+    },
+    {
+      accessorKey: "brand_dim",
+      header: "Brand",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.brandListTabel as any,
+      },
+    },
+    {
+      accessorKey: "oricode",
+      header: "OriCode",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.oricodeListTabel as any,
+      },
+    },
+    {
+      accessorKey: "deskripsi_produk",
+      header: "Deskripsi Produk",
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "warna",
+      header: "Deskripsi Warna",
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "ukuran",
+      header: "Ukuran",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.ukuranListTabel as any,
+      },
+    },
+    {
+      accessorKey: "prod_div",
+      header: "Divisi Produk",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.prodDivListTabel as any,
+      },
+    },
+    {
+      accessorKey: "prod_grp",
+      header: "Grup Produk",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.prodGrpListTabel as any,
+      },
+    },
+    {
+      accessorKey: "prod_cat",
+      header: "Kategori Produk",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.prodCatListTabel as any,
+      },
+    },
+    {
+      accessorKey: "retail_price_per_unit",
+      header: "Retail Price per Unit",
+      filterFn: "between",
+    },
+    {
+      accessorKey: "goods_received_quantity",
+      header: "Goods Received Qty",
+      filterFn: "between",
+    },
+    {
+      accessorKey: "goods_received_cost",
+      header: "Goods Received Cost",
       filterFn: "between",
     },
   ];
