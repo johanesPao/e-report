@@ -2,13 +2,18 @@ import { MultiSelect } from "@mantine/core";
 import { DataMultiSelect } from "../fitur_state/dataParam";
 import { StateInputDrawerPenjualan } from "../fungsi/halaman/penjualan";
 import { StateInputDrawerPenerimaanBarang } from "../fungsi/halaman/penerimaanBarang";
+import { StateInputDrawerStok } from "../fungsi/halaman/stok";
 
 interface MultiLokasiProps {
   arrayLokasiLabel: DataMultiSelect[];
-  props: StateInputDrawerPenjualan | StateInputDrawerPenerimaanBarang;
+  props:
+    | StateInputDrawerPenjualan
+    | StateInputDrawerPenerimaanBarang
+    | StateInputDrawerStok;
   setProps:
     | React.Dispatch<React.SetStateAction<StateInputDrawerPenjualan>>
-    | React.Dispatch<React.SetStateAction<StateInputDrawerPenerimaanBarang>>;
+    | React.Dispatch<React.SetStateAction<StateInputDrawerPenerimaanBarang>>
+    | React.Dispatch<React.SetStateAction<StateInputDrawerStok>>;
 }
 
 const MultiLokasi = ({

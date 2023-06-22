@@ -63,9 +63,15 @@ const InputPenjualan = ({
   const lokasiInput = useAppSelector(getLokasiInput);
   const klasifikasiInput = useAppSelector(getKlasifikasiInput);
   const regionInput = useAppSelector(getRegionInput);
+  const tanggalHariIni = new Date();
+  const tanggalPertamaBulanIni = new Date(
+    tanggalHariIni.getFullYear(),
+    tanggalHariIni.getMonth(),
+    1
+  );
 
   const intialStateInputDrawerPenjualan: StateInputDrawerPenjualan = {
-    rangeTanggal: [null, null],
+    rangeTanggal: [tanggalPertamaBulanIni, tanggalHariIni],
     nilaiBrand: brandInput[indeksData],
     nilaiDiv: divInput[indeksData],
     nilaiGrp: grpInput[indeksData],
@@ -112,6 +118,8 @@ const InputPenjualan = ({
             allowSingleDateInRange
             numberOfColumns={2}
             pr={0}
+            maxDate={tanggalHariIni}
+            minDate={new Date(2022, 11, 1)}
           />
           {/* </Center> */}
         </Grid.Col>

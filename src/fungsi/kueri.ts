@@ -880,7 +880,7 @@ export const endingStokByILE = (
           SUM(${parameterBc.kolom_bc.cost_amount_actual} + ${parameterBc.kolom_bc.cost_amount_exp}) [Stock Cost]
       FROM [${compKueri}${parameterBc.tabel_bc.va_entry_437}]
       GROUP BY
-          ${parameterBc.kolom_bc.no_entri_ile}
+          ${parameterBc.kolom_bc.ile_entry_no}
   ) 
   SELECT DISTINCT
       ile.[Lokasi] [Lokasi],
@@ -915,6 +915,7 @@ export const endingStokByILE = (
       ile.[Unit Price]
     `,
   };
+  console.log(setKueri.kueri);
   return setKueri;
 };
 

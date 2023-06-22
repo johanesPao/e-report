@@ -317,88 +317,32 @@ const bacaDataPenjualan = (dispatch: any, data: any[]) => {
       prod_cat: data[19]["values"][hitung],
       period: data[20]["values"][hitung],
       season: data[21]["values"][hitung],
-      ppn:
-        data[22]["values"][hitung] !== null
-          ? data[22]["values"][hitung].toLocaleString("id-ID", {
-              style: "percent",
-              maximumFractionDigits: 2,
-            })
-          : "0.00%",
+      ppn: data[22]["values"][hitung] !== null ? data[22]["values"][hitung] : 0,
       promo: data[23]["values"][hitung],
       diskon:
-        data[24]["values"][hitung] !== null
-          ? data[24]["values"][hitung].toLocaleString("id-ID", {
-              style: "percent",
-              maximumFractionDigits: 2,
-            })
-          : "0.00%",
+        data[24]["values"][hitung] !== null ? data[24]["values"][hitung] : 0,
       kuantitas:
-        data[25]["values"][hitung] !== null
-          ? data[25]["values"][hitung].toLocaleString("id-ID", {
-              maximumFractionDigits: 0,
-            })
-          : "0",
+        data[25]["values"][hitung] !== null ? data[25]["values"][hitung] : 0,
       cost_price_per_unit:
-        data[26]["values"][hitung] !== null
-          ? data[26]["values"][hitung].toLocaleString("id-ID", {
-              maximumFractionDigits: 0,
-            })
-          : "0",
+        data[26]["values"][hitung] !== null ? data[26]["values"][hitung] : 0,
       retail_price_per_unit:
-        data[27]["values"][hitung] !== null
-          ? data[27]["values"][hitung].toLocaleString("id-ID", {
-              maximumFractionDigits: 0,
-            })
-          : "0",
+        data[27]["values"][hitung] !== null ? data[27]["values"][hitung] : 0,
       retail_price_per_unit_aft_disc:
-        data[28]["values"][hitung] !== null
-          ? data[28]["values"][hitung].toLocaleString("id-ID", {
-              maximumFractionDigits: 0,
-            })
-          : "0",
+        data[28]["values"][hitung] !== null ? data[28]["values"][hitung] : 0,
       retail_price_per_unit_aft_vat:
-        data[29]["values"][hitung] !== null
-          ? data[29]["values"][hitung].toLocaleString("id-ID", {
-              maximumFractionDigits: 0,
-            })
-          : "0",
+        data[29]["values"][hitung] !== null ? data[29]["values"][hitung] : 0,
       total_sales_at_retail:
-        data[30]["values"][hitung] !== null
-          ? data[30]["values"][hitung].toLocaleString("id-ID", {
-              maximumFractionDigits: 0,
-            })
-          : "0",
+        data[30]["values"][hitung] !== null ? data[30]["values"][hitung] : 0,
       total_sales_at_retail_aft_disc:
-        data[31]["values"][hitung] !== null
-          ? data[31]["values"][hitung].toLocaleString("id-ID", {
-              maximumFractionDigits: 0,
-            })
-          : "0",
+        data[31]["values"][hitung] !== null ? data[31]["values"][hitung] : 0,
       total_sales_at_retail_aft_vat:
-        data[32]["values"][hitung] !== null
-          ? data[32]["values"][hitung].toLocaleString("id-ID", {
-              maximumFractionDigits: 0,
-            })
-          : "0",
+        data[32]["values"][hitung] !== null ? data[32]["values"][hitung] : 0,
       total_sales_at_cost:
-        data[33]["values"][hitung] !== null
-          ? data[33]["values"][hitung].toLocaleString("id-ID", {
-              maximumFractionDigits: 0,
-            })
-          : "0",
+        data[33]["values"][hitung] !== null ? data[33]["values"][hitung] : 0,
       total_margin_aft_vat_rp:
-        data[34]["values"][hitung] !== null
-          ? data[34]["values"][hitung].toLocaleString("id-ID", {
-              maximumFractionDigits: 0,
-            })
-          : "0",
+        data[34]["values"][hitung] !== null ? data[34]["values"][hitung] : 0,
       total_margin_aft_vat_persen:
-        data[35]["values"][hitung] !== null
-          ? data[35]["values"][hitung].toLocaleString("id-ID", {
-              style: "percent",
-              maximumFractionDigits: 2,
-            })
-          : "0.00%",
+        data[35]["values"][hitung] !== null ? data[35]["values"][hitung] : 0,
     });
   }
   dispatch(setDataPenjualan(arrDataPenjualan));

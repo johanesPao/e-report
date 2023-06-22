@@ -5,7 +5,6 @@ import {
   getDivInput,
   getGrpInput,
   getLokasiInput,
-  getParameterBc,
   getParameterBrand,
   getParameterCat,
   getParameterDiv,
@@ -13,7 +12,6 @@ import {
   getParameterLokasi,
 } from "../../fitur_state/dataParam";
 import { getIndeksData, setDrawerTerbuka } from "../../fitur_state/event";
-import { getCompPengguna } from "../../fitur_state/pengguna";
 import {
   StateInputDrawerPenerimaanBarang,
   StatePenerimaanBarang,
@@ -44,10 +42,16 @@ const InputPenerimaanBarang = ({
   const grpInput = useAppSelector(getGrpInput);
   const catInput = useAppSelector(getCatInput);
   const lokasiInput = useAppSelector(getLokasiInput);
+  const tanggalHariIni = new Date();
+  const tanggalPertamaBulanIni = new Date(
+    tanggalHariIni.getFullYear(),
+    tanggalHariIni.getMonth(),
+    1
+  );
 
   const initialStateInputDrawerPenerimaanBarang: StateInputDrawerPenerimaanBarang =
     {
-      rangeTanggal: [null, null],
+      rangeTanggal: [tanggalPertamaBulanIni, tanggalHariIni],
       nilaiBrand: brandInput[indeksData],
       nilaiDiv: divInput[indeksData],
       nilaiGrp: grpInput[indeksData],
@@ -91,6 +95,8 @@ const InputPenerimaanBarang = ({
             allowSingleDateInRange
             numberOfColumns={2}
             pr={0}
+            maxDate={tanggalHariIni}
+            minDate={new Date(2022, 11, 1)}
           />
           {/* </Center> */}
         </Grid.Col>

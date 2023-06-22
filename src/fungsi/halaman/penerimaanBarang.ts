@@ -169,23 +169,11 @@ const bacaDataPenerimaanBarang = (dispatch: any, data: any[]) => {
       prod_grp: data[12]["values"][hitung],
       prod_cat: data[13]["values"][hitung],
       retail_price_per_unit:
-        data[14]["values"][hitung] !== null
-          ? data[14]["values"][hitung].toLocaleString("id-ID", {
-              maximumFractionDigits: 0,
-            })
-          : "0",
+        data[14]["values"][hitung] !== null ? data[14]["values"][hitung] : 0,
       goods_received_quantity:
-        data[15]["values"][hitung] !== null
-          ? data[15]["values"][hitung].toLocaleString("id-ID", {
-              maximumFractionDigits: 0,
-            })
-          : "0",
+        data[15]["values"][hitung] !== null ? data[15]["values"][hitung] : 0,
       goods_received_cost:
-        data[16]["values"][hitung] !== null
-          ? data[16]["values"][hitung].toLocaleString("id-ID", {
-              maximumFractionDigits: 0,
-            })
-          : "0",
+        data[16]["values"][hitung] !== null ? data[16]["values"][hitung] : 0,
     });
   }
   dispatch(setDataPenerimaanBarang(arrDataPenerimaanBarang));
@@ -267,7 +255,7 @@ export const callbackNotifikasiPenerimaanBarang = (e: any) => {
     case "finish": {
       notifications.update({
         id: e.event,
-        title: "Penarikan Data Selesai",
+        title: "Penarikan Data Penerimaan Barang Selesai",
         message: e.payload.konten,
         autoClose: 3000,
         color: "green",

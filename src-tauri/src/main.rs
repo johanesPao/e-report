@@ -677,6 +677,96 @@ async fn handle_data_penerimaan_barang(
     Ok(json!({"status": true, "konten": df_utama}).to_string())
 }
 
+#[tauri::command]
+async fn handle_data_stok(
+    set_kueri: Vec<Kueri<'_>>,
+    filter_data: Filter,
+    window: tauri::Window,
+) -> Result<String, String> {
+    // Konstruksi series untuk penampung filter_data
+    window
+        .emit(
+            "data-stok",
+            json!({"state": "start", "konten": "Parameter data diterima di Rust, rekonstruksi filter dilakukan"})
+        )
+        .expect("Gagal emit notifikasi penerimaan parameter");
+    let filter_brand = Series::new("filter_brand", filter_data.brand);
+    let filter_prod_div = Series::new("filter_prod_div", filter_data.prod_div);
+    let filter_prod_grp = Series::new("filter_prod_cat", filter_data.prod_grp);
+    let filter_prod_cat = Series::new("filter_prod_cat", filter_data.prod_cat);
+    let filter_lokasi = Series::new("filter_lokasi", filter_data.lokasi.unwrap());
+
+    // KUERI STOK
+    let mut df_utama: DataFrame = DataFrame::default();
+    for kueri in set_kueri {
+        let konten = format!("Melakukan kueri dengan ID {}", kueri.judul);
+        let gagal_emit_notif = format!("Gagal emit notifikasi kueri ID {}", kueri.judul);
+        window
+            .emit("data-stok", json!({"state": "update", "konten": &konten}))
+            .expect(&gagal_emit_notif);
+        match kueri_bc::kueri_stok(kueri).await {
+            Ok(hasil) => match hasil {
+                HasilKueriDataStok::DataStokEnum(vektor_data) => {
+                    // Konversi vektor struct hasil kueri ke dalam dataframe polars
+                    let vektor_series = vektor_data.ke_series();
+                    df_utama =
+                        DataFrame::new(vektor_series).expect("Gagal membuat dataframe utama stok");
+                }
+            },
+            Err(_) => {
+                let _ = json!({"status": false, "konten": "Kesalahan dalam matching Enum dengan hasil kueri"}).to_string();
+            }
+        }
+    }
+
+    // FILTER DATAFRAME
+    window
+        .emit(
+            "data-stok",
+            json!({
+                "state": "update",
+                "konten": "Melakukan filtering pada dataframe polars"
+            }),
+        )
+        .expect("Gagal emit notifikasi filtering dataframe polars stok");
+    df_utama = df_utama
+        .lazy()
+        .filter(col("brand_dim").is_in(lit(filter_brand)))
+        .collect()
+        .unwrap();
+    df_utama = df_utama
+        .lazy()
+        .filter(col("prod_div").is_in(lit(filter_prod_div)))
+        .collect()
+        .unwrap();
+    df_utama = df_utama
+        .lazy()
+        .filter(col("prod_grp").is_in(lit(filter_prod_grp)))
+        .collect()
+        .unwrap();
+    df_utama = df_utama
+        .lazy()
+        .filter(col("prod_cat").is_in(lit(filter_prod_cat)))
+        .collect()
+        .unwrap();
+    df_utama = df_utama
+        .lazy()
+        .filter(col("loc_code").is_in(lit(filter_lokasi)))
+        .collect()
+        .unwrap();
+    window
+        .emit(
+            "data-stok",
+            json!({
+                "state": "finish",
+                "konten": "Proses penarikan data stok pada Rust selesai, data ditransfer ke React untuk proses pemetaan ke tabel. Mohon tunggu sebentar..."
+            })
+        )
+        .expect("Gagal emit notifikasi penarikan data stok selesai");
+
+    Ok(json!({ "status": true, "konten": df_utama }).to_string())
+}
+
 #[tokio::main]
 async fn main() {
     tauri::Builder::default()
@@ -686,7 +776,8 @@ async fn main() {
             inisiasi_bc_ereport,
             kueri_sederhana,
             handle_data_penjualan,
-            handle_data_penerimaan_barang
+            handle_data_penerimaan_barang,
+            handle_data_stok
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
