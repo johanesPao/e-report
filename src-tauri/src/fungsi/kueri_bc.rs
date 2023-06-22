@@ -339,3 +339,60 @@ pub async fn kueri_penerimaan_barang(
         _ => Err("Shouldn't happened".into()),
     }
 }
+
+pub async fn kueri_stok(
+    kueri: Kueri<'_>,
+) -> Result<HasilKueriDataStok, Box<dyn std::error::Error>> {
+    match kueri.judul {
+        "endingStokByILE" => {
+            let mut vektor_data = Vec::new();
+            let hasil_kueri = &mssql::eksekusi_kueri(kueri.kueri.to_string()).await?[0];
+            if hasil_kueri.len() > 0 {
+                for baris in 0..hasil_kueri.len() {
+                    let loc_code = hasil_kueri[baris].get(0).map(|teks: &str| teks.to_string());
+                    let brand_dim = hasil_kueri[baris].get(1).map(|teks: &str| teks.to_string());
+                    let oricode = hasil_kueri[baris].get(2).map(|teks: &str| teks.to_string());
+                    let deskripsi_produk =
+                        hasil_kueri[baris].get(3).map(|teks: &str| teks.to_string());
+                    let warna = hasil_kueri[baris].get(4).map(|teks: &str| teks.to_string());
+                    let ukuran = hasil_kueri[baris].get(5).map(|teks: &str| teks.to_string());
+                    let season = hasil_kueri[baris].get(6).map(|teks: &str| teks.to_string());
+                    let period = hasil_kueri[baris].get(7).map(|teks: &str| teks.to_string());
+                    let prod_div = hasil_kueri[baris].get(8).map(|teks: &str| teks.to_string());
+                    let prod_grp = hasil_kueri[baris].get(9).map(|teks: &str| teks.to_string());
+                    let prod_cat = hasil_kueri[baris]
+                        .get(10)
+                        .map(|teks: &str| teks.to_string());
+                    let retail_price_per_unit = hasil_kueri[baris]
+                        .get(11)
+                        .map(|n: Numeric| n.to_string().parse().unwrap());
+                    let stock_quantity = hasil_kueri[baris]
+                        .get(12)
+                        .map(|n: Numeric| n.to_string().parse().unwrap());
+                    let stock_cost = hasil_kueri[baris]
+                        .get(13)
+                        .map(|n: Numeric| n.to_string().parse().unwrap());
+                    let data_stok = DataStok {
+                        loc_code,
+                        brand_dim,
+                        oricode,
+                        deskripsi_produk,
+                        warna,
+                        ukuran,
+                        season,
+                        period,
+                        prod_div,
+                        prod_grp,
+                        prod_cat,
+                        retail_price_per_unit,
+                        stock_quantity,
+                        stock_cost,
+                    };
+                    vektor_data.push(data_stok);
+                }
+            }
+            Ok(HasilKueriDataStok::DataStokEnum(vektor_data))
+        }
+        _ => Err("Shouldn't happened".into()),
+    }
+}

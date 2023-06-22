@@ -262,7 +262,7 @@ export type DataKetersediaanStok = {
   proj_stock_aft_so: number;
 };
 
-export const unduhKeExcel = (data: any[], halaman: string) => {
+export const unduhTabelKeExcel = (data: any[], halaman: string) => {
   let file: string;
   switch (halaman) {
     case "penjualan":
@@ -270,6 +270,12 @@ export const unduhKeExcel = (data: any[], halaman: string) => {
       break;
     case "penerimaanBarang":
       file = "DataPenerimaanBarang.xlsx";
+      break;
+    case "stok":
+      file = "DataStok.xlsx";
+      break;
+    case "ketersediaanStok":
+      file = "DataKetersediaanStok.xlsx";
       break;
     default:
       return;

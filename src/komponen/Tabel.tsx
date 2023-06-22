@@ -8,7 +8,7 @@ import {
 } from "mantine-react-table";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
-import { unduhKeExcel } from "../fungsi/basic";
+import { unduhTabelKeExcel } from "../fungsi/basic";
 import { useAppSelector } from "../state/hook";
 import { getHalaman } from "../fitur_state/event";
 
@@ -38,6 +38,7 @@ export const Tabel = <T extends Record<string, any>>({
           enableColumnActions={false}
           enableFilterMatchHighlighting={false}
           enableDensityToggle={false}
+          enableStickyHeader
           memoMode="cells"
           // enableRowActions
           // enableRowSelection
@@ -64,7 +65,7 @@ export const Tabel = <T extends Record<string, any>>({
             >
               <Button
                 color="green"
-                onClick={() => unduhKeExcel(arrData, halaman)}
+                onClick={() => unduhTabelKeExcel(arrData, halaman)}
                 leftIcon={<IconDownload />}
                 variant="filled"
               >

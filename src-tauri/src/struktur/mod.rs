@@ -135,6 +135,25 @@ pub struct DataPenerimaanBarang {
     pub goods_received_cost: Option<f32>,
 }
 
+#[derive(Clone, Debug, FieldNamesAsArray)]
+#[field_names_as_array(visibility = "pub")]
+pub struct DataStok {
+    pub loc_code: Option<String>,
+    pub brand_dim: Option<String>,
+    pub oricode: Option<String>,
+    pub deskripsi_produk: Option<String>,
+    pub warna: Option<String>,
+    pub ukuran: Option<String>,
+    pub season: Option<String>,
+    pub period: Option<String>,
+    pub prod_div: Option<String>,
+    pub prod_grp: Option<String>,
+    pub prod_cat: Option<String>,
+    pub retail_price_per_unit: Option<f32>,
+    pub stock_quantity: Option<f32>,
+    pub stock_cost: Option<f32>,
+}
+
 pub trait DataFrameSerial {
     fn ke_series(&self) -> Vec<Series>;
 }
@@ -767,6 +786,111 @@ impl DataFrameSerial for Vec<DataPenerimaanBarang> {
     }
 }
 
+impl DataFrameSerial for Vec<DataStok> {
+    fn ke_series(&self) -> Vec<Series> {
+        let mut vektor_loc_code = Vec::new();
+        let mut vektor_brand_dim = Vec::new();
+        let mut vektor_oricode = Vec::new();
+        let mut vektor_deskripsi_produk = Vec::new();
+        let mut vektor_warna = Vec::new();
+        let mut vektor_ukuran = Vec::new();
+        let mut vektor_season = Vec::new();
+        let mut vektor_period = Vec::new();
+        let mut vektor_prod_div = Vec::new();
+        let mut vektor_prod_grp = Vec::new();
+        let mut vektor_prod_cat = Vec::new();
+        let mut vektor_retail_price_per_unit = Vec::new();
+        let mut vektor_stock_quantity = Vec::new();
+        let mut vektor_stock_cost = Vec::new();
+
+        for baris in self {
+            for kolom in 0..DataStok::FIELD_NAMES_AS_ARRAY.len() {
+                match kolom {
+                    0 => vektor_loc_code.push(baris.loc_code.clone()),
+                    1 => vektor_brand_dim.push(baris.brand_dim.clone()),
+                    2 => vektor_oricode.push(baris.oricode.clone()),
+                    3 => vektor_deskripsi_produk.push(baris.deskripsi_produk.clone()),
+                    4 => vektor_warna.push(baris.warna.clone()),
+                    5 => vektor_ukuran.push(baris.ukuran.clone()),
+                    6 => vektor_season.push(baris.season.clone()),
+                    7 => vektor_period.push(baris.period.clone()),
+                    8 => vektor_prod_div.push(baris.prod_div.clone()),
+                    9 => vektor_prod_grp.push(baris.prod_grp.clone()),
+                    10 => vektor_prod_cat.push(baris.prod_cat.clone()),
+                    11 => vektor_retail_price_per_unit.push(baris.retail_price_per_unit),
+                    12 => vektor_stock_quantity.push(baris.stock_quantity),
+                    13 => vektor_stock_cost.push(baris.stock_cost),
+                    _ => println!("Nothing"),
+                }
+            }
+        }
+
+        let mut vektor_series = Vec::new();
+        for hitung in 0..DataStok::FIELD_NAMES_AS_ARRAY.len() {
+            match hitung {
+                0 => vektor_series.push(Series::new(
+                    DataStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_loc_code.clone(),
+                )),
+                1 => vektor_series.push(Series::new(
+                    DataStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_brand_dim.clone(),
+                )),
+                2 => vektor_series.push(Series::new(
+                    DataStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_oricode.clone(),
+                )),
+                3 => vektor_series.push(Series::new(
+                    DataStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_deskripsi_produk.clone(),
+                )),
+                4 => vektor_series.push(Series::new(
+                    DataStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_warna.clone(),
+                )),
+                5 => vektor_series.push(Series::new(
+                    DataStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_ukuran.clone(),
+                )),
+                6 => vektor_series.push(Series::new(
+                    DataStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_season.clone(),
+                )),
+                7 => vektor_series.push(Series::new(
+                    DataStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_period.clone(),
+                )),
+                8 => vektor_series.push(Series::new(
+                    DataStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_prod_div.clone(),
+                )),
+                9 => vektor_series.push(Series::new(
+                    DataStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_prod_grp.clone(),
+                )),
+                10 => vektor_series.push(Series::new(
+                    DataStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_prod_cat.clone(),
+                )),
+                11 => vektor_series.push(Series::new(
+                    DataStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_retail_price_per_unit.clone(),
+                )),
+                12 => vektor_series.push(Series::new(
+                    DataStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_stock_quantity.clone(),
+                )),
+                13 => vektor_series.push(Series::new(
+                    DataStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_stock_cost.clone(),
+                )),
+                _ => println!("Nothing"),
+            }
+        }
+        vektor_series
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Kueri<'a> {
     pub judul: &'a str,
@@ -818,4 +942,8 @@ pub enum HasilKueriDataPenjualan {
 
 pub enum HasilKueriDataPenerimaanBarang {
     DataPenerimaanBarangEnum(Vec<DataPenerimaanBarang>),
+}
+
+pub enum HasilKueriDataStok {
+    DataStokEnum(Vec<DataStok>),
 }

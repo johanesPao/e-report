@@ -1,7 +1,8 @@
 import { MRT_ColumnDef } from "mantine-react-table";
-import { DataPenerimaanBarang, DataPenjualan } from "./basic";
+import { DataPenerimaanBarang, DataPenjualan, DataStok } from "./basic";
 import { StatePenjualan } from "./halaman/penjualan";
 import { StatePenerimaanBarang } from "./halaman/penerimaanBarang";
+import { StateStok } from "./halaman/stok";
 
 export const definisiKolomPenjualan = (props: StatePenjualan) => {
   const kolomDef: MRT_ColumnDef<DataPenjualan>[] = [
@@ -9,6 +10,10 @@ export const definisiKolomPenjualan = (props: StatePenjualan) => {
       accessorKey: "no_entry",
       header: "No. Entri ILE",
       filterFn: "fuzzy",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          maximumFractionDigits: 0,
+        }),
     },
     {
       accessorKey: "post_date",
@@ -179,6 +184,11 @@ export const definisiKolomPenjualan = (props: StatePenjualan) => {
       accessorKey: "ppn",
       header: "PPN",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "percent",
+          maximumFractionDigits: 0,
+        }),
     },
     {
       accessorKey: "promo",
@@ -193,61 +203,129 @@ export const definisiKolomPenjualan = (props: StatePenjualan) => {
       accessorKey: "diskon",
       header: "Diskon",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "percent",
+          maximumFractionDigits: 2,
+        }),
     },
     {
       accessorKey: "kuantitas",
       header: "Kuantitas",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          maximumFractionDigits: 0,
+        }),
     },
     {
       accessorKey: "cost_price_per_unit",
       header: "Cost per Unit",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 2,
+        }),
     },
     {
       accessorKey: "retail_price_per_unit",
       header: "Retail Price per Unit",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }),
     },
     {
       accessorKey: "retail_price_per_unit_aft_disc",
       header: "Retail Price per Unit Aft. Disc",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }),
     },
     {
       accessorKey: "retail_price_per_unit_aft_vat",
       header: "Retail Price per Unit Aft. VAT",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }),
     },
     {
       accessorKey: "total_sales_at_retail",
       header: "Total Sales at Retail",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }),
     },
     {
       accessorKey: "total_sales_at_retail_aft_disc",
       header: "Total Sales at Retail Aft. Disc",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }),
     },
     {
       accessorKey: "total_sales_at_retail_aft_vat",
       header: "Total Sales at Retail Aft. VAT",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }),
     },
     {
       accessorKey: "total_sales_at_cost",
       header: "Total Sales at Cost",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }),
     },
     {
       accessorKey: "total_margin_aft_vat_rp",
       header: "Total Margin Aft. VAT (Rp)",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }),
     },
     {
       accessorKey: "total_margin_aft_vat_persen",
       header: "Total Margin Aft. VAT (%)",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "percent",
+          maximumFractionDigits: 2,
+        }),
     },
   ];
   return kolomDef;
@@ -259,6 +337,10 @@ export const definisiKolomPenerimaanBarang = (props: StatePenerimaanBarang) => {
       accessorKey: "no_entry",
       header: "No. Entri ILE",
       filterFn: "fuzzy",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          maximumFractionDigits: 0,
+        }),
     },
     {
       accessorKey: "post_date",
@@ -357,16 +439,160 @@ export const definisiKolomPenerimaanBarang = (props: StatePenerimaanBarang) => {
       accessorKey: "retail_price_per_unit",
       header: "Retail Price per Unit",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }),
     },
     {
       accessorKey: "goods_received_quantity",
       header: "Goods Received Qty",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          maximumFractionDigits: 0,
+        }),
     },
     {
       accessorKey: "goods_received_cost",
       header: "Goods Received Cost",
       filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }),
+    },
+  ];
+  return kolomDef;
+};
+
+export const definisiKolomStok = (props: StateStok) => {
+  const kolomDef: MRT_ColumnDef<DataStok>[] = [
+    {
+      accessorKey: "loc_code",
+      header: "Kode Lokasi",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.lokasiListTabel as any,
+      },
+    },
+    {
+      accessorKey: "brand_dim",
+      header: "Brand",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.brandListTabel as any,
+      },
+    },
+    {
+      accessorKey: "oricode",
+      header: "OriCode",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.oricodeListTabel as any,
+      },
+    },
+    {
+      accessorKey: "deskripsi_produk",
+      header: "Deskripsi Produk",
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "warna",
+      header: "Deskripsi Warna",
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "ukuran",
+      header: "Ukuran",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.ukuranListTabel as any,
+      },
+    },
+    {
+      accessorKey: "season",
+      header: "Season",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.seasonListTabel as any,
+      },
+    },
+    {
+      accessorKey: "period",
+      header: "Period",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.periodListTabel as any,
+      },
+    },
+    {
+      accessorKey: "prod_div",
+      header: "Divisi Produk",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.prodDivListTabel as any,
+      },
+    },
+    {
+      accessorKey: "prod_grp",
+      header: "Grup Produk",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.prodGrpListTabel as any,
+      },
+    },
+    {
+      accessorKey: "prod_cat",
+      header: "Kategori Produk",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.prodCatListTabel as any,
+      },
+    },
+    {
+      accessorKey: "retail_price_per_unit",
+      header: "Retail Price per Unit",
+      filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }),
+    },
+    {
+      accessorKey: "stock_quantity",
+      header: "Stock Qty",
+      filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          maximumFractionDigits: 0,
+        }),
+    },
+    {
+      accessorKey: "stock_cost",
+      header: "Stock Cost",
+      filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }),
     },
   ];
   return kolomDef;
