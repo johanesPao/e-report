@@ -16,19 +16,10 @@ import KelayakanTokoBaru from "../halaman/KelayakanTokoBaru";
 import { getSesiAktif, getHalaman, setHalaman } from "../fitur_state/event";
 import { useAppSelector, useAppDispatch } from "../state/hook";
 import { Container } from "@mantine/core";
-
-export interface PropsPenjualan {
-  tglAwal: Date | null;
-  tglAkhir: Date | null;
-  brand: string[];
-  prodDiv: string[];
-  prodGrp: string[];
-  prodCat: string[];
-  SBU?: string[];
-  lokasi?: string[];
-  klasifikasi?: string[];
-  region?: string[];
-}
+import { StatePenjualan } from "../fungsi/halaman/penjualan";
+import { StatePenerimaanBarang } from "../fungsi/halaman/penerimaanBarang";
+import { StateStok } from "../fungsi/halaman/stok";
+import { StateKetersediaanStok } from "../fungsi/halaman/ketersediaanStok";
 
 const Konten = () => {
   const navigasi = useNavigate();
@@ -37,39 +28,101 @@ const Konten = () => {
   const halaman = useAppSelector(getHalaman);
 
   // PENJUALAN
-  const [penjualan, setPenjualan] = useState<PropsPenjualan>({
-    tglAwal: null,
-    tglAkhir: null,
-    brand: [],
-    prodDiv: [],
-    prodGrp: [],
-    prodCat: [],
-    SBU: [],
-    lokasi: [],
-    klasifikasi: [],
-    region: [],
-  });
-  const [SBUListTabel, setSBUListTabel] = useState<string[]>([]);
-  const [kodeTokoListTabel, setKodeTokoListTabel] = useState<string[]>([]);
-  const [tokoListTabel, setTokoListTabel] = useState<string[]>([]);
-  const [customerListTabel, setCustomerListTabel] = useState<string[]>([]);
-  const [klasifikasiListTabel, setKlasifikasiListTabel] = useState<string[]>(
-    []
+  const initialStatePenjualan: StatePenjualan = {
+    penjualan: {
+      tglAwal: null,
+      tglAkhir: null,
+      brand: [],
+      prodDiv: [],
+      prodGrp: [],
+      prodCat: [],
+      SBU: [],
+      lokasi: [],
+      klasifikasi: [],
+      region: [],
+    },
+    SBUListTabel: [],
+    kodeTokoListTabel: [],
+    tokoListTabel: [],
+    customerListTabel: [],
+    klasifikasiListTabel: [],
+    salespersonListTabel: [],
+    regionListTabel: [],
+    brandListTabel: [],
+    oricodeListTabel: [],
+    ukuranListTabel: [],
+    prodDivListTabel: [],
+    prodGrpListTabel: [],
+    prodCatListTabel: [],
+    periodListTabel: [],
+    seasonListTabel: [],
+    promoListTabel: [],
+    muatDataPenjualan: false,
+  };
+  const [statePenjualan, setStatePenjualan] = useState(initialStatePenjualan);
+
+  // PENERIMAAN BARANG
+  const initialStatePenerimaanBarang: StatePenerimaanBarang = {
+    penerimaanBarang: {
+      tglAwal: null,
+      tglAkhir: null,
+      brand: [],
+      prodDiv: [],
+      prodGrp: [],
+      prodCat: [],
+      lokasi: [],
+    },
+    brandListTabel: [],
+    prodDivListTabel: [],
+    prodGrpListTabel: [],
+    prodCatListTabel: [],
+    oricodeListTabel: [],
+    ukuranListTabel: [],
+    lokasiListTabel: [],
+    muatDataPenerimaanBarang: false,
+  };
+  const [statePenerimaanBarang, setStatePenerimaanBarang] = useState(
+    initialStatePenerimaanBarang
   );
-  const [salespersonListTabel, setSalespersonListTabel] = useState<string[]>(
-    []
+
+  // STOK
+  const initialStateStok: StateStok = {
+    stok: {
+      tglAkhir: null,
+      brand: [],
+      prodDiv: [],
+      prodGrp: [],
+      prodCat: [],
+      lokasi: [],
+    },
+    brandListTabel: [],
+    prodDivListTabel: [],
+    prodGrpListTabel: [],
+    prodCatListTabel: [],
+    lokasiListTabel: [],
+    muatDataStok: false,
+  };
+  const [stateStok, setStateStok] = useState(initialStateStok);
+
+  // KETERSEDIAAN STOK
+  const initialStateKetersediaanStok: StateKetersediaanStok = {
+    ketersediaanStok: {
+      brand: [],
+      prodDiv: [],
+      prodGrp: [],
+      prodCat: [],
+      lokasi: [],
+    },
+    brandListTabel: [],
+    prodDivListTabel: [],
+    prodGrpListTabel: [],
+    prodCatListTabel: [],
+    lokasiListTabel: [],
+    muatKetersediaanStok: false,
+  };
+  const [stateKetersediaanStok, setStateKetersediaanStok] = useState(
+    initialStateKetersediaanStok
   );
-  const [regionListTabel, setRegionListTabel] = useState<string[]>([]);
-  const [brandListTabel, setBrandListTabel] = useState<string[]>([]);
-  const [oricodeListTabel, setOricodeListTabel] = useState<string[]>([]);
-  const [ukuranListTabel, setUkuranListTabel] = useState<string[]>([]);
-  const [prodDivListTabel, setProdDivListTabel] = useState<string[]>([]);
-  const [prodGrpListTabel, setKProdGrpListTabel] = useState<string[]>([]);
-  const [prodCatListTabel, setProdCatListTabel] = useState<string[]>([]);
-  const [periodListTabel, setPeriodListTabel] = useState<string[]>([]);
-  const [seasonListTabel, setSeasonListTabel] = useState<string[]>([]);
-  const [promoListTabel, setPromoListTabel] = useState<string[]>([]);
-  const [muatDataPenjualan, setMuatDataPenjualan] = useState(false);
 
   useEffect(() => {
     if (!sesiAktif) {
@@ -85,50 +138,24 @@ const Konten = () => {
     switch (halaman) {
       case "penjualan":
         return (
-          <Penjualan
-            propsPenjualan={penjualan}
-            propsMuatDataPenjualan={muatDataPenjualan}
-            setMuatDataPenjualan={setMuatDataPenjualan}
-            setSBUListTabel={setSBUListTabel}
-            setKodeTokoListTabel={setKodeTokoListTabel}
-            setTokoListTabel={setTokoListTabel}
-            setCustomerListTabel={setCustomerListTabel}
-            setKlasifikasiListTabel={setKlasifikasiListTabel}
-            setSalespersonListTabel={setSalespersonListTabel}
-            setRegionListTabel={setRegionListTabel}
-            setBrandListTabel={setBrandListTabel}
-            setOricodeListTabel={setOricodeListTabel}
-            setUkuranListTabel={setUkuranListTabel}
-            setProdDivListTabel={setProdDivListTabel}
-            setProdGrpListTabel={setKProdGrpListTabel}
-            setProdCatListTabel={setProdCatListTabel}
-            setPeriodListTabel={setPeriodListTabel}
-            setSeasonListTabel={setSeasonListTabel}
-            setPromoListTabel={setPromoListTabel}
-            SBUListTabel={SBUListTabel}
-            kodeTokoListTabel={kodeTokoListTabel}
-            tokoListTabel={tokoListTabel}
-            customerListTabel={customerListTabel}
-            klasifikasiListTabel={klasifikasiListTabel}
-            salespersonListTabel={salespersonListTabel}
-            regionListTabel={regionListTabel}
-            brandListTabel={brandListTabel}
-            oricodeListTabel={oricodeListTabel}
-            ukuranListTabel={ukuranListTabel}
-            prodDivListTabel={prodDivListTabel}
-            prodGrpListTabel={prodGrpListTabel}
-            prodCatListTabel={prodCatListTabel}
-            periodListTabel={periodListTabel}
-            seasonListTabel={seasonListTabel}
-            promoListTabel={promoListTabel}
-          />
+          <Penjualan props={statePenjualan} setProps={setStatePenjualan} />
         );
       case "penerimaanBarang":
-        return <PenerimaanBarang />;
+        return (
+          <PenerimaanBarang
+            props={statePenerimaanBarang}
+            setProps={setStatePenerimaanBarang}
+          />
+        );
       case "stok":
-        return <Stok />;
+        return <Stok props={stateStok} setProps={setStateStok} />;
       case "ketersediaanStok":
-        return <KetersediaanStok />;
+        return (
+          <KetersediaanStok
+            props={stateKetersediaanStok}
+            setProps={setStateKetersediaanStok}
+          />
+        );
       case "buyingProposal":
         return <BuyingProposal />;
       case "labaRugiToko":
@@ -137,6 +164,31 @@ const Konten = () => {
         return <KelayakanTokoBaru />;
       default:
         return <Dashboard />;
+    }
+  };
+
+  const renderDrawer = () => {
+    switch (halaman) {
+      case "penjualan":
+        return <DrawerInput setPropsPenjualan={setStatePenjualan} />;
+      case "penerimaanBarang":
+        return (
+          <DrawerInput setPropsPenerimaanBarang={setStatePenerimaanBarang} />
+        );
+      case "stok":
+        return <DrawerInput setPropsStok={setStateStok} />;
+      case "ketersediaanStok":
+        return (
+          <DrawerInput setPropsKetersediaanStok={setStateKetersediaanStok} />
+        );
+      case "buyingProposal":
+        return null;
+      case "labaRugiToko":
+        return null;
+      case "kelayakanTokoBaru":
+        return null;
+      default:
+        return null;
     }
   };
 
@@ -151,10 +203,7 @@ const Konten = () => {
       >
         {renderKonten()}
       </Container>
-      <DrawerInput
-        setPenjualan={setPenjualan}
-        setMuatDataPenjualan={setMuatDataPenjualan}
-      />
+      {renderDrawer()}
     </Layout>
   );
 };

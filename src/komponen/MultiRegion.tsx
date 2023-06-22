@@ -1,17 +1,17 @@
 import { MultiSelect } from "@mantine/core";
 import { DataMultiSelect } from "../fitur_state/dataParam";
-import { Dispatch, SetStateAction } from "react";
+import { StateInputDrawerPenjualan } from "../fungsi/halaman/penjualan";
 
 interface MultiRegionProps {
   arrayRegionLabel: DataMultiSelect[];
-  stateNilai: string[];
-  setNilai: Dispatch<SetStateAction<string[]>>;
+  props: StateInputDrawerPenjualan;
+  setProps: React.Dispatch<React.SetStateAction<StateInputDrawerPenjualan>>;
 }
 
 const MultiRegion = ({
   arrayRegionLabel,
-  stateNilai,
-  setNilai,
+  props,
+  setProps,
 }: MultiRegionProps) => {
   return (
     <MultiSelect
@@ -19,8 +19,13 @@ const MultiRegion = ({
       limit={10}
       searchable
       nothingFound="Tidak ada region ditemukan"
-      value={stateNilai}
-      onChange={setNilai}
+      value={props.nilaiRegion}
+      onChange={(nilai) =>
+        setProps((stateSebelumnya) => ({
+          ...stateSebelumnya,
+          nilaiRegion: nilai,
+        }))
+      }
       placeholder="Pilih Region"
       label="Region"
       clearable

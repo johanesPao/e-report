@@ -1,17 +1,20 @@
 import { MultiSelect } from "@mantine/core";
 import { DataMultiSelect } from "../fitur_state/dataParam";
-import { Dispatch, SetStateAction } from "react";
+import { StateInputDrawerPenjualan } from "../fungsi/halaman/penjualan";
+import { StateInputDrawerPenerimaanBarang } from "../fungsi/halaman/penerimaanBarang";
 
 interface MultiLokasiProps {
   arrayLokasiLabel: DataMultiSelect[];
-  stateNilai: string[];
-  setNilai: Dispatch<SetStateAction<string[]>>;
+  props: StateInputDrawerPenjualan | StateInputDrawerPenerimaanBarang;
+  setProps:
+    | React.Dispatch<React.SetStateAction<StateInputDrawerPenjualan>>
+    | React.Dispatch<React.SetStateAction<StateInputDrawerPenerimaanBarang>>;
 }
 
 const MultiLokasi = ({
   arrayLokasiLabel,
-  stateNilai,
-  setNilai,
+  props,
+  setProps,
 }: MultiLokasiProps) => {
   return (
     <MultiSelect
@@ -19,8 +22,13 @@ const MultiLokasi = ({
       limit={10}
       searchable
       nothingFound="Tidak ada lokasi ditemukan"
-      value={stateNilai}
-      onChange={setNilai}
+      value={props.nilaiLokasi}
+      onChange={(nilai) =>
+        setProps((stateSebelumnya: any) => ({
+          ...stateSebelumnya,
+          nilaiLokasi: nilai,
+        }))
+      }
       placeholder="Pilih Lokasi"
       label="Lokasi"
       clearable

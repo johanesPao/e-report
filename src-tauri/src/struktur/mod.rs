@@ -113,6 +113,28 @@ pub struct DataKlasifikasiByILE {
     pub classification: Option<String>,
 }
 
+#[derive(Clone, Debug, FieldNamesAsArray)]
+#[field_names_as_array(visibility = "pub")]
+pub struct DataPenerimaanBarang {
+    pub no_entry: Option<i32>,
+    pub post_date: Option<NaiveDateTime>,
+    pub no_dokumen_pr: Option<String>,
+    pub no_dokumen_wr: Option<String>,
+    pub no_dokumen_po: Option<String>,
+    pub loc_code: Option<String>,
+    pub brand_dim: Option<String>,
+    pub oricode: Option<String>,
+    pub deskripsi_produk: Option<String>,
+    pub warna: Option<String>,
+    pub ukuran: Option<String>,
+    pub prod_div: Option<String>,
+    pub prod_grp: Option<String>,
+    pub prod_cat: Option<String>,
+    pub retail_price_per_unit: Option<f32>,
+    pub goods_received_quantity: Option<f32>,
+    pub goods_received_cost: Option<f32>,
+}
+
 pub trait DataFrameSerial {
     fn ke_series(&self) -> Vec<Series>;
 }
@@ -195,7 +217,7 @@ impl DataFrameSerial for Vec<DataILE> {
             }
         }
 
-        return vektor_series;
+        vektor_series
     }
 }
 
@@ -235,7 +257,7 @@ impl DataFrameSerial for Vec<DataSalespersonRegionByILE> {
             }
         }
 
-        return vektor_series;
+        vektor_series
     }
 }
 
@@ -269,7 +291,7 @@ impl DataFrameSerial for Vec<DataTokoByILE> {
             }
         }
 
-        return vektor_series;
+        vektor_series
     }
 }
 
@@ -339,7 +361,7 @@ impl DataFrameSerial for Vec<DataProdukByILE> {
             }
         }
 
-        return vektor_series;
+        vektor_series
     }
 }
 
@@ -373,7 +395,7 @@ impl DataFrameSerial for Vec<DataVatByILE> {
             }
         }
 
-        return vektor_series;
+        vektor_series
     }
 }
 
@@ -407,7 +429,7 @@ impl DataFrameSerial for Vec<DataPromoByILE> {
             }
         }
 
-        return vektor_series;
+        vektor_series
     }
 }
 
@@ -441,7 +463,7 @@ impl DataFrameSerial for Vec<DataDiskonByILE> {
             }
         }
 
-        return vektor_series;
+        vektor_series
     }
 }
 
@@ -475,7 +497,7 @@ impl DataFrameSerial for Vec<DataDokumenLainnyaByILE> {
             }
         }
 
-        return vektor_series;
+        vektor_series
     }
 }
 
@@ -509,7 +531,7 @@ impl DataFrameSerial for Vec<DataKuantitasByILE> {
             }
         }
 
-        return vektor_series;
+        vektor_series
     }
 }
 
@@ -550,7 +572,7 @@ impl DataFrameSerial for Vec<DataCPPUByILE> {
             }
         }
 
-        return vektor_series;
+        vektor_series
     }
 }
 
@@ -584,7 +606,7 @@ impl DataFrameSerial for Vec<DataRPPUByILE> {
             }
         }
 
-        return vektor_series;
+        vektor_series
     }
 }
 
@@ -618,7 +640,130 @@ impl DataFrameSerial for Vec<DataKlasifikasiByILE> {
             }
         }
 
-        return vektor_series;
+        vektor_series
+    }
+}
+
+impl DataFrameSerial for Vec<DataPenerimaanBarang> {
+    fn ke_series(&self) -> Vec<Series> {
+        let mut vektor_no_entry = Vec::new();
+        let mut vektor_post_date = Vec::new();
+        let mut vektor_no_dokumen_pr = Vec::new();
+        let mut vektor_no_dokumen_wr = Vec::new();
+        let mut vektor_no_dokumen_po = Vec::new();
+        let mut vektor_loc_code = Vec::new();
+        let mut vektor_brand_dim = Vec::new();
+        let mut vektor_oricode = Vec::new();
+        let mut vektor_deskripsi_produk = Vec::new();
+        let mut vektor_warna = Vec::new();
+        let mut vektor_ukuran = Vec::new();
+        let mut vektor_prod_div = Vec::new();
+        let mut vektor_prod_grp = Vec::new();
+        let mut vektor_prod_cat = Vec::new();
+        let mut vektor_retail_price_per_unit = Vec::new();
+        let mut vektor_goods_received_quantity = Vec::new();
+        let mut vektor_goods_received_cost = Vec::new();
+
+        for baris in self {
+            for kolom in 0..DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY.len() {
+                match kolom {
+                    0 => vektor_no_entry.push(baris.no_entry),
+                    1 => vektor_post_date.push(baris.post_date),
+                    2 => vektor_no_dokumen_pr.push(baris.no_dokumen_pr.clone()),
+                    3 => vektor_no_dokumen_wr.push(baris.no_dokumen_wr.clone()),
+                    4 => vektor_no_dokumen_po.push(baris.no_dokumen_po.clone()),
+                    5 => vektor_loc_code.push(baris.loc_code.clone()),
+                    6 => vektor_brand_dim.push(baris.brand_dim.clone()),
+                    7 => vektor_oricode.push(baris.oricode.clone()),
+                    8 => vektor_deskripsi_produk.push(baris.deskripsi_produk.clone()),
+                    9 => vektor_warna.push(baris.warna.clone()),
+                    10 => vektor_ukuran.push(baris.ukuran.clone()),
+                    11 => vektor_prod_div.push(baris.prod_div.clone()),
+                    12 => vektor_prod_grp.push(baris.prod_grp.clone()),
+                    13 => vektor_prod_cat.push(baris.prod_cat.clone()),
+                    14 => vektor_retail_price_per_unit.push(baris.retail_price_per_unit),
+                    15 => vektor_goods_received_quantity.push(baris.goods_received_quantity),
+                    16 => vektor_goods_received_cost.push(baris.goods_received_cost),
+                    _ => println!("Nothing"),
+                }
+            }
+        }
+
+        let mut vektor_series = Vec::new();
+        for hitung in 0..DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY.len() {
+            match hitung {
+                0 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_no_entry.clone(),
+                )),
+                1 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_post_date.clone(),
+                )),
+                2 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_no_dokumen_pr.clone(),
+                )),
+                3 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_no_dokumen_wr.clone(),
+                )),
+                4 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_no_dokumen_po.clone(),
+                )),
+                5 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_loc_code.clone(),
+                )),
+                6 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_brand_dim.clone(),
+                )),
+                7 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_oricode.clone(),
+                )),
+                8 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_deskripsi_produk.clone(),
+                )),
+                9 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_warna.clone(),
+                )),
+                10 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_ukuran.clone(),
+                )),
+                11 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_prod_div.clone(),
+                )),
+                12 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_prod_grp.clone(),
+                )),
+                13 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_prod_cat.clone(),
+                )),
+                14 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_retail_price_per_unit.clone(),
+                )),
+                15 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_goods_received_quantity.clone(),
+                )),
+                16 => vektor_series.push(Series::new(
+                    DataPenerimaanBarang::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_goods_received_cost.clone(),
+                )),
+                _ => println!("Nothing"),
+            }
+        }
+        vektor_series
     }
 }
 
@@ -642,10 +787,10 @@ pub struct Filter {
     pub prod_div: Vec<String>,
     pub prod_grp: Vec<String>,
     pub prod_cat: Vec<String>,
-    pub sbu: Vec<String>,
-    pub lokasi: Vec<String>,
-    pub klasifikasi: Vec<String>,
-    pub region: Vec<String>,
+    pub sbu: Option<Vec<String>>,
+    pub lokasi: Option<Vec<String>>,
+    pub klasifikasi: Option<Vec<String>>,
+    pub region: Option<Vec<String>>,
 }
 
 fn deserialize_vektor<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
@@ -656,7 +801,7 @@ where
     Ok(vec)
 }
 
-pub enum HasilKueri {
+pub enum HasilKueriDataPenjualan {
     DataILEEnum(Vec<DataILE>),
     DataSalespersonRegionILEEnum(Vec<DataSalespersonRegionByILE>),
     DataTokoILEEnum(Vec<DataTokoByILE>),
@@ -669,4 +814,8 @@ pub enum HasilKueri {
     DataCPPUILEEnum(Vec<DataCPPUByILE>),
     DataRPPUILEEnum(Vec<DataRPPUByILE>),
     DataKlasifikasiILEEnum(Vec<DataKlasifikasiByILE>),
+}
+
+pub enum HasilKueriDataPenerimaanBarang {
+    DataPenerimaanBarangEnum(Vec<DataPenerimaanBarang>),
 }

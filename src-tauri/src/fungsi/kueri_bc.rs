@@ -27,7 +27,9 @@ pub async fn kueri_umum(kueri: String) -> Result<Vec<Vec<String>>, Box<dyn std::
     Ok(data)
 }
 
-pub async fn kueri_penjualan(kueri: Kueri<'_>) -> Result<HasilKueri, Box<dyn std::error::Error>> {
+pub async fn kueri_penjualan(
+    kueri: Kueri<'_>,
+) -> Result<HasilKueriDataPenjualan, Box<dyn std::error::Error>> {
     match kueri.judul {
         "ILEByPostDate" => {
             let mut vektor_data = Vec::new();
@@ -59,7 +61,7 @@ pub async fn kueri_penjualan(kueri: Kueri<'_>) -> Result<HasilKueri, Box<dyn std
                     vektor_data.push(data_penjualan);
                 }
             }
-            Ok(HasilKueri::DataILEEnum(vektor_data))
+            Ok(HasilKueriDataPenjualan::DataILEEnum(vektor_data))
         }
         "salespersonAndRegionByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -77,7 +79,9 @@ pub async fn kueri_penjualan(kueri: Kueri<'_>) -> Result<HasilKueri, Box<dyn std
                     vektor_data.push(data_salesperson_region);
                 }
             }
-            Ok(HasilKueri::DataSalespersonRegionILEEnum(vektor_data))
+            Ok(HasilKueriDataPenjualan::DataSalespersonRegionILEEnum(
+                vektor_data,
+            ))
         }
         "tokoByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -90,7 +94,7 @@ pub async fn kueri_penjualan(kueri: Kueri<'_>) -> Result<HasilKueri, Box<dyn std
                     vektor_data.push(data_toko);
                 }
             }
-            Ok(HasilKueri::DataTokoILEEnum(vektor_data))
+            Ok(HasilKueriDataPenjualan::DataTokoILEEnum(vektor_data))
         }
         "produkByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -119,7 +123,7 @@ pub async fn kueri_penjualan(kueri: Kueri<'_>) -> Result<HasilKueri, Box<dyn std
                     vektor_data.push(data_produk);
                 }
             }
-            Ok(HasilKueri::DataProdukILEEnum(vektor_data))
+            Ok(HasilKueriDataPenjualan::DataProdukILEEnum(vektor_data))
         }
         "vatByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -134,7 +138,7 @@ pub async fn kueri_penjualan(kueri: Kueri<'_>) -> Result<HasilKueri, Box<dyn std
                     vektor_data.push(data_vat);
                 }
             }
-            Ok(HasilKueri::DataVatILEEnum(vektor_data))
+            Ok(HasilKueriDataPenjualan::DataVatILEEnum(vektor_data))
         }
         "promoByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -147,7 +151,7 @@ pub async fn kueri_penjualan(kueri: Kueri<'_>) -> Result<HasilKueri, Box<dyn std
                     vektor_data.push(data_promo);
                 }
             }
-            Ok(HasilKueri::DataPromoILEEnum(vektor_data))
+            Ok(HasilKueriDataPenjualan::DataPromoILEEnum(vektor_data))
         }
         "diskonByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -162,7 +166,7 @@ pub async fn kueri_penjualan(kueri: Kueri<'_>) -> Result<HasilKueri, Box<dyn std
                     vektor_data.push(data_diskon);
                 }
             }
-            Ok(HasilKueri::DataDiskonILEEnum(vektor_data))
+            Ok(HasilKueriDataPenjualan::DataDiskonILEEnum(vektor_data))
         }
         "dokumenLainnyaByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -179,7 +183,9 @@ pub async fn kueri_penjualan(kueri: Kueri<'_>) -> Result<HasilKueri, Box<dyn std
                     vektor_data.push(data_dokumen_lainnya);
                 }
             }
-            Ok(HasilKueri::DataDokumenLainnyaILEEnum(vektor_data))
+            Ok(HasilKueriDataPenjualan::DataDokumenLainnyaILEEnum(
+                vektor_data,
+            ))
         }
         "quantityByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -197,7 +203,7 @@ pub async fn kueri_penjualan(kueri: Kueri<'_>) -> Result<HasilKueri, Box<dyn std
                     vektor_data.push(data_kuantitas);
                 }
             }
-            Ok(HasilKueri::DataKuantitasILEEnum(vektor_data))
+            Ok(HasilKueriDataPenjualan::DataKuantitasILEEnum(vektor_data))
         }
         "cppuByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -219,7 +225,7 @@ pub async fn kueri_penjualan(kueri: Kueri<'_>) -> Result<HasilKueri, Box<dyn std
                     vektor_data.push(data_cppu);
                 }
             }
-            Ok(HasilKueri::DataCPPUILEEnum(vektor_data))
+            Ok(HasilKueriDataPenjualan::DataCPPUILEEnum(vektor_data))
         }
         "klasifikasiByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -236,7 +242,7 @@ pub async fn kueri_penjualan(kueri: Kueri<'_>) -> Result<HasilKueri, Box<dyn std
                     vektor_data.push(data_klasifikasi);
                 }
             }
-            Ok(HasilKueri::DataKlasifikasiILEEnum(vektor_data))
+            Ok(HasilKueriDataPenjualan::DataKlasifikasiILEEnum(vektor_data))
         }
         "rppuByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -254,7 +260,81 @@ pub async fn kueri_penjualan(kueri: Kueri<'_>) -> Result<HasilKueri, Box<dyn std
                     vektor_data.push(data_rppu);
                 }
             }
-            Ok(HasilKueri::DataRPPUILEEnum(vektor_data))
+            Ok(HasilKueriDataPenjualan::DataRPPUILEEnum(vektor_data))
+        }
+        _ => Err("Shouldn't happened".into()),
+    }
+}
+
+pub async fn kueri_penerimaan_barang(
+    kueri: Kueri<'_>,
+) -> Result<HasilKueriDataPenerimaanBarang, Box<dyn std::error::Error>> {
+    match kueri.judul {
+        "penerimaanBarangByILEPostDate" => {
+            let mut vektor_data = Vec::new();
+            let hasil_kueri = &mssql::eksekusi_kueri(kueri.kueri.to_string()).await?[0];
+            if hasil_kueri.len() > 0 {
+                for baris in 0..hasil_kueri.len() {
+                    let no_entry = hasil_kueri[baris].get(0);
+                    let post_date = hasil_kueri[baris].get(1);
+                    let no_dokumen_pr =
+                        hasil_kueri[baris].get(2).map(|teks: &str| teks.to_string());
+                    let no_dokumen_wr =
+                        hasil_kueri[baris].get(3).map(|teks: &str| teks.to_string());
+                    let no_dokumen_po =
+                        hasil_kueri[baris].get(4).map(|teks: &str| teks.to_string());
+                    let loc_code = hasil_kueri[baris].get(5).map(|teks: &str| teks.to_string());
+                    let brand_dim = hasil_kueri[baris].get(6).map(|teks: &str| teks.to_string());
+                    let oricode = hasil_kueri[baris].get(7).map(|teks: &str| teks.to_string());
+                    let deskripsi_produk =
+                        hasil_kueri[baris].get(8).map(|teks: &str| teks.to_string());
+                    let warna = hasil_kueri[baris].get(9).map(|teks: &str| teks.to_string());
+                    let ukuran = hasil_kueri[baris]
+                        .get(10)
+                        .map(|teks: &str| teks.to_string());
+                    let prod_div = hasil_kueri[baris]
+                        .get(11)
+                        .map(|teks: &str| teks.to_string());
+                    let prod_grp = hasil_kueri[baris]
+                        .get(12)
+                        .map(|teks: &str| teks.to_string());
+                    let prod_cat = hasil_kueri[baris]
+                        .get(13)
+                        .map(|teks: &str| teks.to_string());
+                    let retail_price_per_unit = hasil_kueri[baris]
+                        .get(14)
+                        .map(|n: Numeric| n.to_string().parse().unwrap());
+                    let goods_received_quantity = hasil_kueri[baris]
+                        .get(15)
+                        .map(|n: Numeric| n.to_string().parse().unwrap());
+                    let goods_received_cost = hasil_kueri[baris]
+                        .get(16)
+                        .map(|n: Numeric| n.to_string().parse().unwrap());
+                    let data_peneriman_barang = DataPenerimaanBarang {
+                        no_entry,
+                        post_date,
+                        no_dokumen_pr,
+                        no_dokumen_wr,
+                        no_dokumen_po,
+                        loc_code,
+                        brand_dim,
+                        oricode,
+                        deskripsi_produk,
+                        warna,
+                        ukuran,
+                        prod_div,
+                        prod_grp,
+                        prod_cat,
+                        retail_price_per_unit,
+                        goods_received_quantity,
+                        goods_received_cost,
+                    };
+                    vektor_data.push(data_peneriman_barang);
+                }
+            }
+            Ok(HasilKueriDataPenerimaanBarang::DataPenerimaanBarangEnum(
+                vektor_data,
+            ))
         }
         _ => Err("Shouldn't happened".into()),
     }

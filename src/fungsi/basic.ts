@@ -1,6 +1,11 @@
 import { utils, writeFile } from "xlsx";
 
-import { setDataPenjualan } from "../fitur_state/dataBank";
+import {
+  setDataKetersediaanStok,
+  setDataPenerimaanBarang,
+  setDataPenjualan,
+  setDataStok,
+} from "../fitur_state/dataBank";
 import {
   setBrandInput,
   setCatInput,
@@ -76,6 +81,9 @@ export const resetAplikasi = (dispatch: any) => {
   dispatch(setLokasiInput([]));
   dispatch(setKlasifikasiInput([]));
   dispatch(setRegionInput([]));
+  dispatch(setDataPenerimaanBarang([]));
+  dispatch(setDataStok([]));
+  dispatch(setDataKetersediaanStok([]));
 };
 
 export interface Dimensi {
@@ -131,6 +139,20 @@ export const dimensiBazaarOthers = (parameterBc: { [key: string]: any }) => {
   return dimensi;
 };
 
+export interface PropsInput {
+  brand: string[];
+  prodDiv: string[];
+  prodGrp: string[];
+  prodCat: string[];
+}
+
+export interface StateInputDrawer {
+  nilaiBrand: string[];
+  nilaiDiv: string[];
+  nilaiGrp: string[];
+  nilaiCat: string[];
+}
+
 export interface Filter {
   brand: string[];
   prod_div: string[];
@@ -181,9 +203,79 @@ export type DataPenjualan = {
   total_margin_aft_vat_persen: number;
 };
 
-export const unduhKeExcel = (data: any[]) => {
+export type DataPenerimaanBarang = {
+  no_entry: number;
+  post_date: string;
+  no_dokumen_pr: string;
+  no_dokumen_wr: string;
+  no_dokumen_po: string;
+  loc_code: string;
+  brand_dim: string;
+  oricode: string;
+  deskripsi_produk: string;
+  warna: string;
+  ukuran: string;
+  prod_div: string;
+  prod_grp: string;
+  prod_cat: string;
+  retail_price_per_unit: number;
+  goods_received_quantity: number;
+  goods_received_cost: number;
+};
+
+export type DataStok = {
+  loc_code: string;
+  brand_dim: string;
+  oricode: string;
+  deskripsi_produk: string;
+  warna: string;
+  ukuran: string;
+  season: string;
+  period: string;
+  prod_div: string;
+  prod_grp: string;
+  prod_cat: string;
+  retail_price_per_unit: number;
+  stock_quantity: number;
+  stock_cost: number;
+};
+
+export type DataKetersediaanStok = {
+  loc_code: string;
+  brand_dim: string;
+  oricode: string;
+  ukuran: string;
+  season: string;
+  period: string;
+  deskripsi_produk: string;
+  warna: string;
+  prod_div: string;
+  prod_grp: string;
+  prod_cat: string;
+  item_disc_group: string;
+  retail_price_per_unit: number;
+  stock_on_hand: number;
+  total_cost: number;
+  po_outstanding_qty: number;
+  so_outstanding_qty: number;
+  proj_stock_intake: number;
+  proj_stock_aft_so: number;
+};
+
+export const unduhKeExcel = (data: any[], halaman: string) => {
+  let file: string;
+  switch (halaman) {
+    case "penjualan":
+      file = "DataPenjualan.xlsx";
+      break;
+    case "penerimaanBarang":
+      file = "DataPenerimaanBarang.xlsx";
+      break;
+    default:
+      return;
+  }
   const worksheet = utils.json_to_sheet(data);
   const workbook = utils.book_new();
   utils.book_append_sheet(workbook, worksheet, "Data");
-  writeFile(workbook, "DataPenjualan.xlsx");
+  writeFile(workbook, file);
 };

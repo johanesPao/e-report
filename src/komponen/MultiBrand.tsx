@@ -1,26 +1,30 @@
 import { MultiSelect } from "@mantine/core";
 import { DataMultiSelect } from "../fitur_state/dataParam";
-import { Dispatch, SetStateAction } from "react";
+import { StateInputDrawerPenjualan } from "../fungsi/halaman/penjualan";
+import { StateInputDrawerPenerimaanBarang } from "../fungsi/halaman/penerimaanBarang";
 
 interface MultiBrandProps {
   arrayBrandLabel: DataMultiSelect[];
-  stateNilai: string[];
-  setNilai: Dispatch<SetStateAction<string[]>>;
+  props: StateInputDrawerPenjualan | StateInputDrawerPenerimaanBarang;
+  setProps:
+    | React.Dispatch<React.SetStateAction<StateInputDrawerPenjualan>>
+    | React.Dispatch<React.SetStateAction<StateInputDrawerPenerimaanBarang>>;
 }
 
-const MultiBrand = ({
-  arrayBrandLabel,
-  stateNilai,
-  setNilai,
-}: MultiBrandProps) => {
+const MultiBrand = ({ arrayBrandLabel, props, setProps }: MultiBrandProps) => {
   return (
     <MultiSelect
       data={arrayBrandLabel}
       limit={10}
       searchable
       nothingFound="Tidak ada brand ditemukan"
-      value={stateNilai}
-      onChange={setNilai}
+      value={props.nilaiBrand}
+      onChange={(nilai) =>
+        setProps((stateSebelumnya: any) => ({
+          ...stateSebelumnya,
+          nilaiBrand: nilai,
+        }))
+      }
       placeholder="Pilih Brand"
       label="Brand"
       clearable

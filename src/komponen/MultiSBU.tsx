@@ -1,22 +1,27 @@
 import { MultiSelect } from "@mantine/core";
 import { DataMultiSelect } from "../fitur_state/dataParam";
-import { Dispatch, SetStateAction } from "react";
+import { StateInputDrawerPenjualan } from "../fungsi/halaman/penjualan";
 
 interface MultiSBUProps {
   arraySBULabel: DataMultiSelect[];
-  stateNilai: string[];
-  setNilai: Dispatch<SetStateAction<string[]>>;
+  props: StateInputDrawerPenjualan;
+  setProps: React.Dispatch<React.SetStateAction<StateInputDrawerPenjualan>>;
 }
 
-const MultiSBU = ({ arraySBULabel, stateNilai, setNilai }: MultiSBUProps) => {
+const MultiSBU = ({ arraySBULabel, props, setProps }: MultiSBUProps) => {
   return (
     <MultiSelect
       data={arraySBULabel}
       limit={10}
       searchable
       nothingFound="Tidak ada SBU ditemukan"
-      value={stateNilai}
-      onChange={setNilai}
+      value={props.nilaiSBU}
+      onChange={(nilai) =>
+        setProps((stateSebelumnya) => ({
+          ...stateSebelumnya,
+          nilaiSBU: nilai,
+        }))
+      }
       placeholder="Pilih SBU"
       label="SBU"
       clearable

@@ -192,7 +192,6 @@ const muatBrand = async (
     if (respon !== undefined && respon.length !== 0) {
       arrayBrandLabel.push(respon);
       dispatch(setParameterBrand(arrayBrandLabel));
-      console.log([respon.map((item) => item.value)]);
       dispatch(setBrandInput([respon.map((item) => item.value)]));
     }
   } else {
@@ -290,21 +289,51 @@ const muatLokasi = async (
   parameterBc: { [key: string]: { [key: string]: string } },
   dispatch: any
 ) => {
-  const respon = await lokasiLabel(
-    parameterBc,
-    parameterBc.tabel_bc[
-      `${
-        compPengguna.length === 1
-          ? compPengguna[0].toLowerCase()
-          : compPengguna[
-              compPengguna.indexOf(parameterBc.comp.pri)
-            ].toLowerCase()
-      }`
-    ]
-  );
-  if (respon !== undefined && respon.length !== 0) {
-    dispatch(setParameterLokasi(respon));
-    dispatch(setLokasiInput(respon.map((item: DataMultiSelect) => item.value)));
+  const arrayLokasiLabel: DataMultiSelect[][] = [];
+  // `${
+  //   compPengguna.length === 1
+  //     ? compPengguna[0].toLowerCase()
+  //     : compPengguna[
+  //         compPengguna.indexOf(parameterBc.comp.pri)
+  //       ].toLowerCase()
+  // }`
+  if (compPengguna.length === 1) {
+    const respon = await lokasiLabel(
+      parameterBc,
+      parameterBc.tabel_bc[`${compPengguna[0].toLowerCase()}`]
+    );
+    if (respon !== undefined && respon.length !== 0) {
+      arrayLokasiLabel.push(respon);
+      dispatch(setParameterLokasi(arrayLokasiLabel));
+      dispatch(
+        setLokasiInput([respon.map((item: DataMultiSelect) => item.value)])
+      );
+    }
+  } else {
+    const lokasiLabelPromises = compPengguna.map(async (comp) => {
+      const respon = await lokasiLabel(
+        parameterBc,
+        parameterBc.tabel_bc[`${comp.toLowerCase()}`]
+      );
+      if (respon !== undefined && respon.length !== 0) {
+        return respon;
+      }
+    });
+
+    const lokasiLabelJamak = await Promise.all(lokasiLabelPromises);
+    const lokasiLabelValid = lokasiLabelJamak.filter(
+      (hasil): hasil is DataMultiSelect[] => hasil !== undefined
+    );
+    arrayLokasiLabel.push(...lokasiLabelValid);
+    dispatch(setParameterLokasi(arrayLokasiLabel));
+    let arrLokasiComp: string[][] = [];
+    for (var indeks in arrayLokasiLabel) {
+      const arrLokasi: string[] = arrayLokasiLabel[indeks].map(
+        (lokasi: DataMultiSelect) => lokasi.value
+      );
+      arrLokasiComp.push(arrLokasi);
+    }
+    dispatch(setLokasiInput(arrLokasiComp));
   }
 };
 
