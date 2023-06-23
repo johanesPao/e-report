@@ -71,7 +71,6 @@ export const resetAplikasi = (dispatch: any) => {
   dispatch(setParameterLokasi([]));
   dispatch(setParameterKlasifikasi([]));
   dispatch(setParameterRegion([]));
-  dispatch(setDataPenjualan([]));
   dispatch(setDrawerTerbuka(false));
   dispatch(setBrandInput([]));
   dispatch(setDivInput([]));
@@ -81,6 +80,7 @@ export const resetAplikasi = (dispatch: any) => {
   dispatch(setLokasiInput([]));
   dispatch(setKlasifikasiInput([]));
   dispatch(setRegionInput([]));
+  dispatch(setDataPenjualan([]));
   dispatch(setDataPenerimaanBarang([]));
   dispatch(setDataStok([]));
   dispatch(setDataKetersediaanStok([]));

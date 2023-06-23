@@ -29,7 +29,7 @@ pub async fn kueri_umum(kueri: String) -> Result<Vec<Vec<String>>, Box<dyn std::
 
 pub async fn kueri_penjualan(
     kueri: Kueri<'_>,
-) -> Result<HasilKueriDataPenjualan, Box<dyn std::error::Error>> {
+) -> Result<HasilKueriPenjualan, Box<dyn std::error::Error>> {
     match kueri.judul {
         "ILEByPostDate" => {
             let mut vektor_data = Vec::new();
@@ -61,7 +61,7 @@ pub async fn kueri_penjualan(
                     vektor_data.push(data_penjualan);
                 }
             }
-            Ok(HasilKueriDataPenjualan::DataILEEnum(vektor_data))
+            Ok(HasilKueriPenjualan::DataILEEnum(vektor_data))
         }
         "salespersonAndRegionByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -79,7 +79,7 @@ pub async fn kueri_penjualan(
                     vektor_data.push(data_salesperson_region);
                 }
             }
-            Ok(HasilKueriDataPenjualan::DataSalespersonRegionILEEnum(
+            Ok(HasilKueriPenjualan::DataSalespersonRegionILEEnum(
                 vektor_data,
             ))
         }
@@ -94,7 +94,7 @@ pub async fn kueri_penjualan(
                     vektor_data.push(data_toko);
                 }
             }
-            Ok(HasilKueriDataPenjualan::DataTokoILEEnum(vektor_data))
+            Ok(HasilKueriPenjualan::DataTokoILEEnum(vektor_data))
         }
         "produkByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -123,7 +123,7 @@ pub async fn kueri_penjualan(
                     vektor_data.push(data_produk);
                 }
             }
-            Ok(HasilKueriDataPenjualan::DataProdukILEEnum(vektor_data))
+            Ok(HasilKueriPenjualan::DataProdukILEEnum(vektor_data))
         }
         "vatByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -138,7 +138,7 @@ pub async fn kueri_penjualan(
                     vektor_data.push(data_vat);
                 }
             }
-            Ok(HasilKueriDataPenjualan::DataVatILEEnum(vektor_data))
+            Ok(HasilKueriPenjualan::DataVatILEEnum(vektor_data))
         }
         "promoByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -151,7 +151,7 @@ pub async fn kueri_penjualan(
                     vektor_data.push(data_promo);
                 }
             }
-            Ok(HasilKueriDataPenjualan::DataPromoILEEnum(vektor_data))
+            Ok(HasilKueriPenjualan::DataPromoILEEnum(vektor_data))
         }
         "diskonByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -166,7 +166,7 @@ pub async fn kueri_penjualan(
                     vektor_data.push(data_diskon);
                 }
             }
-            Ok(HasilKueriDataPenjualan::DataDiskonILEEnum(vektor_data))
+            Ok(HasilKueriPenjualan::DataDiskonILEEnum(vektor_data))
         }
         "dokumenLainnyaByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -183,9 +183,7 @@ pub async fn kueri_penjualan(
                     vektor_data.push(data_dokumen_lainnya);
                 }
             }
-            Ok(HasilKueriDataPenjualan::DataDokumenLainnyaILEEnum(
-                vektor_data,
-            ))
+            Ok(HasilKueriPenjualan::DataDokumenLainnyaILEEnum(vektor_data))
         }
         "quantityByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -203,7 +201,7 @@ pub async fn kueri_penjualan(
                     vektor_data.push(data_kuantitas);
                 }
             }
-            Ok(HasilKueriDataPenjualan::DataKuantitasILEEnum(vektor_data))
+            Ok(HasilKueriPenjualan::DataKuantitasILEEnum(vektor_data))
         }
         "cppuByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -225,7 +223,7 @@ pub async fn kueri_penjualan(
                     vektor_data.push(data_cppu);
                 }
             }
-            Ok(HasilKueriDataPenjualan::DataCPPUILEEnum(vektor_data))
+            Ok(HasilKueriPenjualan::DataCPPUILEEnum(vektor_data))
         }
         "klasifikasiByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -242,7 +240,7 @@ pub async fn kueri_penjualan(
                     vektor_data.push(data_klasifikasi);
                 }
             }
-            Ok(HasilKueriDataPenjualan::DataKlasifikasiILEEnum(vektor_data))
+            Ok(HasilKueriPenjualan::DataKlasifikasiILEEnum(vektor_data))
         }
         "rppuByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -260,7 +258,7 @@ pub async fn kueri_penjualan(
                     vektor_data.push(data_rppu);
                 }
             }
-            Ok(HasilKueriDataPenjualan::DataRPPUILEEnum(vektor_data))
+            Ok(HasilKueriPenjualan::DataRPPUILEEnum(vektor_data))
         }
         _ => Err("Shouldn't happened".into()),
     }
@@ -268,7 +266,7 @@ pub async fn kueri_penjualan(
 
 pub async fn kueri_penerimaan_barang(
     kueri: Kueri<'_>,
-) -> Result<HasilKueriDataPenerimaanBarang, Box<dyn std::error::Error>> {
+) -> Result<HasilKueriPenerimaanBarang, Box<dyn std::error::Error>> {
     match kueri.judul {
         "penerimaanBarangByILEPostDate" => {
             let mut vektor_data = Vec::new();
@@ -332,7 +330,7 @@ pub async fn kueri_penerimaan_barang(
                     vektor_data.push(data_peneriman_barang);
                 }
             }
-            Ok(HasilKueriDataPenerimaanBarang::DataPenerimaanBarangEnum(
+            Ok(HasilKueriPenerimaanBarang::DataPenerimaanBarangEnum(
                 vektor_data,
             ))
         }
@@ -340,9 +338,7 @@ pub async fn kueri_penerimaan_barang(
     }
 }
 
-pub async fn kueri_stok(
-    kueri: Kueri<'_>,
-) -> Result<HasilKueriDataStok, Box<dyn std::error::Error>> {
+pub async fn kueri_stok(kueri: Kueri<'_>) -> Result<HasilKueriStok, Box<dyn std::error::Error>> {
     match kueri.judul {
         "endingStokByILE" => {
             let mut vektor_data = Vec::new();
@@ -391,7 +387,86 @@ pub async fn kueri_stok(
                     vektor_data.push(data_stok);
                 }
             }
-            Ok(HasilKueriDataStok::DataStokEnum(vektor_data))
+            Ok(HasilKueriStok::DataStokEnum(vektor_data))
+        }
+        _ => Err("Shouldn't happened".into()),
+    }
+}
+
+pub async fn kueri_ketersediaan_stok(
+    kueri: Kueri<'_>,
+) -> Result<HasilKueriKetersediaanStok, Box<dyn std::error::Error>> {
+    match kueri.judul {
+        "ketersediaanStokByILE" => {
+            let mut vektor_data = Vec::new();
+            let hasil_kueri = &mssql::eksekusi_kueri(kueri.kueri.to_string()).await?[0];
+            if hasil_kueri.len() > 0 {
+                for baris in 0..hasil_kueri.len() {
+                    let loc_code = hasil_kueri[baris].get(0).map(|teks: &str| teks.to_string());
+                    let brand_dim = hasil_kueri[baris].get(1).map(|teks: &str| teks.to_string());
+                    let oricode = hasil_kueri[baris].get(2).map(|teks: &str| teks.to_string());
+                    let ukuran = hasil_kueri[baris].get(3).map(|teks: &str| teks.to_string());
+                    let season = hasil_kueri[baris].get(4).map(|teks: &str| teks.to_string());
+                    let period = hasil_kueri[baris].get(5).map(|teks: &str| teks.to_string());
+                    let deskripsi_produk =
+                        hasil_kueri[baris].get(6).map(|teks: &str| teks.to_string());
+                    let warna = hasil_kueri[baris].get(7).map(|teks: &str| teks.to_string());
+                    let prod_div = hasil_kueri[baris].get(8).map(|teks: &str| teks.to_string());
+                    let prod_grp = hasil_kueri[baris].get(9).map(|teks: &str| teks.to_string());
+                    let prod_cat = hasil_kueri[baris]
+                        .get(10)
+                        .map(|teks: &str| teks.to_string());
+                    let item_disc_group = hasil_kueri[baris]
+                        .get(11)
+                        .map(|teks: &str| teks.to_string());
+                    let retail_price_per_unit = hasil_kueri[baris]
+                        .get(12)
+                        .map(|n: Numeric| n.to_string().parse().unwrap());
+                    let stock_on_hand = hasil_kueri[baris]
+                        .get(13)
+                        .map(|n: Numeric| n.to_string().parse().unwrap());
+                    let total_cost = hasil_kueri[baris]
+                        .get(14)
+                        .map(|n: Numeric| n.to_string().parse().unwrap());
+                    let po_outstanding_qty = hasil_kueri[baris]
+                        .get(15)
+                        .map(|n: Numeric| n.to_string().parse().unwrap());
+                    let so_outstanding_qty = hasil_kueri[baris]
+                        .get(16)
+                        .map(|n: Numeric| n.to_string().parse().unwrap());
+                    let proj_stock_intake = hasil_kueri[baris]
+                        .get(17)
+                        .map(|n: Numeric| n.to_string().parse().unwrap());
+                    let proj_stock_aft_so = hasil_kueri[baris]
+                        .get(18)
+                        .map(|n: Numeric| n.to_string().parse().unwrap());
+                    let data_ketersediaan_stok = DataKetersediaanStok {
+                        loc_code,
+                        brand_dim,
+                        oricode,
+                        ukuran,
+                        season,
+                        period,
+                        deskripsi_produk,
+                        warna,
+                        prod_div,
+                        prod_grp,
+                        prod_cat,
+                        item_disc_group,
+                        retail_price_per_unit,
+                        stock_on_hand,
+                        total_cost,
+                        po_outstanding_qty,
+                        so_outstanding_qty,
+                        proj_stock_intake,
+                        proj_stock_aft_so,
+                    };
+                    vektor_data.push(data_ketersediaan_stok);
+                }
+            }
+            Ok(HasilKueriKetersediaanStok::DataKetersediaanStokEnum(
+                vektor_data,
+            ))
         }
         _ => Err("Shouldn't happened".into()),
     }

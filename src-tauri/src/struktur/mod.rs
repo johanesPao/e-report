@@ -154,6 +154,30 @@ pub struct DataStok {
     pub stock_cost: Option<f32>,
 }
 
+#[derive(Clone, Debug, FieldNamesAsArray)]
+#[field_names_as_array(visibility = "pub")]
+pub struct DataKetersediaanStok {
+    pub loc_code: Option<String>,
+    pub brand_dim: Option<String>,
+    pub oricode: Option<String>,
+    pub ukuran: Option<String>,
+    pub season: Option<String>,
+    pub period: Option<String>,
+    pub deskripsi_produk: Option<String>,
+    pub warna: Option<String>,
+    pub prod_div: Option<String>,
+    pub prod_grp: Option<String>,
+    pub prod_cat: Option<String>,
+    pub item_disc_group: Option<String>,
+    pub retail_price_per_unit: Option<f32>,
+    pub stock_on_hand: Option<f32>,
+    pub total_cost: Option<f32>,
+    pub po_outstanding_qty: Option<f32>,
+    pub so_outstanding_qty: Option<f32>,
+    pub proj_stock_intake: Option<f32>,
+    pub proj_stock_aft_so: Option<f32>,
+}
+
 pub trait DataFrameSerial {
     fn ke_series(&self) -> Vec<Series>;
 }
@@ -891,6 +915,141 @@ impl DataFrameSerial for Vec<DataStok> {
     }
 }
 
+impl DataFrameSerial for Vec<DataKetersediaanStok> {
+    fn ke_series(&self) -> Vec<Series> {
+        let mut vektor_loc_code = Vec::new();
+        let mut vektor_brand_dim = Vec::new();
+        let mut vektor_oricode = Vec::new();
+        let mut vektor_ukuran = Vec::new();
+        let mut vektor_season = Vec::new();
+        let mut vektor_period = Vec::new();
+        let mut vektor_deskripsi_produk = Vec::new();
+        let mut vektor_warna = Vec::new();
+        let mut vektor_prod_div = Vec::new();
+        let mut vektor_prod_grp = Vec::new();
+        let mut vektor_prod_cat = Vec::new();
+        let mut vektor_item_disc_group = Vec::new();
+        let mut vektor_retail_price_per_unit = Vec::new();
+        let mut vektor_stock_on_hand = Vec::new();
+        let mut vektor_total_cost = Vec::new();
+        let mut vektor_po_outstanding_qty = Vec::new();
+        let mut vektor_so_outstanding_qty = Vec::new();
+        let mut vektor_proj_stock_intake = Vec::new();
+        let mut vektor_proj_stock_aft_so = Vec::new();
+
+        for baris in self {
+            for kolom in 0..DataKetersediaanStok::FIELD_NAMES_AS_ARRAY.len() {
+                match kolom {
+                    0 => vektor_loc_code.push(baris.loc_code.clone()),
+                    1 => vektor_brand_dim.push(baris.brand_dim.clone()),
+                    2 => vektor_oricode.push(baris.oricode.clone()),
+                    3 => vektor_ukuran.push(baris.ukuran.clone()),
+                    4 => vektor_season.push(baris.season.clone()),
+                    5 => vektor_period.push(baris.period.clone()),
+                    6 => vektor_deskripsi_produk.push(baris.deskripsi_produk.clone()),
+                    7 => vektor_warna.push(baris.warna.clone()),
+                    8 => vektor_prod_div.push(baris.prod_div.clone()),
+                    9 => vektor_prod_grp.push(baris.prod_grp.clone()),
+                    10 => vektor_prod_cat.push(baris.prod_cat.clone()),
+                    11 => vektor_item_disc_group.push(baris.item_disc_group.clone()),
+                    12 => vektor_retail_price_per_unit.push(baris.retail_price_per_unit),
+                    13 => vektor_stock_on_hand.push(baris.stock_on_hand),
+                    14 => vektor_total_cost.push(baris.total_cost),
+                    15 => vektor_po_outstanding_qty.push(baris.po_outstanding_qty),
+                    16 => vektor_so_outstanding_qty.push(baris.so_outstanding_qty),
+                    17 => vektor_proj_stock_intake.push(baris.proj_stock_intake),
+                    18 => vektor_proj_stock_aft_so.push(baris.proj_stock_aft_so),
+                    _ => println!("Nothing"),
+                }
+            }
+        }
+
+        let mut vektor_series = Vec::new();
+        for hitung in 0..DataKetersediaanStok::FIELD_NAMES_AS_ARRAY.len() {
+            match hitung {
+                0 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_loc_code.clone(),
+                )),
+                1 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_brand_dim.clone(),
+                )),
+                2 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_oricode.clone(),
+                )),
+                3 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_ukuran.clone(),
+                )),
+                4 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_season.clone(),
+                )),
+                5 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_period.clone(),
+                )),
+                6 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_deskripsi_produk.clone(),
+                )),
+                7 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_warna.clone(),
+                )),
+                8 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_prod_div.clone(),
+                )),
+                9 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_prod_grp.clone(),
+                )),
+                10 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_prod_cat.clone(),
+                )),
+                11 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_item_disc_group.clone(),
+                )),
+                12 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_retail_price_per_unit.clone(),
+                )),
+                13 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_stock_on_hand.clone(),
+                )),
+                14 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_total_cost.clone(),
+                )),
+                15 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_po_outstanding_qty.clone(),
+                )),
+                16 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_so_outstanding_qty.clone(),
+                )),
+                17 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_proj_stock_intake.clone(),
+                )),
+                18 => vektor_series.push(Series::new(
+                    DataKetersediaanStok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_proj_stock_aft_so.clone(),
+                )),
+                _ => println!("Nothing"),
+            }
+        }
+        vektor_series
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Kueri<'a> {
     pub judul: &'a str,
@@ -925,7 +1084,7 @@ where
     Ok(vec)
 }
 
-pub enum HasilKueriDataPenjualan {
+pub enum HasilKueriPenjualan {
     DataILEEnum(Vec<DataILE>),
     DataSalespersonRegionILEEnum(Vec<DataSalespersonRegionByILE>),
     DataTokoILEEnum(Vec<DataTokoByILE>),
@@ -940,10 +1099,14 @@ pub enum HasilKueriDataPenjualan {
     DataKlasifikasiILEEnum(Vec<DataKlasifikasiByILE>),
 }
 
-pub enum HasilKueriDataPenerimaanBarang {
+pub enum HasilKueriPenerimaanBarang {
     DataPenerimaanBarangEnum(Vec<DataPenerimaanBarang>),
 }
 
-pub enum HasilKueriDataStok {
+pub enum HasilKueriStok {
     DataStokEnum(Vec<DataStok>),
+}
+
+pub enum HasilKueriKetersediaanStok {
+    DataKetersediaanStokEnum(Vec<DataKetersediaanStok>),
 }
