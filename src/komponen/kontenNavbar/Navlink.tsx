@@ -21,6 +21,10 @@ import {
   rem,
 } from "@mantine/core";
 import { IconChevronRight } from "@tabler/icons-react";
+import { useAppSelector } from "../../state/hook";
+import { getCompPengguna } from "../../fitur_state/pengguna";
+import { getParameterBc } from "../../fitur_state/dataParam";
+import { getIndeksData } from "../../fitur_state/event";
 
 interface NavLinkProp {
   icon: React.ReactNode;
@@ -166,6 +170,13 @@ function NavLink({
   );
   const adaLinks = Array.isArray(links);
   const adaSubMenu = Array.isArray(subMenu);
+  const compPengguna = useAppSelector(getCompPengguna);
+  const parameterBc = useAppSelector(getParameterBc);
+  const indeksData = useAppSelector(getIndeksData);
+  const singleMode = compPengguna.length === 1;
+  const compPRI: boolean = !singleMode
+    ? indeksData === 0
+    : compPengguna[0] === parameterBc.comp.pri;
 
   const toggleSubMenu = (index: number) => {
     toggleSubMenuTerbuka((stateSebelumnya) => {
@@ -181,6 +192,18 @@ function NavLink({
 
   const itemSubMenu = (adaSubMenu ? subMenu : []).map((item, index) => {
     const linkSubMenu = item.links?.map((subMenuItem) => {
+      const disabled =
+        subMenuItem.link === "ketersediaanStok"
+          ? singleMode
+            ? compPRI
+              ? true
+              : false
+            : indeksData === 0
+            ? true
+            : false
+          : false;
+      const warnaTeks = disabled ? theme.colors.gray[7] : theme.colors.gray[5];
+
       return (
         <React.Fragment key={subMenuItem.label}>
           <UnstyledButton sx={{ width: "100%" }}>
@@ -188,16 +211,21 @@ function NavLink({
               component="a"
               className={classes.link}
               key={subMenuItem.label}
-              onClick={() => navigasiKonten(subMenuItem.link)}
+              onClick={
+                disabled ? undefined : () => navigasiKonten(subMenuItem.link)
+              }
               sx={{
                 marginLeft: "80px",
                 "&:hover": {
                   backgroundColor:
                     theme.colorScheme === "dark"
-                      ? theme.colors.dark[9]
+                      ? !disabled
+                        ? theme.colors.dark[9]
+                        : theme.colors.dark[7]
                       : theme.colors.gray[0],
                   // borderRadius: theme.radius.lg,
                 },
+                color: warnaTeks,
               }}
             >
               {subMenuItem.label}
@@ -259,24 +287,38 @@ function NavLink({
   });
 
   const itemLink = (adaLinks ? links : []).map((item) => {
+    const disabled =
+      item.link === "ketersediaanStok"
+        ? singleMode
+          ? compPRI
+            ? true
+            : false
+          : indeksData === 0
+          ? true
+          : false
+        : false;
+    const warnaTeks = disabled ? theme.colors.gray[7] : theme.colors.gray[5];
+
     return (
       <React.Fragment key={item.label}>
         <UnstyledButton sx={{ width: "100%" }}>
           <Text<"a">
             component="a"
             className={classes.link}
-            // href={item.link}
             key={item.label}
-            onClick={() => navigasiKonten(item.link)}
+            onClick={disabled ? undefined : () => navigasiKonten(item.link)}
             sx={{
               marginLeft: "40px",
               "&:hover": {
                 backgroundColor:
                   theme.colorScheme === "dark"
-                    ? theme.colors.dark[9]
+                    ? !disabled
+                      ? theme.colors.dark[9]
+                      : theme.colors.dark[7]
                     : theme.colors.gray[0],
                 // borderRadius: theme.radius.lg,
               },
+              color: warnaTeks,
             }}
           >
             {item.label}
@@ -335,8 +377,6 @@ function NavLink({
     </>
   );
 }
-
-// function LinksGroup({icon, color, label, links}:)
 
 export function NavLinks({
   onLinkClick,

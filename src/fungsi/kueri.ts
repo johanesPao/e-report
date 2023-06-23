@@ -956,7 +956,7 @@ export const ketersediaanStokByILE = (
           ile.${parameterBc.kolom_bc.loc_code},
           ile.${parameterBc.kolom_bc.brand_dim},
           ile.${parameterBc.kolom_bc.oricode},
-          ile.${parameterBc.kolom_bc.ukuran},
+          ile.${parameterBc.kolom_bc.size},
           deskripsi.${parameterBc.kolom_bc.desc},
           deskripsi.${parameterBc.kolom_bc.color_desc},
           deskripsi.${parameterBc.kolom_bc.item_disc_group},
@@ -1077,5 +1077,6 @@ export const ketersediaanStokByILE = (
   ORDER BY SUM(COALESCE(ile.[Quantity], 0) + COALESCE(purchase.[Outstanding Quantity PO], 0) - COALESCE(to_ship.[Sales Order Outstanding Quantity], 0)) ASC
     `,
   };
+  console.log(setKueri.kueri);
   return setKueri;
 };

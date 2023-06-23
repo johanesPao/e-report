@@ -118,9 +118,14 @@ const Konten = () => {
       lokasi: [],
     },
     brandListTabel: [],
+    oricodeListTabel: [],
+    ukuranListTabel: [],
+    seasonListTabel: [],
+    periodListTabel: [],
     prodDivListTabel: [],
     prodGrpListTabel: [],
     prodCatListTabel: [],
+    itemDiscGroupListTabel: [],
     lokasiListTabel: [],
     muatKetersediaanStok: false,
   };
@@ -201,7 +206,7 @@ const Konten = () => {
       <Container
         sx={{
           padding: "0px",
-          margin: "0px",
+          marginTop: "0px",
           minWidth: "100%",
         }}
       >

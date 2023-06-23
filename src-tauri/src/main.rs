@@ -132,74 +132,74 @@ async fn handle_data_penjualan(
             .expect(&gagal_emit_notif);
         match kueri_bc::kueri_penjualan(kueri).await {
             Ok(hasil) => match hasil {
-                HasilKueriDataPenjualan::DataILEEnum(vektor_data) => {
+                HasilKueriPenjualan::DataILEEnum(vektor_data) => {
                     // Konversi vektor struct hasil kueri ke dalam dataframe polars
                     let vektor_series = vektor_data.ke_series();
                     let df_ile =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe ILE");
                     df_utama = df_ile;
                 }
-                HasilKueriDataPenjualan::DataSalespersonRegionILEEnum(vektor_data) => {
+                HasilKueriPenjualan::DataSalespersonRegionILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_salespersonregion = DataFrame::new(vektor_series)
                         .expect("Gagal membuat dataframe salespersonregion");
                     vektor_dataframe.push(df_salespersonregion);
                 }
-                HasilKueriDataPenjualan::DataTokoILEEnum(vektor_data) => {
+                HasilKueriPenjualan::DataTokoILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_toko =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe toko");
                     vektor_dataframe.push(df_toko);
                 }
-                HasilKueriDataPenjualan::DataProdukILEEnum(vektor_data) => {
+                HasilKueriPenjualan::DataProdukILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_produk =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe produk");
                     vektor_dataframe.push(df_produk);
                 }
-                HasilKueriDataPenjualan::DataVatILEEnum(vektor_data) => {
+                HasilKueriPenjualan::DataVatILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_vat =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe VAT");
                     vektor_dataframe.push(df_vat);
                 }
-                HasilKueriDataPenjualan::DataPromoILEEnum(vektor_data) => {
+                HasilKueriPenjualan::DataPromoILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_promo =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe promo");
                     vektor_dataframe.push(df_promo);
                 }
-                HasilKueriDataPenjualan::DataDiskonILEEnum(vektor_data) => {
+                HasilKueriPenjualan::DataDiskonILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_diskon =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe diskon");
                     vektor_dataframe.push(df_diskon);
                 }
-                HasilKueriDataPenjualan::DataDokumenLainnyaILEEnum(vektor_data) => {
+                HasilKueriPenjualan::DataDokumenLainnyaILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_dok_lainnya = DataFrame::new(vektor_series)
                         .expect("Gagal membuat dataframe dokumen lainnya");
                     vektor_dataframe.push(df_dok_lainnya);
                 }
-                HasilKueriDataPenjualan::DataKuantitasILEEnum(vektor_data) => {
+                HasilKueriPenjualan::DataKuantitasILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_kuantitas =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe kuantitas");
                     vektor_dataframe.push(df_kuantitas);
                 }
-                HasilKueriDataPenjualan::DataCPPUILEEnum(vektor_data) => {
+                HasilKueriPenjualan::DataCPPUILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_cppu =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe CPPU");
                     vektor_dataframe.push(df_cppu);
                 }
-                HasilKueriDataPenjualan::DataKlasifikasiILEEnum(vektor_data) => {
+                HasilKueriPenjualan::DataKlasifikasiILEEnum(vektor_data) => {
                     let vektor_series = vektor_data.ke_series();
                     let df_klasifikasi =
                         DataFrame::new(vektor_series).expect("Gagal membuat dataframe klasifikasi");
                     vektor_dataframe.push(df_klasifikasi);
                 }
-                HasilKueriDataPenjualan::DataRPPUILEEnum(vektor_data) => {
+                HasilKueriPenjualan::DataRPPUILEEnum(vektor_data) => {
                     if comp_pri {
                         let vektor_series = vektor_data.ke_series();
                         let df_rppu =
@@ -617,7 +617,7 @@ async fn handle_data_penerimaan_barang(
             .expect(&gagal_emit_notif);
         match kueri_bc::kueri_penerimaan_barang(kueri).await {
             Ok(hasil) => match hasil {
-                HasilKueriDataPenerimaanBarang::DataPenerimaanBarangEnum(vektor_data) => {
+                HasilKueriPenerimaanBarang::DataPenerimaanBarangEnum(vektor_data) => {
                     // Konversi vektor struct hasil kueri ke dalam dataframe polars
                     let vektor_series = vektor_data.ke_series();
                     df_utama = DataFrame::new(vektor_series)
@@ -706,7 +706,7 @@ async fn handle_data_stok(
             .expect(&gagal_emit_notif);
         match kueri_bc::kueri_stok(kueri).await {
             Ok(hasil) => match hasil {
-                HasilKueriDataStok::DataStokEnum(vektor_data) => {
+                HasilKueriStok::DataStokEnum(vektor_data) => {
                     // Konversi vektor struct hasil kueri ke dalam dataframe polars
                     let vektor_series = vektor_data.ke_series();
                     df_utama =
@@ -767,6 +767,99 @@ async fn handle_data_stok(
     Ok(json!({ "status": true, "konten": df_utama }).to_string())
 }
 
+#[tauri::command]
+async fn handle_data_ketersediaan_stok(
+    set_kueri: Vec<Kueri<'_>>,
+    filter_data: Filter,
+    window: tauri::Window,
+) -> Result<String, String> {
+    // Konstruksi series untuk penampung filter_data
+    window
+        .emit(
+            "data-ketersediaan-stok",
+            json!({"state": "start", "konten": "Parameter data diterima di Rust, rekonstruksi filter dilakukan"})
+        )
+        .expect("Gagal emit notifikasi penerimaan parameter");
+    let filter_brand = Series::new("filter_brand", filter_data.brand);
+    let filter_prod_div = Series::new("filter_prod_div", filter_data.prod_div);
+    let filter_prod_grp = Series::new("filter_prod_cat", filter_data.prod_grp);
+    let filter_prod_cat = Series::new("filter_prod_cat", filter_data.prod_cat);
+    let filter_lokasi = Series::new("filter_lokasi", filter_data.lokasi.unwrap());
+
+    // KUERI KETERSEDIAAN STOK
+    let mut df_utama: DataFrame = DataFrame::default();
+    for kueri in set_kueri {
+        let konten = format!("Melakukan kueri dengan ID {}", kueri.judul);
+        let gagal_emit_notif = format!("Gagal emit notifikasi kueri ID {}", kueri.judul);
+        window
+            .emit(
+                "data-ketersediaan-stok",
+                json!({"state": "update", "konten": &konten}),
+            )
+            .expect(&gagal_emit_notif);
+        match kueri_bc::kueri_ketersediaan_stok(kueri).await {
+            Ok(hasil) => match hasil {
+                HasilKueriKetersediaanStok::DataKetersediaanStokEnum(vektor_data) => {
+                    // Konversi vektor struct hasil kueri ke dalam dataframe polars
+                    let vektor_series = vektor_data.ke_series();
+                    df_utama =
+                        DataFrame::new(vektor_series).expect("Gagal membuat dataframe utama stok");
+                }
+            },
+            Err(_) => {
+                let _ = json!({"status": false, "konten": "Kesalahan dalam matching Enum dengan hasil kueri"}).to_string();
+            }
+        }
+    }
+
+    // FILTER DATAFRAME
+    window
+        .emit(
+            "data-ketersediaan-stok",
+            json!({
+                "state": "update",
+                "konten": "Melakukan filtering pada dataframe polars"
+            }),
+        )
+        .expect("Gagal emit notifikasi filtering dataframe polars stok");
+    df_utama = df_utama
+        .lazy()
+        .filter(col("brand_dim").is_in(lit(filter_brand)))
+        .collect()
+        .unwrap();
+    df_utama = df_utama
+        .lazy()
+        .filter(col("prod_div").is_in(lit(filter_prod_div)))
+        .collect()
+        .unwrap();
+    df_utama = df_utama
+        .lazy()
+        .filter(col("prod_grp").is_in(lit(filter_prod_grp)))
+        .collect()
+        .unwrap();
+    df_utama = df_utama
+        .lazy()
+        .filter(col("prod_cat").is_in(lit(filter_prod_cat)))
+        .collect()
+        .unwrap();
+    df_utama = df_utama
+        .lazy()
+        .filter(col("loc_code").is_in(lit(filter_lokasi)))
+        .collect()
+        .unwrap();
+    window
+        .emit(
+            "data-ketersediaan-stok",
+            json!({
+                "state": "finish",
+                "konten": "Proses penarikan data stok pada Rust selesai, data ditransfer ke React untuk proses pemetaan ke tabel. Mohon tunggu sebentar..."
+            })
+        )
+        .expect("Gagal emit notifikasi penarikan data stok selesai");
+
+    Ok(json!({ "status": true, "konten": df_utama }).to_string())
+}
+
 #[tokio::main]
 async fn main() {
     tauri::Builder::default()
@@ -777,7 +870,8 @@ async fn main() {
             kueri_sederhana,
             handle_data_penjualan,
             handle_data_penerimaan_barang,
-            handle_data_stok
+            handle_data_stok,
+            handle_data_ketersediaan_stok
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

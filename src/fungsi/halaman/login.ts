@@ -305,9 +305,7 @@ const muatLokasi = async (
     if (respon !== undefined && respon.length !== 0) {
       arrayLokasiLabel.push(respon);
       dispatch(setParameterLokasi(arrayLokasiLabel));
-      dispatch(
-        setLokasiInput([respon.map((item: DataMultiSelect) => item.value)])
-      );
+      dispatch(setLokasiInput([respon.map((item) => item.value)]));
     }
   } else {
     const lokasiLabelPromises = compPengguna.map(async (comp) => {
@@ -492,7 +490,9 @@ export const prosesLogin = async (
             await muatBrand(hasil.comp, parameterBc.konten, dispatch);
             // inisiasi data mc
             await muatMC(hasil.comp, parameterBc.konten, dispatch);
-            // inisiasi data Lokasi & SBU jika PRI
+            // inisiasi data lokasi
+            await muatLokasi(hasil.comp, parameterBc.konten, dispatch);
+            // inisiasi data SBU jika PRI
             if (
               (hasil.comp.length === 1 &&
                 hasil.comp[0] === parameterBc.konten.comp.pri) ||
@@ -506,7 +506,6 @@ export const prosesLogin = async (
               dispatch(
                 setSBUInput(arraySBU.map((item: DataMultiSelect) => item.value))
               );
-              await muatLokasi(hasil.comp, parameterBc.konten, dispatch);
             }
             // inisiasi data Klasifikasi & Region jika PNT
             if (
