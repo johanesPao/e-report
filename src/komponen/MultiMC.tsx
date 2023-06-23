@@ -3,6 +3,7 @@ import { DataMultiSelect } from "../fitur_state/dataParam";
 import { StateInputDrawerPenjualan } from "../fungsi/halaman/penjualan";
 import { StateInputDrawerPenerimaanBarang } from "../fungsi/halaman/penerimaanBarang";
 import { StateInputDrawerStok } from "../fungsi/halaman/stok";
+import { StateInputDrawerKetersediaanStok } from "../fungsi/halaman/ketersediaanStok";
 
 interface MultiMCProps {
   arrayDivLabel: DataMultiSelect[];
@@ -11,11 +12,13 @@ interface MultiMCProps {
   props:
     | StateInputDrawerPenjualan
     | StateInputDrawerPenerimaanBarang
-    | StateInputDrawerStok;
+    | StateInputDrawerStok
+    | StateInputDrawerKetersediaanStok;
   setProps:
     | React.Dispatch<React.SetStateAction<StateInputDrawerPenjualan>>
     | React.Dispatch<React.SetStateAction<StateInputDrawerPenerimaanBarang>>
-    | React.Dispatch<React.SetStateAction<StateInputDrawerStok>>;
+    | React.Dispatch<React.SetStateAction<StateInputDrawerStok>>
+    | React.Dispatch<React.SetStateAction<StateInputDrawerKetersediaanStok>>;
 }
 
 const MultiMC = ({

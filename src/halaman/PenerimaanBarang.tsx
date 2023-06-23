@@ -11,7 +11,7 @@ import { getDataPenerimaanBarang } from "../fitur_state/dataBank";
 import { getCompKueri, getCompPengguna } from "../fitur_state/pengguna";
 import { useCallback, useEffect, useMemo } from "react";
 import { MRT_ColumnDef } from "mantine-react-table";
-import { DataPenerimaanBarang, resetAplikasi } from "../fungsi/basic";
+import { DataPenerimaanBarang } from "../fungsi/basic";
 import { definisiKolomPenerimaanBarang } from "../fungsi/kolom_data";
 import { TombolDrawer } from "../komponen/TombolDrawer";
 import { Tabel } from "../komponen/Tabel";
@@ -31,7 +31,6 @@ const PenerimaanBarang = ({
   const compPengguna = useAppSelector(getCompPengguna);
   const compKueri = useAppSelector(getCompKueri);
   const indeksData = useAppSelector(getIndeksData);
-  // resetAplikasi(dispatch);
 
   const definisiKolom = useMemo<MRT_ColumnDef<DataPenerimaanBarang>[]>(
     () => definisiKolomPenerimaanBarang(props),

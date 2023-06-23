@@ -6,12 +6,14 @@ import {
   IconSettings,
 } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "../state/hook";
+import { useAppDispatch, useAppSelector } from "../state/hook";
 import { appWindow } from "@tauri-apps/api/window";
 
 import { NavigasiPengguna } from "./kontenNavbar/NavigasiPengguna";
 import { NavLinks } from "./kontenNavbar/Navlink";
 import { resetAplikasi } from "../fungsi/basic";
+import { useEffect } from "react";
+import { getIndeksData } from "../fitur_state/event";
 
 function NavbarMod({
   onNavlinkClick,
@@ -23,6 +25,7 @@ function NavbarMod({
   const dispatch = useAppDispatch();
   const headerHeight = 50;
   const { height } = useViewportSize();
+  const indeksData = useAppSelector(getIndeksData);
 
   const keluarAkun = () => {
     resetAplikasi(dispatch);
@@ -33,6 +36,10 @@ function NavbarMod({
     resetAplikasi(dispatch);
     appWindow.close();
   };
+
+  useEffect(() => {
+    console.log(`indeksData ${indeksData}`);
+  }, [indeksData]);
 
   return (
     <Navbar height={`${height - headerHeight}`} p="xs" width={{ base: 330 }}>

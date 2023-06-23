@@ -2,6 +2,7 @@ import {
   AppShell,
   Group,
   Header,
+  ScrollArea,
   Switch,
   createStyles,
   rem,
@@ -9,8 +10,9 @@ import {
 import NavbarMod from "./Navbar";
 import { useAppDispatch, useAppSelector } from "../state/hook";
 import { getCompPengguna } from "../fitur_state/pengguna";
-import { getIndeksData, setIndeksData } from "../fitur_state/event";
+import { getHalaman, getIndeksData, setIndeksData } from "../fitur_state/event";
 import { useState } from "react";
+import { useViewportSize } from "@mantine/hooks";
 
 function Layout({
   children,
@@ -20,6 +22,7 @@ function Layout({
   onNavbarLinkClick: (halamanBaru: string) => void;
 }) {
   const compPengguna = useAppSelector(getCompPengguna);
+  const halaman = useAppSelector(getHalaman);
   const dispatch = useAppDispatch();
   const [comp, toggleComp] = useState(false);
 
@@ -45,6 +48,8 @@ function Layout({
     }
   };
 
+  const { height } = useViewportSize();
+
   return (
     <>
       <AppShell
@@ -65,6 +70,7 @@ function Layout({
                     color="red"
                     checked={comp}
                     onChange={(event) => set_comp(event.currentTarget.checked)}
+                    disabled={halaman === "ketersediaanStok"}
                   />
                 </Group>
               )}
@@ -84,7 +90,9 @@ function Layout({
           },
         })}
       >
-        {children}
+        <ScrollArea h={height - 50} p={0} m={0}>
+          {children}
+        </ScrollArea>
       </AppShell>
     </>
   );

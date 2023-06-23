@@ -6,7 +6,6 @@ import {
   MRT_ToggleFiltersButton,
   MantineReactTable,
 } from "mantine-react-table";
-import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 import { unduhTabelKeExcel } from "../fungsi/basic";
 import { useAppSelector } from "../state/hook";
@@ -26,64 +25,60 @@ export const Tabel = <T extends Record<string, any>>({
   const halaman = useAppSelector(getHalaman);
   return (
     <div style={{ height: "100%" }}>
-      <SimpleBar style={{ height: "100vh" }}>
-        <MantineReactTable<T>
-          columns={arrKolom}
-          data={arrData}
-          enableColumnFilterModes
-          // enableColumnOrdering
-          enableColumnDragging={false}
-          enablePinning
-          enableGrouping
-          enableColumnActions={false}
-          enableFilterMatchHighlighting={false}
-          enableDensityToggle={false}
-          enableStickyHeader
-          memoMode="cells"
-          // enableRowActions
-          // enableRowSelection
-          mantineTableContainerProps={{
-            sx: { height: "100%" },
-          }}
-          initialState={{
-            pagination: {
-              pageSize: 15,
-              pageIndex: 0,
-            },
-            showColumnFilters: false,
-            density: "xs",
-          }}
-          positionToolbarAlertBanner="bottom"
-          renderTopToolbarCustomActions={() => (
-            <Box
-              sx={{
-                display: "flex",
-                gap: "16px",
-                padding: "8px",
-                flexWrap: "wrap",
-              }}
+      <MantineReactTable<T>
+        columns={arrKolom}
+        data={arrData}
+        enableColumnFilterModes
+        // enableColumnOrdering
+        enableColumnDragging={false}
+        enablePinning
+        enableGrouping
+        enableColumnActions={false}
+        enableFilterMatchHighlighting={false}
+        enableDensityToggle={false}
+        enableStickyHeader
+        memoMode="cells"
+        mantineTableContainerProps={{
+          sx: { maxHeight: "65vh" },
+        }}
+        initialState={{
+          pagination: {
+            pageSize: 15,
+            pageIndex: 0,
+          },
+          showColumnFilters: false,
+          density: "xs",
+        }}
+        positionToolbarAlertBanner="bottom"
+        renderTopToolbarCustomActions={() => (
+          <Box
+            sx={{
+              display: "flex",
+              gap: "16px",
+              padding: "8px",
+              flexWrap: "wrap",
+            }}
+          >
+            <Button
+              color="green"
+              onClick={() => unduhTabelKeExcel(arrData, halaman)}
+              leftIcon={<IconDownload />}
+              variant="filled"
             >
-              <Button
-                color="green"
-                onClick={() => unduhTabelKeExcel(arrData, halaman)}
-                leftIcon={<IconDownload />}
-                variant="filled"
-              >
-                Unduh ke Excel
-              </Button>
-            </Box>
-          )}
-          renderToolbarInternalActions={({ table }) => {
-            return (
-              <>
-                <MRT_ToggleFiltersButton table={table} />
-                <MRT_ShowHideColumnsButton table={table} />
-              </>
-            );
-          }}
-          state={{ isLoading: memuatData }}
-        />
-      </SimpleBar>
+              Unduh ke Excel
+            </Button>
+          </Box>
+        )}
+        renderToolbarInternalActions={({ table }) => {
+          return (
+            <>
+              <MRT_ToggleFiltersButton table={table} />
+              <MRT_ShowHideColumnsButton table={table} />
+            </>
+          );
+        }}
+        state={{ isLoading: memuatData }}
+      />
     </div>
   );
 };

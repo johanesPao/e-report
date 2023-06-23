@@ -110,7 +110,7 @@ const DrawerInput = ({
       onClose={() => dispatch(setDrawerTerbuka(false))}
       position="top"
       overlayProps={{ opacity: 0.5, blur: 2 }}
-      size="560px"
+      size="auto"
       withCloseButton={false}
       closeOnEscape={false}
       transitionProps={{
@@ -119,6 +119,7 @@ const DrawerInput = ({
         timingFunction: "ease-in",
       }}
       trapFocus={false}
+      // scrollAreaComponent={ScrollArea}
     >
       {renderInput()}
     </Drawer>
