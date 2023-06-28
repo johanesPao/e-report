@@ -2,6 +2,7 @@ import { utils, writeFile } from "xlsx";
 
 import {
   setDataKetersediaanStok,
+  setDataLabaRugiToko,
   setDataPenerimaanBarang,
   setDataPenjualan,
   setDataStok,
@@ -84,6 +85,7 @@ export const resetAplikasi = (dispatch: any) => {
   dispatch(setDataPenerimaanBarang([]));
   dispatch(setDataStok([]));
   dispatch(setDataKetersediaanStok([]));
+  dispatch(setDataLabaRugiToko([]));
 };
 
 export interface Dimensi {
@@ -262,6 +264,12 @@ export type DataKetersediaanStok = {
   proj_stock_aft_so: number;
 };
 
+export type DataLabaRugiToko = {
+  coa: string;
+  acc_name: string;
+  [key: string]: string | number;
+};
+
 export const unduhTabelKeExcel = (data: any[], halaman: string) => {
   let file: string;
   switch (halaman) {
@@ -276,6 +284,9 @@ export const unduhTabelKeExcel = (data: any[], halaman: string) => {
       break;
     case "ketersediaanStok":
       file = "DataKetersediaanStok.xlsx";
+      break;
+    case "labaRugiToko":
+      file = "LabaRugiToko.xlsx";
       break;
     default:
       return;

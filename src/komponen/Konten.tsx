@@ -20,6 +20,7 @@ import { StatePenjualan } from "../fungsi/halaman/penjualan";
 import { StatePenerimaanBarang } from "../fungsi/halaman/penerimaanBarang";
 import { StateStok } from "../fungsi/halaman/stok";
 import { StateKetersediaanStok } from "../fungsi/halaman/ketersediaanStok";
+import { StateLabaRugiToko } from "../fungsi/halaman/labaRugiToko";
 
 const Konten = () => {
   const navigasi = useNavigate();
@@ -133,6 +134,18 @@ const Konten = () => {
     initialStateKetersediaanStok
   );
 
+  // LABA RUGI TOKO
+  const initialStateLabaRugiToko: StateLabaRugiToko = {
+    labaRugiToko: {
+      tglAwal: null,
+      tglAkhir: null,
+    },
+    muatDataLabaRugiToko: false,
+  };
+  const [stateLabaRugiToko, setStateLabaRugiToko] = useState(
+    initialStateLabaRugiToko
+  );
+
   useEffect(() => {
     if (!sesiAktif) {
       navigasi("/");
@@ -168,7 +181,12 @@ const Konten = () => {
       case "buyingProposal":
         return <BuyingProposal />;
       case "labaRugiToko":
-        return <LabaRugiToko />;
+        return (
+          <LabaRugiToko
+            props={stateLabaRugiToko}
+            setProps={setStateLabaRugiToko}
+          />
+        );
       case "kelayakanTokoBaru":
         return <KelayakanTokoBaru />;
       default:
@@ -193,7 +211,7 @@ const Konten = () => {
       case "buyingProposal":
         return null;
       case "labaRugiToko":
-        return null;
+        return <DrawerInput setPropsLabaRugiToko={setStateLabaRugiToko} />;
       case "kelayakanTokoBaru":
         return null;
       default:

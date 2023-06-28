@@ -915,7 +915,6 @@ export const endingStokByILE = (
       ile.[Unit Price]
     `,
   };
-  console.log(setKueri.kueri);
   return setKueri;
 };
 
@@ -1077,6 +1076,83 @@ export const ketersediaanStokByILE = (
   ORDER BY SUM(COALESCE(ile.[Quantity], 0) + COALESCE(purchase.[Outstanding Quantity PO], 0) - COALESCE(to_ship.[Sales Order Outstanding Quantity], 0)) ASC
     `,
   };
-  console.log(setKueri.kueri);
+  return setKueri;
+};
+
+export const store_pnl = (
+  parameterBc: { [key: string]: any },
+  tglAwal: string,
+  tglAkhir: string,
+  compKueri: string
+) => {
+  const setKueri: Kueri = {
+    judul: "storePNL",
+    kueri: `
+    WITH jurnal_umum AS (
+      SELECT DISTINCT
+          jurnal.${parameterBc.kolom_bc.gl_acc_no} [CoA],
+          coa.${parameterBc.kolom_bc.name} [Nama Akun],
+          jurnal.${parameterBc.kolom_bc.store_dim} [Dimensi Toko],
+          SUM(jurnal.${parameterBc.kolom_bc.amount}) [Nilai]
+      FROM [${compKueri}${parameterBc.tabel_bc.gl_entry_437}] jurnal
+      LEFT JOIN [${compKueri}${parameterBc.tabel_bc.gl_acc_437}] coa
+          ON jurnal.${parameterBc.kolom_bc.gl_acc_no} = coa.${parameterBc.kolom_bc.no}
+      WHERE 
+          jurnal.${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
+          jurnal.${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
+          (
+              (
+                  jurnal.${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.fisik_sport_prefix}' AND
+                  jurnal.${parameterBc.kolom_bc.store_dim} != '${parameterBc.argumen_bc.website_fisik_sport}'
+              ) OR
+              (
+                  jurnal.${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.fisik_football_prefix}' AND
+                  jurnal.${parameterBc.kolom_bc.store_dim} != '${parameterBc.argumen_bc.website_fisik_football}'
+              ) OR
+              (
+                  jurnal.${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.our_daily_dose_prefix}' AND
+                  jurnal.${parameterBc.kolom_bc.store_dim} != '${parameterBc.argumen_bc.website_our_daily_dose}'
+              ) OR
+              jurnal.${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.wholesale_prefix}'
+          ) AND
+          (
+              jurnal.${parameterBc.kolom_bc.gl_acc_no} LIKE '${parameterBc.argumen_bc.coa_sales_prefix}' OR
+              jurnal.${parameterBc.kolom_bc.gl_acc_no} LIKE '${parameterBc.argumen_bc.coa_cogs_prefix}' OR
+              jurnal.${parameterBc.kolom_bc.gl_acc_no} LIKE '${parameterBc.argumen_bc.coa_opex_prefix}' OR
+              jurnal.${parameterBc.kolom_bc.gl_acc_no} LIKE '${parameterBc.argumen_bc.coa_oth_incexp_prefix}'
+          )
+      GROUP BY
+          jurnal.${parameterBc.kolom_bc.gl_acc_no},
+          coa.${parameterBc.kolom_bc.name},
+          jurnal.${parameterBc.kolom_bc.store_dim}
+  ), toko_map AS (
+      SELECT DISTINCT
+          ${parameterBc.kolom_bc.loc_code} [Kode Toko],
+          ${parameterBc.kolom_bc.store_dim} [Dimensi Toko]
+      FROM [${compKueri}${parameterBc.tabel_bc.store_map_5ec}]
+  ), toko AS (
+      SELECT DISTINCT
+          ${parameterBc.kolom_bc.code} [Dimensi Toko],
+          ${parameterBc.kolom_bc.name} [Nama Toko]
+      FROM [${compKueri}${parameterBc.tabel_bc.dim_val_437}]
+  )
+  SELECT DISTINCT
+      jurnal_umum.[CoA] [CoA],
+      jurnal_umum.[Nama Akun] [Nama Akun],
+      COALESCE(toko_map.[Kode Toko], 'Wholesale') [Kode Toko],
+      toko.[Nama Toko] [Nama Toko],
+      SUM(jurnal_umum.[Nilai]) * -1 [Nilai]
+  FROM jurnal_umum
+  LEFT JOIN toko_map
+      ON jurnal_umum.[Dimensi Toko] = toko_map.[Dimensi Toko]
+  LEFT JOIN toko
+      ON toko_map.[Dimensi Toko] = toko.[Dimensi Toko]
+  GROUP BY
+      jurnal_umum.[CoA],
+      jurnal_umum.[Nama Akun],
+      COALESCE(toko_map.[Kode Toko], 'Wholesale'),
+      toko.[Nama Toko]
+    `,
+  };
   return setKueri;
 };

@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../state/store";
 import {
   DataKetersediaanStok,
+  DataLabaRugiToko,
   DataPenerimaanBarang,
   DataPenjualan,
   DataStok,
@@ -12,6 +13,7 @@ export interface dataState {
   dataPenerimaanBarang: DataPenerimaanBarang[];
   dataStok: DataStok[];
   dataKetersediaanStok: DataKetersediaanStok[];
+  dataLabaRugiToko: DataLabaRugiToko[];
   // ...
 }
 
@@ -20,6 +22,7 @@ const initialState: dataState = {
   dataPenerimaanBarang: [],
   dataStok: [],
   dataKetersediaanStok: [],
+  dataLabaRugiToko: [],
   // ...
 };
 
@@ -45,6 +48,9 @@ const dataSlice = createSlice({
     ) => {
       state.dataKetersediaanStok = action.payload;
     },
+    setDataLabaRugiToko: (state, action: PayloadAction<DataLabaRugiToko[]>) => {
+      state.dataLabaRugiToko = action.payload;
+    },
     // ...
   },
 });
@@ -54,6 +60,7 @@ export const {
   setDataPenerimaanBarang,
   setDataStok,
   setDataKetersediaanStok,
+  setDataLabaRugiToko,
   // ...
 } = dataSlice.actions;
 
@@ -63,5 +70,7 @@ export const getDataPenerimaanBarang = (state: RootState) =>
 export const getDataStok = (state: RootState) => state.data.dataStok;
 export const getDataKetersediaanStok = (state: RootState) =>
   state.data.dataKetersediaanStok;
+export const getDataLabaRugiToko = (state: RootState) =>
+  state.data.dataLabaRugiToko;
 
 export default dataSlice;
