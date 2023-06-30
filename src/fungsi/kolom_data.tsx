@@ -45,62 +45,102 @@ export const buatPropsTabel = (
   memuat: boolean
 ) => {
   let props: TableProps;
+  // Default props
+  props = {
+    enableColumnFilterModes: true,
+    enableColumnOrdering: true,
+    enableColumnDragging: false,
+    enablePinning: true,
+    enableGrouping: true,
+    enableColumnActions: false,
+    enableFilterMatchHighlighting: false,
+    enableDensityToggle: false,
+    enableStickyHeader: true,
+    enableStickyFooter: true,
+    enablePagination: true,
+    memoMode: "cells",
+    mantineTableContainerProps: {
+      sx: { maxHeight: "65vh" },
+    },
+    initialState: {
+      pagination: {
+        pageSize: 15,
+        pageIndex: 0,
+      },
+      showColumnFilters: false,
+      density: "xs",
+    },
+    renderTopToolbarCustomActions: () => (
+      <Box
+        sx={{
+          display: "flex",
+          gap: "16px",
+          padding: "8px",
+          flexWrap: "wrap",
+        }}
+      >
+        <Button
+          color="green"
+          onClick={() => unduhTabelKeExcel(data, halaman)}
+          leftIcon={<IconDownload />}
+          variant="filled"
+        >
+          Unduh ke Excel
+        </Button>
+      </Box>
+    ),
+    // @ts-ignore
+    renderToolbarInternalActions: ({ table }: MantineReactTableProps) => {
+      return (
+        <>
+          <MRT_ToggleFiltersButton table={table} />
+          <MRT_ShowHideColumnsButton table={table} />
+        </>
+      );
+    },
+    state: {
+      isLoading: memuat,
+    },
+  };
   switch (halaman) {
+    case "penjualan":
+      {
+        props = {
+          ...props,
+        };
+      }
+      break;
+    case "penerimaanBarang": {
+      props = {
+        ...props,
+      };
+      break;
+    }
+    case "stok": {
+      props = {
+        ...props,
+      };
+      break;
+    }
+    case "ketersediaanStok": {
+      props = {
+        ...props,
+      };
+      break;
+    }
     case "labaRugiToko": {
       props = {
-        enableColumnFilterModes: true,
-        enableColumnOrdering: true,
-        enableColumnDragging: false,
-        enablePinning: true,
-        enableGrouping: true,
+        ...props,
+        enableColumnFilterModes: false,
         enableColumnActions: false,
-        enableFilterMatchHighlighting: false,
-        enableDensityToggle: false,
-        enableStickyHeader: true,
-        enableStickyFooter: true,
         enablePagination: false,
-        memoMode: "cells",
-        mantineTableContainerProps: {
-          sx: { maxHeight: "65vh" },
-        },
-        initialState: {
-          pagiantion: {
-            pageSize: 45,
-            pageIndex: 0,
-          },
-          showColumnFilters: false,
-          density: "xs",
-        },
-        renderTopToolbarCustomActions: () => (
-          <Box
-            sx={{
-              display: "flex",
-              gap: "16px",
-              padding: "8px",
-              flexWrap: "wrap",
-            }}
-          >
-            <Button
-              color="green"
-              onClick={() => unduhTabelKeExcel(data, halaman)}
-              leftIcon={<IconDownload />}
-              variant="filled"
-            >
-              Unduh ke Excel
-            </Button>
-          </Box>
-        ),
         // @ts-ignore
         renderToolbarInternalActions: ({ table }: MantineReactTableProps) => {
           return (
             <>
-              <MRT_ToggleFiltersButton table={table} />
               <MRT_ShowHideColumnsButton table={table} />
             </>
           );
-        },
-        state: {
-          isLoading: memuat,
         },
       };
       break;
@@ -917,8 +957,8 @@ export const definisiKolomLabaRugiToko = (data: DataLabaRugiToko[]) => {
           : 0;
     }
     const kolomToko: MRT_ColumnDef<any> = {
-      accessorKey: `${toko}`,
-      header: `${toko}`,
+      accessorKey: toko,
+      header: toko,
       enableColumnActions: true,
       filterFn: "between",
       aggregationFn: "sum",

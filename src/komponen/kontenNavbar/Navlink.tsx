@@ -22,7 +22,10 @@ import {
 } from "@mantine/core";
 import { IconChevronRight } from "@tabler/icons-react";
 import { useAppSelector } from "../../state/hook";
-import { getCompPengguna } from "../../fitur_state/pengguna";
+import {
+  getCompPengguna,
+  getDepartemenPengguna,
+} from "../../fitur_state/pengguna";
 import { getParameterBc } from "../../fitur_state/dataParam";
 import { getIndeksData } from "../../fitur_state/event";
 
@@ -171,6 +174,7 @@ function NavLink({
   const adaLinks = Array.isArray(links);
   const adaSubMenu = Array.isArray(subMenu);
   const compPengguna = useAppSelector(getCompPengguna);
+  const deptPengguna = useAppSelector(getDepartemenPengguna);
   const parameterBc = useAppSelector(getParameterBc);
   const indeksData = useAppSelector(getIndeksData);
   const singleMode = compPengguna.length === 1;
@@ -192,7 +196,7 @@ function NavLink({
 
   const itemSubMenu = (adaSubMenu ? subMenu : []).map((item, index) => {
     const linkSubMenu = item.links?.map((subMenuItem) => {
-      const disabled =
+      const ketersediaanStokDisabled =
         subMenuItem.link === "ketersediaanStok"
           ? singleMode
             ? compPRI
@@ -202,7 +206,14 @@ function NavLink({
             ? true
             : false
           : false;
-      const warnaTeks = disabled ? theme.colors.gray[7] : theme.colors.gray[5];
+      const labaRugiTokoDisabled =
+        subMenuItem.link === "labaRugiToko"
+          ? deptPengguna.includes("fa") || deptPengguna.includes("all")
+            ? false
+            : true
+          : false;
+      const warnaTeksDisabled = theme.colors.gray[7];
+      const warnaTeks = theme.colors.gray[5];
 
       return (
         <React.Fragment key={subMenuItem.label}>
@@ -212,20 +223,25 @@ function NavLink({
               className={classes.link}
               key={subMenuItem.label}
               onClick={
-                disabled ? undefined : () => navigasiKonten(subMenuItem.link)
+                ketersediaanStokDisabled || labaRugiTokoDisabled
+                  ? undefined
+                  : () => navigasiKonten(subMenuItem.link)
               }
               sx={{
                 marginLeft: "80px",
                 "&:hover": {
                   backgroundColor:
                     theme.colorScheme === "dark"
-                      ? !disabled
+                      ? !ketersediaanStokDisabled || !labaRugiTokoDisabled
                         ? theme.colors.dark[9]
                         : theme.colors.dark[7]
                       : theme.colors.gray[0],
                   // borderRadius: theme.radius.lg,
                 },
-                color: warnaTeks,
+                color:
+                  ketersediaanStokDisabled || labaRugiTokoDisabled
+                    ? warnaTeksDisabled
+                    : warnaTeks,
               }}
             >
               {subMenuItem.label}
