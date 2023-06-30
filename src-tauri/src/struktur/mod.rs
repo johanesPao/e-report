@@ -178,6 +178,16 @@ pub struct DataKetersediaanStok {
     pub proj_stock_aft_so: Option<f32>,
 }
 
+#[derive(Clone, Debug, FieldNamesAsArray)]
+#[field_names_as_array(visibility = "pub")]
+pub struct DataLabaRugiToko {
+    pub coa: Option<String>,
+    pub acc_name: Option<String>,
+    pub store_code: Option<String>,
+    pub store_desc: Option<String>,
+    pub amount: Option<f32>,
+}
+
 pub trait DataFrameSerial {
     fn ke_series(&self) -> Vec<Series>;
 }
@@ -1050,6 +1060,57 @@ impl DataFrameSerial for Vec<DataKetersediaanStok> {
     }
 }
 
+impl DataFrameSerial for Vec<DataLabaRugiToko> {
+    fn ke_series(&self) -> Vec<Series> {
+        let mut vektor_coa = Vec::new();
+        let mut vektor_acc_name = Vec::new();
+        let mut vektor_store_code = Vec::new();
+        let mut vektor_store_desc = Vec::new();
+        let mut vektor_amount = Vec::new();
+
+        for baris in self {
+            for kolom in 0..DataLabaRugiToko::FIELD_NAMES_AS_ARRAY.len() {
+                match kolom {
+                    0 => vektor_coa.push(baris.coa.clone()),
+                    1 => vektor_acc_name.push(baris.acc_name.clone()),
+                    2 => vektor_store_code.push(baris.store_code.clone()),
+                    3 => vektor_store_desc.push(baris.store_desc.clone()),
+                    4 => vektor_amount.push(baris.amount),
+                    _ => println!("Nothing"),
+                }
+            }
+        }
+
+        let mut vektor_series = Vec::new();
+        for hitung in 0..DataLabaRugiToko::FIELD_NAMES_AS_ARRAY.len() {
+            match hitung {
+                0 => vektor_series.push(Series::new(
+                    DataLabaRugiToko::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_coa.clone(),
+                )),
+                1 => vektor_series.push(Series::new(
+                    DataLabaRugiToko::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_acc_name.clone(),
+                )),
+                2 => vektor_series.push(Series::new(
+                    DataLabaRugiToko::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_store_code.clone(),
+                )),
+                3 => vektor_series.push(Series::new(
+                    DataLabaRugiToko::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_store_desc.clone(),
+                )),
+                4 => vektor_series.push(Series::new(
+                    DataLabaRugiToko::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_amount.clone(),
+                )),
+                _ => println!("Nothing"),
+            }
+        }
+        vektor_series
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Kueri<'a> {
     pub judul: &'a str,
@@ -1109,4 +1170,8 @@ pub enum HasilKueriStok {
 
 pub enum HasilKueriKetersediaanStok {
     DataKetersediaanStokEnum(Vec<DataKetersediaanStok>),
+}
+
+pub enum HasilKueriLabaRugiToko {
+    DataLabaRugiTokoEnum(Vec<DataLabaRugiToko>),
 }

@@ -860,6 +860,57 @@ async fn handle_data_ketersediaan_stok(
     Ok(json!({ "status": true, "konten": df_utama }).to_string())
 }
 
+#[tauri::command]
+async fn handle_data_laba_rugi_toko(
+    set_kueri: Vec<Kueri<'_>>,
+    window: tauri::Window,
+) -> Result<String, String> {
+    // Konstruksi series untuk penampung filter_data
+    window
+        .emit(
+            "data-laba-rugi-toko",
+            json!({"state": "start", "konten": "Parameter data diterima di Rust"}),
+        )
+        .expect("Gagal emit notifikasi penerimaan parameter");
+
+    // KUERI LABA RUGI TOKO
+    let mut df_utama: DataFrame = DataFrame::default();
+    for kueri in set_kueri {
+        let konten = format!("Melakukan kueri dengan ID {}", kueri.judul);
+        let gagal_emit_notif = format!("Gagal emit notifikasi kueri ID {}", kueri.judul);
+        window
+            .emit(
+                "data-laba-rugi-toko",
+                json!({"state": "update", "konten": &konten}),
+            )
+            .expect(&gagal_emit_notif);
+        match kueri_bc::kueri_laba_rugi_toko(kueri).await {
+            Ok(hasil) => match hasil {
+                HasilKueriLabaRugiToko::DataLabaRugiTokoEnum(vektor_data) => {
+                    // Konversi vektor struct hasil kueri ke dalam dataframe polars
+                    let vektor_series = vektor_data.ke_series();
+                    df_utama = DataFrame::new(vektor_series)
+                        .expect("Gagal membuat dataframe utama penerimaan barang");
+                }
+            },
+            Err(_) => {
+                let _ = json!({"status": false, "konten": "Kesalahan dalam matching Enum dengan hasil kueri"}).to_string();
+            }
+        }
+    }
+
+    window
+        .emit(
+            "data-laba-rugi-toko",
+            json!({
+                "state": "finish",
+                "konten": "Proses penarikan data laba rugi toko pada Rust selesai, data ditransfer ke React untuk proses pemetaan ke tabel. Mohon tunggu sebentar..."
+            })
+        )
+        .expect("Gagal emit notifikasi penarikan data laba rugi toko selesai");
+    Ok(json!({"status": true, "konten": df_utama}).to_string())
+}
+
 #[tokio::main]
 async fn main() {
     tauri::Builder::default()
@@ -871,7 +922,8 @@ async fn main() {
             handle_data_penjualan,
             handle_data_penerimaan_barang,
             handle_data_stok,
-            handle_data_ketersediaan_stok
+            handle_data_ketersediaan_stok,
+            handle_data_laba_rugi_toko
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

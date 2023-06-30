@@ -471,3 +471,35 @@ pub async fn kueri_ketersediaan_stok(
         _ => Err("Shouldn't happened".into()),
     }
 }
+
+pub async fn kueri_laba_rugi_toko(
+    kueri: Kueri<'_>,
+) -> Result<HasilKueriLabaRugiToko, Box<dyn std::error::Error>> {
+    match kueri.judul {
+        "storePNL" => {
+            let mut vektor_data = Vec::new();
+            let hasil_kueri = &mssql::eksekusi_kueri(kueri.kueri.to_string()).await?[0];
+            if hasil_kueri.len() > 0 {
+                for baris in 0..hasil_kueri.len() {
+                    let coa = hasil_kueri[baris].get(0).map(|teks: &str| teks.to_string());
+                    let acc_name = hasil_kueri[baris].get(1).map(|teks: &str| teks.to_string());
+                    let store_code = hasil_kueri[baris].get(2).map(|teks: &str| teks.to_string());
+                    let store_desc = hasil_kueri[baris].get(3).map(|teks: &str| teks.to_string());
+                    let amount = hasil_kueri[baris]
+                        .get(4)
+                        .map(|n: Numeric| n.to_string().parse().unwrap());
+                    let data_laba_rugi_toko = DataLabaRugiToko {
+                        coa,
+                        acc_name,
+                        store_code,
+                        store_desc,
+                        amount,
+                    };
+                    vektor_data.push(data_laba_rugi_toko);
+                }
+            }
+            Ok(HasilKueriLabaRugiToko::DataLabaRugiTokoEnum(vektor_data))
+        }
+        _ => Err("Shouldn't happened".into()),
+    }
+}

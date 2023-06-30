@@ -1,14 +1,117 @@
-import { MRT_ColumnDef } from "mantine-react-table";
+import {
+  MRT_ColumnDef,
+  MRT_ShowHideColumnsButton,
+  MRT_ToggleFiltersButton,
+  MantineReactTableProps,
+} from "mantine-react-table";
 import {
   DataKetersediaanStok,
+  DataLabaRugiToko,
   DataPenerimaanBarang,
   DataPenjualan,
   DataStok,
+  unduhTabelKeExcel,
 } from "./basic";
 import { StatePenjualan } from "./halaman/penjualan";
 import { StatePenerimaanBarang } from "./halaman/penerimaanBarang";
 import { StateStok } from "./halaman/stok";
 import { StateKetersediaanStok } from "./halaman/ketersediaanStok";
+import { Box, Button, Stack } from "@mantine/core";
+import { IconDownload } from "@tabler/icons-react";
+
+export interface TableProps {
+  enableColumnFilterModes?: boolean;
+  enableColumnOrdering?: boolean;
+  enableColumnDragging?: boolean;
+  enablePinning?: boolean;
+  enableGrouping?: boolean;
+  enableColumnActions?: boolean;
+  enableFilterMatchHighlighting?: boolean;
+  enableDensityToggle?: boolean;
+  enableStickyHeader?: boolean;
+  enableStickyFooter?: boolean;
+  enablePagination?: boolean;
+  memoMode?: "cells" | "rows" | "table-body" | undefined;
+  mantineTableContainerProps?: { [key: string]: any };
+  initialState?: { [key: string]: any };
+  renderTopToolbarCustomActions?: () => React.ReactNode;
+  renderToolbarInternalActions?: (table: any) => React.ReactNode;
+  state?: { [key: string]: any };
+}
+
+export const buatPropsTabel = (
+  halaman: string,
+  data: any[],
+  memuat: boolean
+) => {
+  let props: TableProps;
+  switch (halaman) {
+    case "labaRugiToko": {
+      props = {
+        enableColumnFilterModes: true,
+        enableColumnOrdering: true,
+        enableColumnDragging: false,
+        enablePinning: true,
+        enableGrouping: true,
+        enableColumnActions: false,
+        enableFilterMatchHighlighting: false,
+        enableDensityToggle: false,
+        enableStickyHeader: true,
+        enableStickyFooter: true,
+        enablePagination: false,
+        memoMode: "cells",
+        mantineTableContainerProps: {
+          sx: { maxHeight: "65vh" },
+        },
+        initialState: {
+          pagiantion: {
+            pageSize: 45,
+            pageIndex: 0,
+          },
+          showColumnFilters: false,
+          density: "xs",
+        },
+        renderTopToolbarCustomActions: () => (
+          <Box
+            sx={{
+              display: "flex",
+              gap: "16px",
+              padding: "8px",
+              flexWrap: "wrap",
+            }}
+          >
+            <Button
+              color="green"
+              onClick={() => unduhTabelKeExcel(data, halaman)}
+              leftIcon={<IconDownload />}
+              variant="filled"
+            >
+              Unduh ke Excel
+            </Button>
+          </Box>
+        ),
+        // @ts-ignore
+        renderToolbarInternalActions: ({ table }: MantineReactTableProps) => {
+          return (
+            <>
+              <MRT_ToggleFiltersButton table={table} />
+              <MRT_ShowHideColumnsButton table={table} />
+            </>
+          );
+        },
+        state: {
+          isLoading: memuat,
+        },
+      };
+      break;
+    }
+    default: {
+      props = {};
+      break;
+    }
+  }
+  return props;
+};
 
 export const definisiKolomPenjualan = (props: StatePenjualan) => {
   const kolomDef: MRT_ColumnDef<DataPenjualan>[] = [
@@ -775,4 +878,78 @@ export const definisiKolomKetersediaanStok = (props: StateKetersediaanStok) => {
     },
   ];
   return kolomDef;
+};
+
+export const definisiKolomLabaRugiToko = (data: DataLabaRugiToko[]) => {
+  let kolomDef: MRT_ColumnDef<any>[] = [];
+  kolomDef = [
+    {
+      accessorKey: "coa",
+      header: "Chart of Account",
+      enableColumnActions: true,
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "acc_name",
+      header: "Acc. Name",
+      enableColumnActions: true,
+      filterFn: "fuzzy",
+    },
+  ];
+
+  // buat kolom toko secara dinamis...
+  console.log("Test");
+  console.log(data);
+  let list_toko: string[] = [];
+  for (let item of Object.keys(data[0])) {
+    if (typeof data[0][item] === "number") {
+      list_toko.push(item);
+    }
+  }
+  const tokoUnik = [...new Set<string>(list_toko)];
+  console.log(tokoUnik);
+  for (var toko of tokoUnik) {
+    let total = 0;
+    for (let hitung = 0; hitung <= data.length - 1; hitung++) {
+      total +=
+        data[hitung][`${toko}`] !== undefined
+          ? (data[hitung][`${toko}`] as number)
+          : 0;
+    }
+    const kolomToko: MRT_ColumnDef<any> = {
+      accessorKey: `${toko}`,
+      header: `${toko}`,
+      enableColumnActions: true,
+      filterFn: "between",
+      aggregationFn: "sum",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }),
+      Footer: (
+        <Stack>
+          Profit/Loss:
+          <Box
+            sx={(theme) => ({
+              color: total > 0 ? theme.colors.green[5] : theme.colors.red[5],
+              fontWeight: "bolder",
+            })}
+          >
+            {total?.toLocaleString?.("id-ID", {
+              style: "currency",
+              currency: "IDR",
+              maximumFractionDigits: 0,
+            })}
+          </Box>
+        </Stack>
+      ),
+    };
+    kolomDef.push(kolomToko);
+  }
+
+  const kolomFinalDef: MRT_ColumnDef<any>[] = kolomDef;
+
+  return kolomFinalDef;
 };

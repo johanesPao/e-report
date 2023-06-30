@@ -19,6 +19,7 @@ import { StatePenjualan } from "../fungsi/halaman/penjualan";
 import { StatePenerimaanBarang } from "../fungsi/halaman/penerimaanBarang";
 import { StateStok } from "../fungsi/halaman/stok";
 import { StateKetersediaanStok } from "../fungsi/halaman/ketersediaanStok";
+import { StateLabaRugiToko } from "../fungsi/halaman/labaRugiToko";
 
 interface PropsDrawer {
   setPropsPenjualan?: React.Dispatch<React.SetStateAction<StatePenjualan>>;
@@ -29,6 +30,9 @@ interface PropsDrawer {
   setPropsKetersediaanStok?: React.Dispatch<
     React.SetStateAction<StateKetersediaanStok>
   >;
+  setPropsLabaRugiToko?: React.Dispatch<
+    React.SetStateAction<StateLabaRugiToko>
+  >;
 }
 
 const DrawerInput = ({
@@ -36,6 +40,7 @@ const DrawerInput = ({
   setPropsPenerimaanBarang,
   setPropsStok,
   setPropsKetersediaanStok,
+  setPropsLabaRugiToko,
 }: PropsDrawer) => {
   const halaman = useAppSelector(getHalaman);
   const drawerTerbuka = useAppSelector(getDrawerTerbuka);
@@ -97,7 +102,10 @@ const DrawerInput = ({
       case "buyingProposal":
         return () => <InputBuyingProposal />;
       case "labaRugiToko":
-        return () => <InputLabaRugiToko />;
+        if (setPropsLabaRugiToko) {
+          return () => <InputLabaRugiToko setProps={setPropsLabaRugiToko} />;
+        }
+        return () => null;
       default:
         return () => null;
     }
