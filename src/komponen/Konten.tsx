@@ -21,6 +21,7 @@ import { StatePenerimaanBarang } from "../fungsi/halaman/penerimaanBarang";
 import { StateStok } from "../fungsi/halaman/stok";
 import { StateKetersediaanStok } from "../fungsi/halaman/ketersediaanStok";
 import { StateLabaRugiToko } from "../fungsi/halaman/labaRugiToko";
+import { StateKelayakanTokoBaru } from "../fungsi/halaman/kelayakanTokoBaru";
 
 const Konten = () => {
   const navigasi = useNavigate();
@@ -146,6 +147,20 @@ const Konten = () => {
     initialStateLabaRugiToko
   );
 
+  // KELAYAKAN TOKO BARU
+  const initialStateKelayakanTokoBaru: StateKelayakanTokoBaru = {
+    tampilanTabel: [],
+    dataKelayakanTokoBaru: [],
+    muatTabelKelayakanTokoBaru: false,
+    togglePopUp: false,
+    judulPopUp: undefined,
+    modePopUp: undefined,
+    idPopUp: undefined,
+  };
+  const [stateKelayakanTokoBaru, setStateKelayakanTokoBaru] = useState(
+    initialStateKelayakanTokoBaru
+  );
+
   useEffect(() => {
     if (!sesiAktif) {
       navigasi("/");
@@ -188,7 +203,12 @@ const Konten = () => {
           />
         );
       case "kelayakanTokoBaru":
-        return <KelayakanTokoBaru />;
+        return (
+          <KelayakanTokoBaru
+            props={stateKelayakanTokoBaru}
+            setProps={setStateKelayakanTokoBaru}
+          />
+        );
       default:
         return <Dashboard />;
     }

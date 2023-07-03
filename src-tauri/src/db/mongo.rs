@@ -1,13 +1,14 @@
+use futures::stream::TryStreamExt;
 use mongodb::{
     bson::{self, Document},
-    options::ClientOptions,
+    options::{ClientOptions},
     Client, Database,
 };
 use serde::de::DeserializeOwned;
 use std::error::Error;
 
-use crate::fungsi::rahasia;
 use crate::struktur::Pengguna;
+use crate::{fungsi::rahasia, struktur::ProposalTokoBaru};
 
 async fn buka_koneksi() -> Result<Option<Client>, Box<dyn Error>> {
     let mongo_url = rahasia::MONGODB_URL;
@@ -43,6 +44,29 @@ where
 
     if let Some(hasil) = koleksi_user.find_one(auth, None).await? {
         Ok(Some(hasil))
+    } else {
+        Ok(None)
+    }
+}
+
+pub async fn get_all_proposal_toko_baru() -> Result<Option<Vec<ProposalTokoBaru>>, Box<dyn Error>> {
+    let database = bc_database().await?;
+    let koleksi_proposal = database.collection(rahasia::KOLEKSI_PROPOSAL_TOKO_BARU);
+
+    let mut hasil_kueri = koleksi_proposal
+        .find(None, None)
+        .await
+        .expect("Gagal memuat data proposal dari mongodb");
+
+    // Iterasi cursor
+    let mut kumpulan_proposal: Vec<ProposalTokoBaru> = Vec::new();
+    while let Some(proposal) = hasil_kueri.try_next().await? {
+        kumpulan_proposal.push(proposal);
+    }
+
+    // Kembalikan Option Some None jika Ok
+    if kumpulan_proposal.len() > 0 {
+        Ok(Some(kumpulan_proposal))
     } else {
         Ok(None)
     }

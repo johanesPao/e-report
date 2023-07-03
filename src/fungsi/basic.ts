@@ -6,6 +6,7 @@ import {
   setDataPenerimaanBarang,
   setDataPenjualan,
   setDataStok,
+  setDataTabelKelayakanTokoBaru,
 } from "../fitur_state/dataBank";
 import {
   setBrandInput,
@@ -31,6 +32,7 @@ import {
   setHalaman,
   setIndeksData,
   setKonekKeBC,
+  setProsesAuth,
   setSesiAktif,
 } from "../fitur_state/event";
 import {
@@ -54,6 +56,7 @@ export const toTitle = (kalimat: string) => {
 
 export const resetAplikasi = (dispatch: any) => {
   dispatch(setSesiAktif(false));
+  dispatch(setProsesAuth(false));
   dispatch(setNamaPengguna(""));
   dispatch(setEmailPengguna(""));
   dispatch(setDepartemenPengguna(""));
@@ -86,6 +89,7 @@ export const resetAplikasi = (dispatch: any) => {
   dispatch(setDataStok([]));
   dispatch(setDataKetersediaanStok([]));
   dispatch(setDataLabaRugiToko([]));
+  dispatch(setDataTabelKelayakanTokoBaru([]));
 };
 
 export interface Dimensi {
@@ -268,6 +272,80 @@ export type DataLabaRugiToko = {
   coa: string;
   acc_name: string;
   [key: string]: string | number;
+};
+
+export type DataKelayakanTokoBaru = {
+  proposal_id: string;
+  versi: number;
+  data: DataProposalTokoBaru;
+  log_output: string[];
+  remark: RemarkProposal;
+  dibuat: Date;
+  diedit: Date;
+  pengguna: string;
+  status: number;
+};
+
+type DataProposalTokoBaru = {
+  input: InputProposalTokoBaru;
+  output: OutputProposalTokoBaru;
+};
+
+type InputProposalTokoBaru = {
+  nama_model: string;
+  versi_model: string;
+  sbu: string;
+  kota_kabupaten: string;
+  rentang_populasi: string;
+  kelas_mall: string;
+  luas_toko: number;
+  prediksi_model: number;
+  prediksi_user: number;
+  margin_penjualan: number;
+  ppn: number;
+  tahun_umr: number;
+  provinsi_umr: string;
+  jumlah_staff: number;
+  biaya_atk_utilitas: number;
+  biaya_sewa: number;
+  lama_sewa: number;
+  biaya_fitout: number;
+};
+
+type OutputProposalTokoBaru = {
+  user_generated: GeneratedProposalOutput;
+  model_generated: GeneratedProposalOutput;
+};
+
+type GeneratedProposalOutput = {
+  vat: number;
+  net_sales: number;
+  cogs: number;
+  gross_profit: number;
+  staff_expense: number;
+  oau_expense: number;
+  rental_expense: number;
+  fitout_expense: number;
+  store_income: number;
+};
+
+type RemarkProposal = {
+  konten: string;
+};
+
+export type DataTabelKelayakanTokoBaru = {
+  proposal_id: string;
+  versi: number;
+  sbu: string;
+  kota_kabupaten: string;
+  kelas_mall: string;
+  luas_toko: number;
+  user_generated_store_income: number;
+  model_generated_store_income: number;
+  submit_by: string;
+  dibuat: Date;
+  diedit: Date;
+  status: string;
 };
 
 export const unduhTabelKeExcel = (data: any[], halaman: string) => {

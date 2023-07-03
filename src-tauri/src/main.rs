@@ -911,6 +911,18 @@ async fn handle_data_laba_rugi_toko(
     Ok(json!({"status": true, "konten": df_utama}).to_string())
 }
 
+#[tauri::command]
+async fn ambil_semua_proposal_toko_baru() -> Result<String, String> {
+    match mongo::get_all_proposal_toko_baru().await {
+        Ok(Some(kumpulan_proposal)) => {
+            let json = serde_json::to_string(&kumpulan_proposal).map_err(|e| e.to_string())?;
+            Ok(json)
+        }
+        Ok(None) => Ok(r###"{}"###.to_string()),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
 #[tokio::main]
 async fn main() {
     tauri::Builder::default()
@@ -923,7 +935,8 @@ async fn main() {
             handle_data_penerimaan_barang,
             handle_data_stok,
             handle_data_ketersediaan_stok,
-            handle_data_laba_rugi_toko
+            handle_data_laba_rugi_toko,
+            ambil_semua_proposal_toko_baru
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

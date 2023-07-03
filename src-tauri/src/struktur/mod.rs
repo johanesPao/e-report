@@ -1,4 +1,5 @@
 use chrono::NaiveDateTime;
+use mongodb::bson::DateTime;
 use polars::prelude::*;
 use serde::{Deserialize, Deserializer, Serialize};
 use struct_field_names_as_array::FieldNamesAsArray;
@@ -186,6 +187,71 @@ pub struct DataLabaRugiToko {
     pub store_code: Option<String>,
     pub store_desc: Option<String>,
     pub amount: Option<f32>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ProposalTokoBaru {
+    proposal_id: String,
+    versi: i32,
+    data: DataInputOutputProposalTokoBaru,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct DataInputOutputProposalTokoBaru {
+    input: InputProposalTokoBaru,
+    output: UserModelOutputProposalTokoBaru,
+    log_output: Vec<String>,
+    remark: RemarkProposal,
+    dibuat: DateTime,
+    diedit: DateTime,
+    pengguna: String,
+    status: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct InputProposalTokoBaru {
+    nama_model: String,
+    versi_model: String,
+    sbu: String,
+    kota_kabupaten: String,
+    rentang_populasi: String,
+    kelas_mall: String,
+    luas_toko: f64,
+    prediksi_model: f64,
+    prediksi_user: i64,
+    margin_penjualan: f64,
+    ppn: f64,
+    tahun_umr: i64,
+    provinsi_umr: String,
+    jumlah_staff: i64,
+    biaya_atk_utilitas: f64,
+    biaya_sewa: i64,
+    lama_sewa: i64,
+    biaya_fitout: i64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct UserModelOutputProposalTokoBaru {
+    user_generated: OutputProposalTokoBaru,
+    model_generated: OutputProposalTokoBaru,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct OutputProposalTokoBaru {
+    vat: f64,
+    net_sales: f64,
+    cogs: f64,
+    gross_profit: f64,
+    staff_expense: i64,
+    oau_expense: f64,
+    rental_expense: f64,
+    fitout_expense: f64,
+    store_income: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct RemarkProposal {
+    konten: String,
 }
 
 pub trait DataFrameSerial {

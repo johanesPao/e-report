@@ -6,6 +6,7 @@ import {
   DataPenerimaanBarang,
   DataPenjualan,
   DataStok,
+  DataTabelKelayakanTokoBaru,
 } from "../fungsi/basic";
 
 export interface dataState {
@@ -14,6 +15,7 @@ export interface dataState {
   dataStok: DataStok[];
   dataKetersediaanStok: DataKetersediaanStok[];
   dataLabaRugiToko: DataLabaRugiToko[];
+  dataTabelKelayakanTokoBaru: DataTabelKelayakanTokoBaru[];
   // ...
 }
 
@@ -23,6 +25,7 @@ const initialState: dataState = {
   dataStok: [],
   dataKetersediaanStok: [],
   dataLabaRugiToko: [],
+  dataTabelKelayakanTokoBaru: [],
   // ...
 };
 
@@ -51,6 +54,12 @@ const dataSlice = createSlice({
     setDataLabaRugiToko: (state, action: PayloadAction<DataLabaRugiToko[]>) => {
       state.dataLabaRugiToko = action.payload;
     },
+    setDataTabelKelayakanTokoBaru: (
+      state,
+      action: PayloadAction<DataTabelKelayakanTokoBaru[]>
+    ) => {
+      state.dataTabelKelayakanTokoBaru = action.payload;
+    },
     // ...
   },
 });
@@ -61,6 +70,7 @@ export const {
   setDataStok,
   setDataKetersediaanStok,
   setDataLabaRugiToko,
+  setDataTabelKelayakanTokoBaru,
   // ...
 } = dataSlice.actions;
 
@@ -72,5 +82,7 @@ export const getDataKetersediaanStok = (state: RootState) =>
   state.data.dataKetersediaanStok;
 export const getDataLabaRugiToko = (state: RootState) =>
   state.data.dataLabaRugiToko;
+export const getDataTabelKelayakanTokoBaru = (state: RootState) =>
+  state.data.dataTabelKelayakanTokoBaru;
 
 export default dataSlice;

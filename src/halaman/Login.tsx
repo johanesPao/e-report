@@ -22,16 +22,13 @@ import {
   handleTutupAplikasi,
   prosesLogin,
 } from "../fungsi/halaman/login";
-import {
-  getAuthGagal,
-  getProsesAuth,
-  getKonekKeBC,
-} from "../fitur_state/event";
+import { getAuthGagal, getProsesAuth } from "../fitur_state/event";
 import latar1 from "../aset/gambar/shoe1.jpg";
 import latar2 from "../aset/gambar/shoe2.jpg";
 import latar3 from "../aset/gambar/shoe3.jpg";
 import latar4 from "../aset/gambar/shoe4.jpg";
 import { useNavigate } from "react-router-dom";
+import { resetAplikasi } from "../fungsi/basic";
 
 const kolamGambar: string[] = [latar1, latar2, latar3, latar4];
 let gambarAcak: number = Math.floor(Math.random() * kolamGambar.length);
@@ -69,7 +66,7 @@ const Login = () => {
   const prosesAuth = useAppSelector(getProsesAuth);
   const [nama, setNama] = useState("");
   const [kataKunci, setKataKunci] = useState("");
-  const konekKeBC = useAppSelector(getKonekKeBC);
+  // const konekKeBC = useAppSelector(getKonekKeBC);
   const [bcTersedia, setBCTersedia] = useState(false);
   const [koneksiBC, toggleKoneksiBC] = useState(false);
   const navigasi = useNavigate();
@@ -196,7 +193,7 @@ const Login = () => {
           size="xl"
           style={{ backgroundColor: theme.colors.red[7] }}
           disabled={prosesAuth}
-          onClick={() => handleTutupAplikasi(dispatch, konekKeBC)}
+          onClick={() => handleTutupAplikasi(dispatch)}
         >
           Tutup
         </Button>

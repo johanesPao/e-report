@@ -10,14 +10,21 @@ import {
   DataPenerimaanBarang,
   DataPenjualan,
   DataStok,
+  DataTabelKelayakanTokoBaru,
   unduhTabelKeExcel,
 } from "./basic";
 import { StatePenjualan } from "./halaman/penjualan";
 import { StatePenerimaanBarang } from "./halaman/penerimaanBarang";
 import { StateStok } from "./halaman/stok";
 import { StateKetersediaanStok } from "./halaman/ketersediaanStok";
-import { Box, Button, Stack } from "@mantine/core";
-import { IconDownload } from "@tabler/icons-react";
+import { Box, Button, Stack, Title } from "@mantine/core";
+import {
+  IconDownload,
+  IconHomeCheck,
+  IconHomeQuestion,
+  IconHomeX,
+} from "@tabler/icons-react";
+import { StateKelayakanTokoBaru } from "./halaman/kelayakanTokoBaru";
 
 export interface TableProps {
   enableColumnFilterModes?: boolean;
@@ -31,18 +38,30 @@ export interface TableProps {
   enableStickyHeader?: boolean;
   enableStickyFooter?: boolean;
   enablePagination?: boolean;
+  enableRowActions?: boolean;
   memoMode?: "cells" | "rows" | "table-body" | undefined;
   mantineTableContainerProps?: { [key: string]: any };
   initialState?: { [key: string]: any };
-  renderTopToolbarCustomActions?: () => React.ReactNode;
-  renderToolbarInternalActions?: (table: any) => React.ReactNode;
+  renderTopToolbarCustomActions?: () => React.ReactNode | void;
+  renderToolbarInternalActions?: (table: any) => React.ReactNode | void;
+  renderRowActions?: ({
+    cell,
+    row,
+    table,
+  }: {
+    cell: any;
+    row: any;
+    table: any;
+  }) => React.ReactNode | void;
   state?: { [key: string]: any };
+  setProps?: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>;
 }
 
 export const buatPropsTabel = (
   halaman: string,
   data: any[],
-  memuat: boolean
+  memuat: boolean,
+  setProps?: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>
 ) => {
   let props: TableProps;
   // Default props
@@ -141,6 +160,84 @@ export const buatPropsTabel = (
               <MRT_ShowHideColumnsButton table={table} />
             </>
           );
+        },
+      };
+      break;
+    }
+    case "kelayakanTokoBaru": {
+      props = {
+        ...props,
+        enableRowActions: true,
+        mantineTableContainerProps: {
+          sx: { maxHeight: "80vh" },
+        },
+        renderTopToolbarCustomActions: () => {
+          return <Title order={2}>Studi Kelayakan Toko Baru</Title>;
+        },
+        //@ts-ignore
+        renderRowActions: ({ row }: MantineReactTableProps) => {
+          return (
+            <Box sx={{ display: "flex", flexWrap: "nowrap", gap: "8px" }}>
+              <Button
+                color={"green"}
+                onClick={() => {
+                  if (setProps !== undefined) {
+                    setProps((stateSebelumnya) => ({
+                      ...stateSebelumnya,
+                      togglePopUp: true,
+                      judulPopUp: `Persetujuan ${row.original.proposal_id}`,
+                      modePopUp: "persetujuan",
+                      idPopUp: row.original.proposal_id,
+                    }));
+                  }
+                }}
+                leftIcon={<IconHomeCheck />}
+              >
+                Persetujuan
+              </Button>
+              <Button
+                color={"orange"}
+                onClick={() => {
+                  if (setProps !== undefined) {
+                    setProps((stateSebelumnya) => ({
+                      ...stateSebelumnya,
+                      togglePopUp: true,
+                      judulPopUp: `Sunting ${row.original.proposal_id}`,
+                      modePopUp: "sunting",
+                      idPopUp: row.original.proposal_id,
+                    }));
+                  }
+                }}
+                leftIcon={<IconHomeQuestion />}
+              >
+                Sunting
+              </Button>
+              <Button
+                color={"red"}
+                onClick={() => {
+                  if (setProps !== undefined) {
+                    setProps((stateSebelumnya) => ({
+                      ...stateSebelumnya,
+                      togglePopUp: true,
+                      judulPopUp: `Hapus ${row.original.proposal_id}`,
+                      modePopUp: "hapus",
+                      idPopUp: row.original.proposal_id,
+                    }));
+                  }
+                }}
+                leftIcon={<IconHomeX />}
+              >
+                Hapus
+              </Button>
+            </Box>
+          );
+        },
+        initialState: {
+          columnPinning: {
+            left: ["proposal_id", "sbu", "kota_kabupaten"],
+            right: ["mrt-row-actions"],
+          },
+          density: "xs",
         },
       };
       break;
@@ -938,8 +1035,6 @@ export const definisiKolomLabaRugiToko = (data: DataLabaRugiToko[]) => {
   ];
 
   // buat kolom toko secara dinamis...
-  console.log("Test");
-  console.log(data);
   let list_toko: string[] = [];
   for (let item of Object.keys(data[0])) {
     if (typeof data[0][item] === "number") {
@@ -992,4 +1087,114 @@ export const definisiKolomLabaRugiToko = (data: DataLabaRugiToko[]) => {
   const kolomFinalDef: MRT_ColumnDef<any>[] = kolomDef;
 
   return kolomFinalDef;
+};
+
+export const definisiKolomKelayakanTokoBaru = () => {
+  let kolomDef: MRT_ColumnDef<DataTabelKelayakanTokoBaru>[] = [];
+  kolomDef = [
+    {
+      accessorKey: "proposal_id",
+      header: "ID Proposal",
+      enableColumnActions: true,
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "versi",
+      header: "Versi",
+      enableColumnActions: true,
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "sbu",
+      header: "SBU",
+      enableColumnActions: true,
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "kota_kabupaten",
+      header: "Kota / Kabupaten",
+      enableColumnActions: true,
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "kelas_mall",
+      header: "Kelas Mall",
+      enableColumnActions: true,
+      filterFn: "fuzzy",
+    },
+    {
+      // accessorKey: "luas_toko",
+      accessorFn: (baris) => {
+        const luas_toko = baris.luas_toko + " m²";
+        return luas_toko;
+      },
+      header: "Luas Toko",
+      enableColumnActions: true,
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "user_generated_store_income",
+      header: "Store Income (User Generated)",
+      enableColumnActions: true,
+      filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }),
+    },
+    {
+      accessorKey: "model_generated_store_income",
+      header: "Store Income (Model Generated)",
+      enableColumnActions: true,
+      filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }),
+    },
+    {
+      accessorKey: "submit_by",
+      header: "Disubmit Oleh",
+      enableColumnActions: true,
+      filterFn: "fuzzy",
+    },
+    {
+      accessorFn: (baris) => {
+        const dibuat = baris.dibuat;
+        dibuat.setHours(0, 0, 0, 0);
+        return dibuat;
+      },
+      header: "Waktu Proposal Dibuat",
+      enableColumnActions: true,
+      enableColumnFilterModes: false,
+      filterVariant: "date-range",
+      sortingFn: "datetime",
+      Cell: ({ cell }) => cell.getValue<Date>()?.toDateString(),
+    },
+    {
+      accessorFn: (baris) => {
+        const diedit = baris.diedit;
+        diedit.setHours(0, 0, 0, 0);
+        return diedit;
+      },
+      header: "Waktu Proposal Diedit",
+      enableColumnActions: true,
+      enableColumnFilterModes: false,
+      filterVariant: "date-range",
+      sortingFn: "datetime",
+      Cell: ({ cell }) => cell.getValue<Date>()?.toDateString(),
+    },
+    {
+      accessorKey: "status",
+      header: "Status Proposal",
+      enableColumnActions: true,
+      filterFn: "fuzzy",
+    },
+  ];
+
+  return kolomDef;
 };
