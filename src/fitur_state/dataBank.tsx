@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../state/store";
 import {
+  DataKelayakanTokoBaru,
   DataKetersediaanStok,
   DataLabaRugiToko,
   DataPenerimaanBarang,
   DataPenjualan,
   DataStok,
-  DataTabelKelayakanTokoBaru,
 } from "../fungsi/basic";
 
 export interface dataState {
@@ -15,7 +15,7 @@ export interface dataState {
   dataStok: DataStok[];
   dataKetersediaanStok: DataKetersediaanStok[];
   dataLabaRugiToko: DataLabaRugiToko[];
-  dataTabelKelayakanTokoBaru: DataTabelKelayakanTokoBaru[];
+  dataKelayakanTokoBaru: DataKelayakanTokoBaru[];
   // ...
 }
 
@@ -25,7 +25,7 @@ const initialState: dataState = {
   dataStok: [],
   dataKetersediaanStok: [],
   dataLabaRugiToko: [],
-  dataTabelKelayakanTokoBaru: [],
+  dataKelayakanTokoBaru: [],
   // ...
 };
 
@@ -54,11 +54,11 @@ const dataSlice = createSlice({
     setDataLabaRugiToko: (state, action: PayloadAction<DataLabaRugiToko[]>) => {
       state.dataLabaRugiToko = action.payload;
     },
-    setDataTabelKelayakanTokoBaru: (
+    setDataKelayakanTokoBaru: (
       state,
-      action: PayloadAction<DataTabelKelayakanTokoBaru[]>
+      action: PayloadAction<DataKelayakanTokoBaru[]>
     ) => {
-      state.dataTabelKelayakanTokoBaru = action.payload;
+      state.dataKelayakanTokoBaru = action.payload;
     },
     // ...
   },
@@ -70,7 +70,7 @@ export const {
   setDataStok,
   setDataKetersediaanStok,
   setDataLabaRugiToko,
-  setDataTabelKelayakanTokoBaru,
+  setDataKelayakanTokoBaru,
   // ...
 } = dataSlice.actions;
 
@@ -83,6 +83,6 @@ export const getDataKetersediaanStok = (state: RootState) =>
 export const getDataLabaRugiToko = (state: RootState) =>
   state.data.dataLabaRugiToko;
 export const getDataTabelKelayakanTokoBaru = (state: RootState) =>
-  state.data.dataTabelKelayakanTokoBaru;
+  state.data.dataKelayakanTokoBaru;
 
 export default dataSlice;

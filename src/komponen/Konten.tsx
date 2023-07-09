@@ -21,7 +21,12 @@ import { StatePenerimaanBarang } from "../fungsi/halaman/penerimaanBarang";
 import { StateStok } from "../fungsi/halaman/stok";
 import { StateKetersediaanStok } from "../fungsi/halaman/ketersediaanStok";
 import { StateLabaRugiToko } from "../fungsi/halaman/labaRugiToko";
-import { StateKelayakanTokoBaru } from "../fungsi/halaman/kelayakanTokoBaru";
+import {
+  StateKelayakanTokoBaru,
+  ambilInputItemKelayakanTokoBaru,
+  ambilProposal,
+} from "../fungsi/halaman/kelayakanTokoBaru";
+import { EHalaman } from "../fungsi/basic";
 
 const Konten = () => {
   const navigasi = useNavigate();
@@ -152,14 +157,26 @@ const Konten = () => {
     tampilanTabel: [],
     dataKelayakanTokoBaru: [],
     muatTabelKelayakanTokoBaru: false,
-    togglePopUp: false,
-    judulPopUp: undefined,
-    modePopUp: undefined,
-    idPopUp: undefined,
+    popUp: {
+      togglePopUp: false,
+      judulPopUp: undefined,
+    },
+    inputItem: undefined,
   };
   const [stateKelayakanTokoBaru, setStateKelayakanTokoBaru] = useState(
     initialStateKelayakanTokoBaru
   );
+
+  useEffect(() => {
+    if (halaman === EHalaman.KELAYAKAN_TOKO_BARU) {
+      async function proposalDanInput() {
+        await ambilProposal(dispatch, setStateKelayakanTokoBaru);
+        await ambilInputItemKelayakanTokoBaru(setStateKelayakanTokoBaru);
+      }
+
+      proposalDanInput();
+    }
+  }, [halaman]);
 
   useEffect(() => {
     if (!sesiAktif) {
@@ -173,36 +190,36 @@ const Konten = () => {
 
   const renderKonten = () => {
     switch (halaman) {
-      case "penjualan":
+      case EHalaman.PENJUALAN:
         return (
           <Penjualan props={statePenjualan} setProps={setStatePenjualan} />
         );
-      case "penerimaanBarang":
+      case EHalaman.PENERIMAAN_BARANG:
         return (
           <PenerimaanBarang
             props={statePenerimaanBarang}
             setProps={setStatePenerimaanBarang}
           />
         );
-      case "stok":
+      case EHalaman.STOK:
         return <Stok props={stateStok} setProps={setStateStok} />;
-      case "ketersediaanStok":
+      case EHalaman.KETERSEDIAAN_STOK:
         return (
           <KetersediaanStok
             props={stateKetersediaanStok}
             setProps={setStateKetersediaanStok}
           />
         );
-      case "buyingProposal":
+      case EHalaman.BUYING_PROPOSAL:
         return <BuyingProposal />;
-      case "labaRugiToko":
+      case EHalaman.LABA_RUGI_TOKO:
         return (
           <LabaRugiToko
             props={stateLabaRugiToko}
             setProps={setStateLabaRugiToko}
           />
         );
-      case "kelayakanTokoBaru":
+      case EHalaman.KELAYAKAN_TOKO_BARU:
         return (
           <KelayakanTokoBaru
             props={stateKelayakanTokoBaru}
@@ -216,23 +233,23 @@ const Konten = () => {
 
   const renderDrawer = () => {
     switch (halaman) {
-      case "penjualan":
+      case EHalaman.PENJUALAN:
         return <DrawerInput setPropsPenjualan={setStatePenjualan} />;
-      case "penerimaanBarang":
+      case EHalaman.PENERIMAAN_BARANG:
         return (
           <DrawerInput setPropsPenerimaanBarang={setStatePenerimaanBarang} />
         );
-      case "stok":
+      case EHalaman.STOK:
         return <DrawerInput setPropsStok={setStateStok} />;
-      case "ketersediaanStok":
+      case EHalaman.KETERSEDIAAN_STOK:
         return (
           <DrawerInput setPropsKetersediaanStok={setStateKetersediaanStok} />
         );
-      case "buyingProposal":
+      case EHalaman.BUYING_PROPOSAL:
         return null;
-      case "labaRugiToko":
+      case EHalaman.LABA_RUGI_TOKO:
         return <DrawerInput setPropsLabaRugiToko={setStateLabaRugiToko} />;
-      case "kelayakanTokoBaru":
+      case EHalaman.KELAYAKAN_TOKO_BARU:
         return null;
       default:
         return null;

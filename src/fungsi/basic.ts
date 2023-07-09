@@ -1,12 +1,12 @@
 import { utils, writeFile } from "xlsx";
 
 import {
+  setDataKelayakanTokoBaru,
   setDataKetersediaanStok,
   setDataLabaRugiToko,
   setDataPenerimaanBarang,
   setDataPenjualan,
   setDataStok,
-  setDataTabelKelayakanTokoBaru,
 } from "../fitur_state/dataBank";
 import {
   setBrandInput,
@@ -89,7 +89,7 @@ export const resetAplikasi = (dispatch: any) => {
   dispatch(setDataStok([]));
   dispatch(setDataKetersediaanStok([]));
   dispatch(setDataLabaRugiToko([]));
-  dispatch(setDataTabelKelayakanTokoBaru([]));
+  dispatch(setDataKelayakanTokoBaru([]));
 };
 
 export interface Dimensi {
@@ -207,6 +207,7 @@ export type DataPenjualan = {
   total_sales_at_cost: number;
   total_margin_aft_vat_rp: number;
   total_margin_aft_vat_persen: number;
+  total_bruto_aft_vat: number;
 };
 
 export type DataPenerimaanBarang = {
@@ -347,6 +348,96 @@ export type DataTabelKelayakanTokoBaru = {
   diedit: Date;
   status: string;
 };
+
+export interface Formulir {
+  log: string[];
+  proposal_id: string;
+  versi_proposal: number;
+  input: InputFormulir;
+  output: {
+    user_generated: OutputFormulir;
+    model_generated: OutputFormulir;
+  };
+  remark: string;
+}
+
+interface InputFormulir {
+  versi_model: string;
+  nama_model: string;
+  sbu: string;
+  kota_kabupaten: string;
+  rentang_populasi: string;
+  kelas_mall: string;
+  luas_toko: number;
+  prediksi_penjualan_user: number;
+  margin_penjualan: number;
+  ppn: number;
+  tahun_umr: number;
+  provinsi_umr: string;
+  jumlah_staff: number;
+  biaya_oau: number;
+  biaya_sewa: number;
+  lama_sewa: number;
+  biaya_fitout: number;
+}
+
+interface OutputFormulir {
+  sales: number;
+  ppn: number;
+  net_sales: number;
+  cogs: number;
+  gross_profit: number;
+  staff_expense: number;
+  oau_expense: number;
+  rental_expense: number;
+  fitout_expense: number;
+  store_income: number;
+}
+
+export interface IPopUpProps {
+  togglePopUp: boolean;
+  judulPopUp?: string;
+  dataPopUp?: Record<string, any> | Record<string, any>[];
+}
+
+interface ILabelNilaiInputItem {
+  label: string;
+  nilai: string | number;
+}
+
+interface UMRItem {
+  nama_data: string;
+  tahun_data: number;
+  data: ILabelNilaiInputItem[];
+}
+
+export interface IInputItemKelayakanTokoBaru {
+  sbuItem: string[];
+  rentangPopulasiItem: ILabelNilaiInputItem[];
+  kelasMallItem: ILabelNilaiInputItem[];
+  umrItem: UMRItem[];
+}
+
+export enum EHalaman {
+  "PENJUALAN" = "penjualan",
+  "PENERIMAAN_BARANG" = "penerimaanBarang",
+  "STOK" = "stok",
+  "KETERSEDIAAN_STOK" = "ketersediaanStok",
+  "BUYING_PROPOSAL" = "buyingProposal",
+  "LABA_RUGI_TOKO" = "labaRugiToko",
+  "KELAYAKAN_TOKO_BARU" = "kelayakanTokoBaru",
+}
+
+export enum EModePopUp {
+  "KELAYAKAN_TOKO_BARU" = "",
+}
+
+export enum EModePopUpKelayakanTokoBaru {
+  "PENAMBAHAN" = "penambahan",
+  "PERSETUJUAN" = "persetujuan",
+  "SUNTING" = "sunting",
+  "HAPUS" = "hapus",
+}
 
 export const unduhTabelKeExcel = (data: any[], halaman: string) => {
   let file: string;

@@ -3,8 +3,7 @@ import { DataTabelKelayakanTokoBaru } from "../fungsi/basic";
 import { Tabel } from "../komponen/Tabel";
 import { MRT_ColumnDef } from "mantine-react-table";
 import { definisiKolomKelayakanTokoBaru } from "../fungsi/kolom_data";
-import { useAppSelector } from "../state/hook";
-import { getDataTabelKelayakanTokoBaru } from "../fitur_state/dataBank";
+import { useAppDispatch } from "../state/hook";
 import {
   StateKelayakanTokoBaru,
   ambilProposal,
@@ -19,16 +18,16 @@ const KelayakanTokoBaru = ({
   props: StateKelayakanTokoBaru;
   setProps: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>;
 }) => {
-  const dataTampilan = useAppSelector(getDataTabelKelayakanTokoBaru);
+  const dispatch = useAppDispatch();
 
   const definisiKolom = useMemo<MRT_ColumnDef<DataTabelKelayakanTokoBaru>[]>(
     () => definisiKolomKelayakanTokoBaru(),
     []
   );
 
-  useEffect(() => {
-    ambilProposal(setProps);
-  }, [dataTampilan]);
+  // useEffect(() => {
+  //   ambilProposal(dispatch, setProps);
+  // }, []);
 
   return (
     <>

@@ -520,6 +520,14 @@ async fn handle_data_penjualan(
         )
         .collect()
         .unwrap();
+    // TOTAL BRUTO AFT PPN
+    df_gabung = df_gabung
+        .lazy()
+        .with_column(
+            (col("total_sales_at_retail") / (lit(1) + col("ppn"))).alias("total_bruto_aft_vat"),
+        )
+        .collect()
+        .unwrap();
 
     window
         .emit(
@@ -571,6 +579,7 @@ async fn handle_data_penjualan(
             "total_sales_at_cost",
             "total_margin_aft_vat_rp",
             "total_margin_aft_vat_persen",
+            "total_bruto_aft_vat",
         ])
         .unwrap();
 
@@ -923,6 +932,19 @@ async fn ambil_semua_proposal_toko_baru() -> Result<String, String> {
     }
 }
 
+#[tauri::command]
+async fn ambil_input_item_kelayakan_toko_baru() -> Result<String, String> {
+    match mongo::get_all_input_item_toko_baru().await {
+        Ok(Some(kumpulan_input_item)) => {
+            let json = serde_json::to_string(&kumpulan_input_item).map_err(|e| e.to_string())?;
+            println!("{}", json);
+            Ok(json)
+        }
+        Ok(None) => Ok(r###"{}"###.to_string()),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
 #[tokio::main]
 async fn main() {
     tauri::Builder::default()
@@ -936,7 +958,8 @@ async fn main() {
             handle_data_stok,
             handle_data_ketersediaan_stok,
             handle_data_laba_rugi_toko,
-            ambil_semua_proposal_toko_baru
+            ambil_semua_proposal_toko_baru,
+            ambil_input_item_kelayakan_toko_baru
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

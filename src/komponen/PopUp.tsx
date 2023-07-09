@@ -1,4 +1,10 @@
-import { Modal } from "@mantine/core";
+import {
+  Modal,
+  Text,
+  Title,
+  useMantineColorScheme,
+  useMantineTheme,
+} from "@mantine/core";
 import { StateKelayakanTokoBaru } from "../fungsi/halaman/kelayakanTokoBaru";
 import { useAppSelector } from "../state/hook";
 import { getHalaman } from "../fitur_state/event";
@@ -11,11 +17,14 @@ export const PopUp = ({
   props: StateKelayakanTokoBaru;
   setProps: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>;
 }) => {
+  const theme = useMantineTheme();
   const halaman = useAppSelector(getHalaman);
   const renderInput = () => {
     switch (halaman) {
       case "kelayakanTokoBaru": {
-        return <InputPopUpKelayakanTokoBaru props={props} />;
+        return (
+          <InputPopUpKelayakanTokoBaru props={props} setProps={setProps} />
+        );
       }
       default: {
         return null;
@@ -23,21 +32,34 @@ export const PopUp = ({
     }
   };
   return (
-    <Modal
-      opened={props.togglePopUp}
+    <Modal.Root
+      opened={props.popUp.togglePopUp}
       onClose={() =>
         setProps((stateSebelumnya) => ({
           ...stateSebelumnya,
-          togglePopUp: false,
-          judulPopUp: "",
-          modePopUp: undefined,
-          idPopUp: undefined,
+          popUp: {
+            togglePopUp: false,
+            judulPopUp: "",
+            dataPopUp: undefined,
+          },
         }))
       }
-      title={props.judulPopUp}
+      size="100%"
       centered
+      transitionProps={{ transition: "slide-down", duration: 500 }}
+      radius="md"
     >
-      {renderInput()}
-    </Modal>
+      <Modal.Overlay blur={1} />
+      <Modal.Content>
+        <Modal.Header sx={{ backgroundColor: theme.colors.blue[9] }} p={10}>
+          <Modal.Title>
+            <Title order={4} color="white">
+              {props.popUp.judulPopUp}
+            </Title>
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body m={15}>{renderInput()}</Modal.Body>
+      </Modal.Content>
+    </Modal.Root>
   );
 };

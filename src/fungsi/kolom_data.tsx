@@ -17,12 +17,13 @@ import { StatePenjualan } from "./halaman/penjualan";
 import { StatePenerimaanBarang } from "./halaman/penerimaanBarang";
 import { StateStok } from "./halaman/stok";
 import { StateKetersediaanStok } from "./halaman/ketersediaanStok";
-import { Box, Button, Stack, Title } from "@mantine/core";
+import { ActionIcon, Box, Button, Stack, Title, Tooltip } from "@mantine/core";
 import {
   IconDownload,
   IconHomeCheck,
   IconHomeQuestion,
   IconHomeX,
+  IconPlus,
 } from "@tabler/icons-react";
 import { StateKelayakanTokoBaru } from "./halaman/kelayakanTokoBaru";
 
@@ -168,67 +169,127 @@ export const buatPropsTabel = (
       props = {
         ...props,
         enableRowActions: true,
+        enablePagination: true,
         mantineTableContainerProps: {
           sx: { maxHeight: "80vh" },
         },
         renderTopToolbarCustomActions: () => {
-          return <Title order={2}>Studi Kelayakan Toko Baru</Title>;
+          const handlePenambahanProposal = () => {
+            if (setProps !== undefined) {
+              setProps((stateSebelumnya) => ({
+                ...stateSebelumnya,
+                popUp: {
+                  togglePopUp: true,
+                  judulPopUp: "Proposal Toko Baru",
+                },
+              }));
+            }
+          };
+          return (
+            <Box sx={{ display: "flex", flexWrap: "nowrap", gap: "15px" }}>
+              <Title order={2}>Studi Kelayakan Toko Baru</Title>
+              <Tooltip
+                label="Buat Proposal Toko Baru"
+                withArrow
+                transitionProps={{ transition: "rotate-left", duration: 300 }}
+                position="right"
+                pos="fixed"
+                color="blue"
+              >
+                <ActionIcon
+                  variant="filled"
+                  color="blue"
+                  onClick={() => handlePenambahanProposal()}
+                  size="2em"
+                >
+                  <IconPlus size="1em" />
+                </ActionIcon>
+              </Tooltip>
+            </Box>
+          );
         },
         //@ts-ignore
         renderRowActions: ({ row }: MantineReactTableProps) => {
           return (
             <Box sx={{ display: "flex", flexWrap: "nowrap", gap: "8px" }}>
-              <Button
-                color={"green"}
-                onClick={() => {
-                  if (setProps !== undefined) {
-                    setProps((stateSebelumnya) => ({
-                      ...stateSebelumnya,
-                      togglePopUp: true,
-                      judulPopUp: `Persetujuan ${row.original.proposal_id}`,
-                      modePopUp: "persetujuan",
-                      idPopUp: row.original.proposal_id,
-                    }));
-                  }
-                }}
-                leftIcon={<IconHomeCheck />}
+              <Tooltip
+                label={`Approval atau Rejection untuk Proposal ${row.original.proposal_id}`}
+                withArrow
+                transitionProps={{ transition: "rotate-left", duration: 300 }}
+                position="left"
+                pos="fixed"
+                color="teal"
               >
-                Persetujuan
-              </Button>
-              <Button
-                color={"orange"}
-                onClick={() => {
-                  if (setProps !== undefined) {
-                    setProps((stateSebelumnya) => ({
-                      ...stateSebelumnya,
-                      togglePopUp: true,
-                      judulPopUp: `Sunting ${row.original.proposal_id}`,
-                      modePopUp: "sunting",
-                      idPopUp: row.original.proposal_id,
-                    }));
-                  }
-                }}
-                leftIcon={<IconHomeQuestion />}
+                <ActionIcon
+                  variant="light"
+                  color={"green"}
+                  onClick={() => {
+                    if (setProps !== undefined) {
+                      setProps((stateSebelumnya) => ({
+                        ...stateSebelumnya,
+                        popUp: {
+                          togglePopUp: true,
+                          judulPopUp: `Persetujuan ${row.original.proposal_id}`,
+                        },
+                      }));
+                    }
+                  }}
+                >
+                  <IconHomeCheck />
+                </ActionIcon>
+              </Tooltip>
+              <Tooltip
+                label={`Sunting Perubahan untuk Proposal ${row.original.proposal_id}`}
+                withArrow
+                transitionProps={{ transition: "rotate-left", duration: 300 }}
+                position="left"
+                pos="fixed"
+                color="orange"
               >
-                Sunting
-              </Button>
-              <Button
-                color={"red"}
-                onClick={() => {
-                  if (setProps !== undefined) {
-                    setProps((stateSebelumnya) => ({
-                      ...stateSebelumnya,
-                      togglePopUp: true,
-                      judulPopUp: `Hapus ${row.original.proposal_id}`,
-                      modePopUp: "hapus",
-                      idPopUp: row.original.proposal_id,
-                    }));
-                  }
-                }}
-                leftIcon={<IconHomeX />}
+                <ActionIcon
+                  variant="light"
+                  color={"orange"}
+                  onClick={() => {
+                    if (setProps !== undefined) {
+                      setProps((stateSebelumnya) => ({
+                        ...stateSebelumnya,
+                        popUp: {
+                          togglePopUp: true,
+                          judulPopUp: `Sunting ${row.original.proposal_id}`,
+                        },
+                      }));
+                    }
+                  }}
+                >
+                  <IconHomeQuestion />
+                </ActionIcon>
+              </Tooltip>
+              <Tooltip
+                label={`Hapus Proposal ${row.original.proposal_id}?`}
+                withArrow
+                transitionProps={{ transition: "rotate-left", duration: 300 }}
+                position="left"
+                pos="fixed"
+                color="red"
               >
-                Hapus
-              </Button>
+                <ActionIcon
+                  variant="light"
+                  color={"red"}
+                  onClick={() => {
+                    if (setProps !== undefined) {
+                      setProps((stateSebelumnya) => ({
+                        ...stateSebelumnya,
+                        popUp: {
+                          togglePopUp: true,
+                          judulPopUp: `Hapus ${row.original.proposal_id}`,
+                        },
+                      }));
+                    }
+                  }}
+                >
+                  <IconHomeX />
+                </ActionIcon>
+              </Tooltip>
             </Box>
           );
         },
@@ -236,6 +297,10 @@ export const buatPropsTabel = (
           columnPinning: {
             left: ["proposal_id", "sbu", "kota_kabupaten"],
             right: ["mrt-row-actions"],
+          },
+          pagination: {
+            pageSize: 15,
+            pageIndex: 0,
           },
           density: "xs",
         },
@@ -571,6 +636,17 @@ export const definisiKolomPenjualan = (props: StatePenjualan) => {
         cell.getValue<number>().toLocaleString("id-ID", {
           style: "percent",
           maximumFractionDigits: 2,
+        }),
+    },
+    {
+      accessorKey: "total_bruto_aft_vat",
+      header: "Total Bruto Aft. VAT (Rp)",
+      filterFn: "between",
+      Cell: ({ cell }) =>
+        cell.getValue<number>().toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
         }),
     },
   ];

@@ -254,6 +254,33 @@ struct RemarkProposal {
     konten: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LabelNilaiInputItem {
+    label: String,
+    nilai: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Model {
+    pub sbu: Vec<String>,
+    pub rentang_populasi_er: Vec<LabelNilaiInputItem>,
+    pub kelas_mall_er: Vec<LabelNilaiInputItem>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct InputItemUMRKelayakanTokoBaru {
+    pub tahun_data: i32,
+    pub data: Vec<LabelNilaiInputItem>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct InputItemKelayakanTokoBaru {
+    pub sbu_item: Vec<String>,
+    pub rentang_populasi_item: Vec<LabelNilaiInputItem>,
+    pub kelas_mall_item: Vec<LabelNilaiInputItem>,
+    pub umr_item: Vec<InputItemUMRKelayakanTokoBaru>,
+}
+
 pub trait DataFrameSerial {
     fn ke_series(&self) -> Vec<Series>;
 }

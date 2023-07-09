@@ -1,13 +1,15 @@
 use futures::stream::TryStreamExt;
 use mongodb::{
-    bson::{self, Document},
-    options::{ClientOptions},
+    bson::{doc, Document},
+    options::ClientOptions,
     Client, Database,
 };
 use serde::de::DeserializeOwned;
 use std::error::Error;
 
-use crate::struktur::Pengguna;
+use crate::struktur::{
+    InputItemKelayakanTokoBaru, InputItemUMRKelayakanTokoBaru, LabelNilaiInputItem, Model, Pengguna,
+};
 use crate::{fungsi::rahasia, struktur::ProposalTokoBaru};
 
 async fn buka_koneksi() -> Result<Option<Client>, Box<dyn Error>> {
@@ -40,7 +42,7 @@ where
     let database = bc_database().await?;
     let koleksi_user: mongodb::Collection<_> = database.collection(rahasia::KOLEKSI_PENGGUNA);
 
-    let auth = bson::doc! {"nama": nama, "password": kata_kunci};
+    let auth = doc! {"nama": nama, "password": kata_kunci};
 
     if let Some(hasil) = koleksi_user.find_one(auth, None).await? {
         Ok(Some(hasil))
@@ -67,6 +69,54 @@ pub async fn get_all_proposal_toko_baru() -> Result<Option<Vec<ProposalTokoBaru>
     // Kembalikan Option Some None jika Ok
     if kumpulan_proposal.len() > 0 {
         Ok(Some(kumpulan_proposal))
+    } else {
+        Ok(None)
+    }
+}
+
+pub async fn get_all_input_item_toko_baru(
+) -> Result<Option<InputItemKelayakanTokoBaru>, Box<dyn Error>> {
+    let database = bc_database().await?;
+    let koleksi_model = database.collection::<Model>(rahasia::KOLEKSI_MODEL);
+    let koleksi_statistik_nasional =
+        database.collection::<InputItemUMRKelayakanTokoBaru>(rahasia::KOLEKSI_STATISTIK_NASIONAL);
+
+    let mut filter = doc! { "nama_model": "leaveoneout_n_30_Model_DNN_3_Layer_RELU_128_128"};
+
+    let hasil_kueri_model = koleksi_model
+        .find_one(filter, None)
+        .await
+        .expect("Gagal memuat data input_item dari mongodb");
+
+    let mut input_item_sbu: Vec<String> = Vec::new();
+    let mut input_item_rentang_populasi: Vec<LabelNilaiInputItem> = Vec::new();
+    let mut input_item_kelas_mall: Vec<LabelNilaiInputItem> = Vec::new();
+    if let Some(model) = hasil_kueri_model {
+        input_item_sbu = model.sbu;
+        input_item_rentang_populasi = model.rentang_populasi_er;
+        input_item_kelas_mall = model.kelas_mall_er;
+    }
+
+    filter = doc! { "nama_data": "umr"};
+
+    let mut hasil_kueri_umr = koleksi_statistik_nasional
+        .find(filter, None)
+        .await
+        .expect("Gagal memuat data umr dari mongodb");
+
+    let mut kumpulan_data_umr: Vec<InputItemUMRKelayakanTokoBaru> = Vec::new();
+    while let Some(data_umr) = hasil_kueri_umr.try_next().await? {
+        kumpulan_data_umr.push(data_umr);
+    }
+
+    if kumpulan_data_umr.len() > 0 {
+        let input_item_final = InputItemKelayakanTokoBaru {
+            sbu_item: input_item_sbu,
+            rentang_populasi_item: input_item_rentang_populasi,
+            kelas_mall_item: input_item_kelas_mall,
+            umr_item: kumpulan_data_umr,
+        };
+        Ok(Some(input_item_final))
     } else {
         Ok(None)
     }

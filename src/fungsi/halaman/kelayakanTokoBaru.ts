@@ -1,17 +1,42 @@
 import { invoke } from "@tauri-apps/api/tauri";
-import { DataKelayakanTokoBaru, DataTabelKelayakanTokoBaru } from "../basic";
+import {
+  DataKelayakanTokoBaru,
+  DataTabelKelayakanTokoBaru,
+  IInputItemKelayakanTokoBaru,
+  IPopUpProps,
+} from "../basic";
+import { setDataKelayakanTokoBaru } from "../../fitur_state/dataBank";
 
 export interface StateKelayakanTokoBaru {
   tampilanTabel: DataTabelKelayakanTokoBaru[];
   dataKelayakanTokoBaru: DataKelayakanTokoBaru[];
   muatTabelKelayakanTokoBaru: boolean;
-  togglePopUp: boolean;
-  judulPopUp: string | undefined;
-  modePopUp: "persetujuan" | "sunting" | "hapus" | undefined;
-  idPopUp: number | undefined;
+  popUp: IPopUpProps;
+  inputItem: IInputItemKelayakanTokoBaru | undefined;
 }
 
+export const ambilInputItemKelayakanTokoBaru = async (
+  setProps: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>
+) => {
+  const respon: string = await invoke("ambil_input_item_kelayakan_toko_baru");
+  const hasil = JSON.parse(respon);
+
+  if (hasil) {
+    const inputItem: IInputItemKelayakanTokoBaru = {
+      sbuItem: hasil.sbu_item,
+      rentangPopulasiItem: hasil.rentang_populasi_item,
+      kelasMallItem: hasil.kelas_mall_item,
+      umrItem: hasil.umr_item,
+    };
+    setProps((stateSebelumnya) => ({
+      ...stateSebelumnya,
+      inputItem,
+    }));
+  }
+};
+
 export const ambilProposal = async (
+  dispatch: any,
   setProps: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>
 ) => {
   setProps((stateSebelumnya) => ({
@@ -22,7 +47,8 @@ export const ambilProposal = async (
   const hasil = JSON.parse(respon);
 
   if (hasil.length > 0) {
-    console.log(hasil);
+    // simpan data full proposal
+    dispatch(setDataKelayakanTokoBaru(hasil));
     // unik proposal
     let proposalList: string[] = [];
     for (let hitung = 0; hitung < hasil.length; hitung++) {

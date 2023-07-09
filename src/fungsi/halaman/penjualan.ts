@@ -343,6 +343,8 @@ const bacaDataPenjualan = (dispatch: any, data: any[]) => {
         data[34]["values"][hitung] !== null ? data[34]["values"][hitung] : 0,
       total_margin_aft_vat_persen:
         data[35]["values"][hitung] !== null ? data[35]["values"][hitung] : 0,
+      total_bruto_aft_vat:
+        data[36]["values"][hitung] !== null ? data[36]["values"][hitung] : 0,
     });
   }
   dispatch(setDataPenjualan(arrDataPenjualan));
