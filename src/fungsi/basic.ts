@@ -352,7 +352,7 @@ export type DataTabelKelayakanTokoBaru = {
 export interface Formulir {
   log: string[];
   proposal_id: string;
-  versi_proposal: number;
+  versi_proposal: string;
   input: InputFormulir;
   output: {
     user_generated: OutputFormulir;
@@ -362,23 +362,23 @@ export interface Formulir {
 }
 
 interface InputFormulir {
-  versi_model: string;
-  nama_model: string;
-  sbu: string;
-  kota_kabupaten: string;
-  rentang_populasi: string;
-  kelas_mall: string;
-  luas_toko: number;
-  prediksi_penjualan_user: number;
-  margin_penjualan: number;
-  ppn: number;
-  tahun_umr: number;
-  provinsi_umr: string;
-  jumlah_staff: number;
-  biaya_oau: number;
-  biaya_sewa: number;
-  lama_sewa: number;
-  biaya_fitout: number;
+  versi_model?: string;
+  nama_model?: string;
+  sbu?: string;
+  kota_kabupaten?: string;
+  rentang_populasi?: number;
+  kelas_mall?: number;
+  luas_toko?: number;
+  prediksi_penjualan_user?: number;
+  margin_penjualan?: number;
+  ppn?: number;
+  tahun_umr?: string;
+  provinsi_umr?: string;
+  jumlah_staff?: number;
+  biaya_oau?: number;
+  biaya_sewa?: number;
+  lama_sewa?: number;
+  biaya_fitout?: number;
 }
 
 interface OutputFormulir {
@@ -394,28 +394,109 @@ interface OutputFormulir {
   store_income: number;
 }
 
+export interface IDisabilitasInputKelayakanTokoBaru {
+  versi_proposal: boolean;
+  sbu: boolean;
+  kota_kabupaten: boolean;
+  rentang_populasi: boolean;
+  kelas_mall: boolean;
+  luas_toko: boolean;
+  prediksi_penjualan_user: boolean;
+  margin_penjualan: boolean;
+  ppn: boolean;
+  tahun_umr: boolean;
+  provinsi_umr: boolean;
+  jumlah_staff: boolean;
+  biaya_oau: boolean;
+  biaya_sewa: boolean;
+  lama_sewa: boolean;
+  biaya_fitout: boolean;
+}
+
 export interface IPopUpProps {
   togglePopUp: boolean;
   judulPopUp?: string;
   dataPopUp?: Record<string, any> | Record<string, any>[];
+  modePopUp?: string;
 }
 
-interface ILabelNilaiInputItem {
+export interface ILabelValueInputItem {
   label: string;
-  nilai: string | number;
+  value: string | number;
+}
+
+export interface IRentangPopulasiInputItem {
+  label: string;
+  value: number;
+}
+
+export interface IUMRInputItem {
+  label: string;
+  value: string;
 }
 
 interface UMRItem {
   nama_data: string;
   tahun_data: number;
-  data: ILabelNilaiInputItem[];
+  data: ILabelValueInputItem[];
 }
 
 export interface IInputItemKelayakanTokoBaru {
   sbuItem: string[];
-  rentangPopulasiItem: ILabelNilaiInputItem[];
-  kelasMallItem: ILabelNilaiInputItem[];
+  rentangPopulasiItem: ILabelValueInputItem[];
+  kelasMallItem: ILabelValueInputItem[];
   umrItem: UMRItem[];
+  model: IModelKelayakanTokoBaru;
+}
+
+export interface IModelKelayakanTokoBaru {
+  namaModelUrl: string;
+  namaModel: string;
+  versi: string;
+  mean: string;
+  std: string;
+}
+
+export interface IDataInputItemKelayakanTokoBaru {
+  versiTerpilih: string[];
+  sbuItem: string[];
+  rentangPopulasi: IRentangPopulasiInputItem[];
+  kelasMall: {
+    iconSemua: React.ReactNode | ((nilai: number) => React.ReactNode);
+    iconTerpilih: React.ReactNode | ((nilai: number) => React.ReactNode);
+  };
+  tahunUMR: IUMRInputItem[];
+  provinsiUMR: IUMRInputItem[][];
+}
+
+export interface IChatGPT {
+  klien: IChatGPTClient;
+  kueri: IKotaKabupatenKueriChatGPT;
+}
+
+export interface IChatGPTClient {
+  endpoint_api: string;
+  kunci_api: string;
+  model_gpt: string;
+  temperature: number;
+  top_p: number;
+  n: number;
+}
+
+export interface IKotaKabupatenKueriChatGPT {
+  kota_eksis: IChatGPTKueri;
+  populasi_kota_kabupaten: IChatGPTKueri;
+  provinsi_kota_kabupaten: IChatGPTKueri;
+}
+
+export interface IChatGPTKueri {
+  role: Record<string, any>[];
+  prompt: Record<string, any>;
+}
+
+export enum EPlaceholderTeks {
+  "NAMA_KOTA_GPT" = "[nama_kota]",
+  "LIST_PROVINSI_GPT" = "[list_provinsi]",
 }
 
 export enum EHalaman {
@@ -426,10 +507,6 @@ export enum EHalaman {
   "BUYING_PROPOSAL" = "buyingProposal",
   "LABA_RUGI_TOKO" = "labaRugiToko",
   "KELAYAKAN_TOKO_BARU" = "kelayakanTokoBaru",
-}
-
-export enum EModePopUp {
-  "KELAYAKAN_TOKO_BARU" = "",
 }
 
 export enum EModePopUpKelayakanTokoBaru {

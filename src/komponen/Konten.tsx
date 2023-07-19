@@ -23,7 +23,7 @@ import { StateKetersediaanStok } from "../fungsi/halaman/ketersediaanStok";
 import { StateLabaRugiToko } from "../fungsi/halaman/labaRugiToko";
 import {
   StateKelayakanTokoBaru,
-  ambilInputItemKelayakanTokoBaru,
+  ambilInputItemModelKelayakanTokoBaru,
   ambilProposal,
 } from "../fungsi/halaman/kelayakanTokoBaru";
 import { EHalaman } from "../fungsi/basic";
@@ -161,22 +161,33 @@ const Konten = () => {
       togglePopUp: false,
       judulPopUp: undefined,
     },
-    inputItem: undefined,
+    inputItem: {
+      sbuItem: [],
+      rentangPopulasiItem: [],
+      kelasMallItem: [],
+      umrItem: [],
+      model: {
+        namaModelUrl: "",
+        namaModel: "",
+        versi: "",
+        mean: "",
+        std: "",
+      },
+    },
   };
   const [stateKelayakanTokoBaru, setStateKelayakanTokoBaru] = useState(
     initialStateKelayakanTokoBaru
   );
 
   useEffect(() => {
-    if (halaman === EHalaman.KELAYAKAN_TOKO_BARU) {
-      async function proposalDanInput() {
-        await ambilProposal(dispatch, setStateKelayakanTokoBaru);
-        await ambilInputItemKelayakanTokoBaru(setStateKelayakanTokoBaru);
-      }
-
-      proposalDanInput();
+    async function proposalDanInput() {
+      await ambilProposal(dispatch, setStateKelayakanTokoBaru);
+      await ambilInputItemModelKelayakanTokoBaru(setStateKelayakanTokoBaru);
     }
-  }, [halaman]);
+
+    proposalDanInput();
+    console.log(stateKelayakanTokoBaru.inputItem);
+  }, []);
 
   useEffect(() => {
     if (!sesiAktif) {

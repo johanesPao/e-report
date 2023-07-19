@@ -11,6 +11,7 @@ import {
   DataPenjualan,
   DataStok,
   DataTabelKelayakanTokoBaru,
+  EModePopUpKelayakanTokoBaru,
   unduhTabelKeExcel,
 } from "./basic";
 import { StatePenjualan } from "./halaman/penjualan";
@@ -174,13 +175,14 @@ export const buatPropsTabel = (
           sx: { maxHeight: "80vh" },
         },
         renderTopToolbarCustomActions: () => {
-          const handlePenambahanProposal = () => {
+          const popUpPenambahanProposal = () => {
             if (setProps !== undefined) {
               setProps((stateSebelumnya) => ({
                 ...stateSebelumnya,
                 popUp: {
                   togglePopUp: true,
                   judulPopUp: "Proposal Toko Baru",
+                  modePopUp: EModePopUpKelayakanTokoBaru.PENAMBAHAN,
                 },
               }));
             }
@@ -199,7 +201,7 @@ export const buatPropsTabel = (
                 <ActionIcon
                   variant="filled"
                   color="blue"
-                  onClick={() => handlePenambahanProposal()}
+                  onClick={() => popUpPenambahanProposal()}
                   size="2em"
                 >
                   <IconPlus size="1em" />
@@ -230,6 +232,7 @@ export const buatPropsTabel = (
                         popUp: {
                           togglePopUp: true,
                           judulPopUp: `Persetujuan ${row.original.proposal_id}`,
+                          modePopUp: EModePopUpKelayakanTokoBaru.PERSETUJUAN,
                         },
                       }));
                     }
@@ -256,6 +259,7 @@ export const buatPropsTabel = (
                         popUp: {
                           togglePopUp: true,
                           judulPopUp: `Sunting ${row.original.proposal_id}`,
+                          modePopUp: EModePopUpKelayakanTokoBaru.SUNTING,
                         },
                       }));
                     }
@@ -282,6 +286,7 @@ export const buatPropsTabel = (
                         popUp: {
                           togglePopUp: true,
                           judulPopUp: `Hapus ${row.original.proposal_id}`,
+                          modePopUp: EModePopUpKelayakanTokoBaru.HAPUS,
                         },
                       }));
                     }

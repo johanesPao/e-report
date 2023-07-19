@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
 use polars::prelude::*;
+use regex::Regex;
 use serde_json::{self, json};
 
 use crate::db::mongo;
@@ -933,16 +933,116 @@ async fn ambil_semua_proposal_toko_baru() -> Result<String, String> {
 }
 
 #[tauri::command]
-async fn ambil_input_item_kelayakan_toko_baru() -> Result<String, String> {
-    match mongo::get_all_input_item_toko_baru().await {
+async fn ambil_input_item_model_kelayakan_toko_baru() -> Result<String, String> {
+    match mongo::get_all_input_item_model_toko_baru().await {
         Ok(Some(kumpulan_input_item)) => {
             let json = serde_json::to_string(&kumpulan_input_item).map_err(|e| e.to_string())?;
-            println!("{}", json);
             Ok(json)
         }
         Ok(None) => Ok(r###"{}"###.to_string()),
         Err(e) => Err(e.to_string()),
     }
+}
+
+#[tauri::command]
+async fn kueri_kota_kabupaten_chatgpt(
+    klien_konfig: KlienKonfigChatGPT,
+    kueri: KotaKabupatenPopulasiProvinsiKontenChatGPT,
+    list_provinsi: Vec<String>,
+) -> Result<String, String> {
+    // let hasil_kota_eksis = match fungsi::ai::kueri(&klien_konfig, kueri.kota_eksis).await {
+    //     Ok(respon) => respon,
+    //     Err(e) => {
+    //         format!("Terjadi kesalahan saat melakukan kueri ChatGPT: {}", e)
+    //     }
+    // };
+    // cek kota kabupaten eksis
+    let hasil_kueri = match fungsi::ai::kueri(&klien_konfig, kueri.kota_eksis).await {
+        // jika kota kabupaten eksis
+        Ok(kota_eksis) => {
+            if kota_eksis.as_str() == "True" {
+                // kueri populasi kota kabupaten ke ChatGPT
+                let hasil_populasi = match fungsi::ai::kueri(&klien_konfig, kueri.populasi_kota_kabupaten).await {
+                    Ok(respon_populasi) => {
+                        // ekstrak angka populasi dari respon chatGPT
+                        let regex_populasi = Regex::new(r"\w[0-9.,]*\|[0-9]*").unwrap();
+                        let kecocokan = match regex_populasi.find(respon_populasi.as_str()) {
+                            // regex menemukan kecocokan
+                            Some(populasi) => HasilChatGPT {
+                                status: true,
+                                konten: populasi
+                            },
+                            None => HasilChatGPT {
+                                status: false,
+                                konten: format!("Tidak berhasil mengekstrak angka populasi dari respon ChatGPT")
+                            }
+                        };
+                        kecocokan
+                    }
+                    Err(e) => HasilChatGPT {
+                        status: false,
+                        konten: format!("Terjadi kesalahan saat melakukan kueri ChatGPT untuk populasi kota kabupaten: {}", e)
+                    }
+                };
+                let hasil_provinsi = match fungsi::ai::kueri(&klien_konfig, kueri.provinsi_kota_kabupaten).await {
+                    Ok(respon_provinsi) => {
+                        // cek jika provinsi ada dalam list_provinsi
+                        if list_provinsi.iter().any(|&provinsi| provinsi == respon_provinsi) {
+                            // set HasilChatGPT true
+                            HasilChatGPT {
+                                status: true,
+                                konten: respon_provinsi
+                            }
+                        } else {
+                            // set HasilChatGPT false
+                            HasilChatGPT {
+                                status: false,
+                                konten: format!("Tidak berhasil menemukan provinsi kota kabupaten dalam respon ChatGPT")
+                            }
+                        }
+                    },
+                    Err(e) => HasilChatGPT {
+                        status: false,
+                        konten: format!("Terjadi kesalahan saat melakukan kueri ChatGPT untuk provinsi kota kabupaten: {}", e)}
+                };
+                Ok(json!({"status": true, "konten": HasilKotaKabupatenChatGPT {
+                        populasi_kota_kabupaten: hasil_populasi,
+                    provinsi_kota_kabupaten: hasil_provinsi
+                }})
+                .to_string())
+            } else {
+                Ok(json!({"status": false, "konten": "ChatGPT tidak mengenali nama kota/kabupaten"}).to_string())
+            }
+        } 
+        Err(e) => {
+              Err(json!({"status": false, "konten": format!("Terjadi kesalahan saat melakukan kueri ChatGPT: {}", e)}).to_string())
+          }
+    };
+    Ok(hasil_kueri?)
+    // Err(json!({"status": false, "konten": format!("Terjadi kesalahan saat melakukan kueri ChatGPT")}).to_string());
+
+    // let hasil_populasi = match fungsi::ai::kueri(&klien_konfig, kueri.populasi_kota_kabupaten).await
+    // {
+    //     Ok(respon) => respon,
+    //     Err(e) => {
+    //         format!("Terjadi kesalahan saat melakukan kueri ChatGPT: {}", e)
+    //     }
+    // };
+    // let hasil_provinsi = match fungsi::ai::kueri(&klien_konfig, kueri.provinsi_kota_kabupaten).await
+    // {
+    //     Ok(respon) => respon,
+    //     Err(e) => {
+    //         format!("Terjadi kesalahan saat melakukan kueri ChatGPT: {}", e)
+    //     }
+    // };
+    // let hasil_kueri = HasilKotaKabupatenChatGPT {
+    //     kota_eksis: hasil_kota_eksis,
+    //     populasi_kota_kabupaten: hasil_populasi,
+    //     provinsi_kota_kabupaten: hasil_provinsi,
+    // };
+    // return Ok(serde_json::to_string(&hasil_kueri)
+    //     .map_err(|e| format!("Kesalahan dalam melakukan serialisasi hasil_kueri: {}", e))?);
+    // Err("Err".as_str())
 }
 
 #[tokio::main]
@@ -959,7 +1059,8 @@ async fn main() {
             handle_data_ketersediaan_stok,
             handle_data_laba_rugi_toko,
             ambil_semua_proposal_toko_baru,
-            ambil_input_item_kelayakan_toko_baru
+            ambil_input_item_model_kelayakan_toko_baru,
+            kueri_kota_kabupaten_chatgpt
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

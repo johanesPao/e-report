@@ -6,6 +6,7 @@ import {
   Flex,
   Grid,
   Group,
+  Loader,
   NumberInput,
   NumberInputHandlers,
   Rating,
@@ -15,6 +16,7 @@ import {
   Slider,
   Text,
   TextInput,
+  Textarea,
   Title,
   rem,
   useMantineTheme,
@@ -22,9 +24,21 @@ import {
 import { useForm } from "@mantine/form";
 import {
   StateKelayakanTokoBaru,
-  ambilInputItemKelayakanTokoBaru,
+  generateProposalID,
+  kueriChatGPT,
+  prosesSimpanKelayakanTokoBaru,
+  rubahPlaceholderKueriChatGPT,
 } from "../../fungsi/halaman/kelayakanTokoBaru";
-import { Formulir, IInputItemKelayakanTokoBaru } from "../../fungsi/basic";
+import {
+  EModePopUpKelayakanTokoBaru,
+  Formulir,
+  IChatGPT,
+  IDataInputItemKelayakanTokoBaru,
+  IDisabilitasInputKelayakanTokoBaru,
+  IRentangPopulasiInputItem,
+  IUMRInputItem,
+  toTitle,
+} from "../../fungsi/basic";
 import {
   IconBriefcase,
   IconBuilding,
@@ -49,7 +63,8 @@ import {
   IconZoomInArea,
 } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
-import { invoke } from "@tauri-apps/api/tauri";
+import { useAppSelector } from "../../state/hook";
+import { getParameterBc } from "../../fitur_state/dataParam";
 
 export const InputPopUpKelayakanTokoBaru = ({
   props,
@@ -59,42 +74,144 @@ export const InputPopUpKelayakanTokoBaru = ({
   setProps: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>;
 }) => {
   const theme = useMantineTheme();
-  // Ambil beberapa parameter input item dari mongodb pada first render
-  // const [inputItem, setInputItem] = useState<
-  //   IInputItemKelayakanTokoBaru | undefined
-  // >(undefined);
-  // useEffect(() => {
-  //   const ambil_input_item = async () => {
-  //     await ambilInputItemKelayakanTokoBaru(setInputItem);
-  //   };
-  //   ambil_input_item();
-  // }, []);
+  const parameterBc = useAppSelector(getParameterBc);
+  const chatGPT: IChatGPT = {
+    klien: {
+      endpoint_api: parameterBc.chatgpt.endpoint_api,
+      kunci_api: parameterBc.chatgpt.kunci_api,
+      model_gpt: parameterBc.chatgpt.model_gpt,
+      temperature: parameterBc.chatgpt.temperature,
+      top_p: parameterBc.chatgpt.top_p,
+      n: parameterBc.chatgpt.n,
+    },
+    kueri: {
+      kota_eksis: {
+        role: parameterBc.chatgpt.role_kota_eksis,
+        prompt: parameterBc.chatgpt.prompt_kota_eksis,
+      },
+      populasi_kota_kabupaten: {
+        role: parameterBc.chatgpt.role_populasi_kota_kabupaten,
+        prompt: parameterBc.chatgpt.prompt_populasi_kota_kabupaten,
+      },
+      provinsi_kota_kabupaten: {
+        role: parameterBc.chatgpt.role_provinsi_kota_kabupaten,
+        prompt: parameterBc.chatgpt.prompt_provinsi_kota_kabupaten,
+      },
+    },
+  };
+
+  // konversi data rentang populasi
+  let dataRentangPopulasi: IRentangPopulasiInputItem[] = [];
+  for (
+    let hitung = 0;
+    hitung < props.inputItem.rentangPopulasiItem.length;
+    hitung++
+  ) {
+    dataRentangPopulasi.push({
+      value: hitung * 20,
+      label: props.inputItem.rentangPopulasiItem[hitung].label,
+    });
+  }
+  // konversi data tahun umr
+  let dataTahunUMR: IUMRInputItem[] = [];
+  let dataProvinsiUMR: IUMRInputItem[][] = [];
+  for (let hitung = 0; hitung < props.inputItem.umrItem.length; hitung++) {
+    dataTahunUMR.push({
+      value: props.inputItem.umrItem[hitung].tahun_data.toString(),
+      label: props.inputItem.umrItem[hitung].tahun_data.toString(),
+    });
+    let dataProvinsiTahun: IUMRInputItem[] = [];
+    for (
+      let hitungProvinsi = 0;
+      hitungProvinsi < props.inputItem.umrItem[hitung].data.length;
+      hitungProvinsi++
+    ) {
+      dataProvinsiTahun.push({
+        value: props.inputItem.umrItem[hitung].data[hitungProvinsi].label,
+        label: props.inputItem.umrItem[hitung].data[hitungProvinsi].label,
+      });
+    }
+    dataProvinsiUMR.push(dataProvinsiTahun);
+  }
+  let dataInputItem: IDataInputItemKelayakanTokoBaru = {
+    versiTerpilih: ["1"],
+    sbuItem: props.inputItem.sbuItem,
+    rentangPopulasi: dataRentangPopulasi,
+    kelasMall: {
+      iconSemua: (nilai: number) => {
+        const defaultProps = { size: rem(30), color: "gray" };
+        switch (nilai) {
+          case 1:
+            return <IconBuildingSkyscraper {...defaultProps} />;
+          case 2:
+            return <IconBuilding {...defaultProps} />;
+          case 3:
+            return <IconBuildingEstate {...defaultProps} />;
+          case 4:
+            return <IconBuildingStore {...defaultProps} />;
+        }
+      },
+      iconTerpilih: (nilai: number) => {
+        const defaultProps = { size: rem(30) };
+        switch (nilai) {
+          case 1:
+            return (
+              <IconBuildingSkyscraper
+                color={theme.colors.lime[7]}
+                {...defaultProps}
+              />
+            );
+          case 2:
+            return (
+              <IconBuilding color={theme.colors.yellow[7]} {...defaultProps} />
+            );
+          case 3:
+            return (
+              <IconBuildingEstate
+                color={theme.colors.orange[7]}
+                {...defaultProps}
+              />
+            );
+          case 4:
+            return (
+              <IconBuildingStore
+                color={theme.colors.red[7]}
+                {...defaultProps}
+              />
+            );
+        }
+      },
+    },
+    tahunUMR: dataTahunUMR,
+    provinsiUMR: dataProvinsiUMR,
+  };
+
   // Initial Value Formulir sebagai blanket kosong
   // Nilai Initial Value Formulir pada dasarnya akan bergantung kepada EModePopUpKelayakanTokoBaru
   // co: EModePopUpKelayakanTokoBaru.PENAMBAHAN, EModePopUpKelayakanTokoBaru.PERSETUJUAN,
   // EModePopUpKelayakanTokoBaru.SUNTING atau EModePopUpKelayakanTokoBaru.HAPUS
-  const initialValueFormulir: Formulir = {
+  let initialValueFormulir: Formulir = {
     log: [],
     proposal_id: "",
-    versi_proposal: 1,
+    versi_proposal: "",
     input: {
       versi_model: "",
       nama_model: "",
       sbu: "",
       kota_kabupaten: "",
-      rentang_populasi: "",
-      kelas_mall: "",
-      luas_toko: 0,
-      prediksi_penjualan_user: 0,
+      rentang_populasi: 0,
+      kelas_mall: 0,
+      luas_toko: undefined,
+      prediksi_penjualan_user: undefined,
       margin_penjualan: 0.35,
       ppn: 0.11,
-      tahun_umr: 2023,
-      provinsi_umr: "",
-      jumlah_staff: 0,
+      tahun_umr: new Date().getFullYear().toString(),
+      provinsi_umr: "DKI Jakarta",
+      jumlah_staff: 1,
       biaya_oau: 0.06,
-      biaya_sewa: 0,
-      lama_sewa: 0,
-      biaya_fitout: 0,
+      biaya_sewa: undefined,
+      lama_sewa: 1,
+      biaya_fitout: undefined,
     },
     output: {
       user_generated: {
@@ -130,112 +247,115 @@ export const InputPopUpKelayakanTokoBaru = ({
     validate: {},
   });
 
-  const [versiTerpilih, setVersiTerpilih] = useState("");
-  const RENTANG_POPULASI = [
-    { value: 0, label: "0 - 500.000" },
-    { value: 20, label: "500.001 - 1.000.000" },
-    { value: 40, label: "1.000.001 - 1.500.000" },
-    { value: 60, label: "1.500.001 - 2.000.000" },
-    { value: 80, label: "2.000.001 - 2.500.000" },
-    { value: 100, label: "> 2.500.000" },
-  ];
-  const [rentangPopulasi, setRentangPopulasi] = useState(0);
-  const [kelasMall, setKelasMall] = useState(0);
-  const mallIconKosong = (nilai: number) => {
-    const defaultProps = { size: rem(30), color: "gray" };
-    switch (nilai) {
-      case 1:
-        return <IconBuildingSkyscraper {...defaultProps} />;
-      case 2:
-        return <IconBuilding {...defaultProps} />;
-      case 3:
-        return <IconBuildingEstate {...defaultProps} />;
-      case 4:
-        return <IconBuildingStore {...defaultProps} />;
-    }
+  // Status disabilitas input default
+  const statusAwalDisabilitasInput: IDisabilitasInputKelayakanTokoBaru = {
+    versi_proposal: false,
+    sbu: false,
+    kota_kabupaten: false,
+    rentang_populasi: false,
+    kelas_mall: false,
+    luas_toko: false,
+    prediksi_penjualan_user: false,
+    margin_penjualan: false,
+    ppn: false,
+    tahun_umr: false,
+    provinsi_umr: false,
+    jumlah_staff: false,
+    biaya_oau: false,
+    biaya_sewa: false,
+    lama_sewa: false,
+    biaya_fitout: false,
   };
-  const mallIconTerpilih = (nilai: number) => {
-    const defaultProps = { size: rem(30) };
+  const [statusDisabilitasInput, setStatusDisabilitasInput] = useState(
+    statusAwalDisabilitasInput
+  );
 
-    switch (nilai) {
-      case 1:
-        return (
-          <IconBuildingSkyscraper
-            color={theme.colors.lime[7]}
-            {...defaultProps}
-          />
-        );
-      case 2:
-        return (
-          <IconBuilding color={theme.colors.yellow[7]} {...defaultProps} />
-        );
-      case 3:
-        return (
-          <IconBuildingEstate
-            color={theme.colors.orange[7]}
-            {...defaultProps}
-          />
-        );
-      case 4:
-        return (
-          <IconBuildingStore color={theme.colors.red[7]} {...defaultProps} />
-        );
+  // Loader TextInput Kota Kabupaten
+  const [memuatChatGPT, setMemuatChatGPT] = useState(false);
+
+  // State Input Item berdasar mode pop up
+  useEffect(() => {
+    switch (props.popUp.modePopUp) {
+      case EModePopUpKelayakanTokoBaru.PENAMBAHAN: {
+        // set initialValueFormulir.proposal_id
+        const proposalID = generateProposalID(props);
+        formulir.setValues((stateSebelumnya) => ({
+          ...stateSebelumnya,
+          proposal_id: proposalID,
+          versi_proposal: "1",
+          input: {
+            ...stateSebelumnya.input,
+            nama_model: props.inputItem.model.namaModel,
+            versi_model: props.inputItem.model.versi,
+          },
+        }));
+        // set state disabilitas input pada saat mode penambahan
+        setStatusDisabilitasInput((stateSebelumnya) => ({
+          ...stateSebelumnya,
+          rentang_populasi: true,
+          tahun_umr: true,
+          provinsi_umr: true,
+        }));
+        // reset touched dan dirty serta membuat snapshot baru dari formulir.values
+        formulir.resetTouched();
+        formulir.resetDirty();
+        break;
+      }
+      default: {
+        break;
+      }
     }
+  }, []);
+
+  const handlePerubahanKotaKabupaten = (nilai: string) => {
+    // set nilai formulir.values.
+    formulir.setFieldValue(
+      "input.kota_kabupaten",
+      nilai !== "" && nilai !== undefined ? toTitle(nilai) : ""
+    );
   };
-  const [luasToko, setLuasToko] = useState<number | "">("");
-  const [penjualanUser, setPenjualanUser] = useState<number | "">("");
-  const [marginPenjualan, setMarginPenjualan] = useState<number | "">(0.33);
-  const [ppn, setPPN] = useState<number | "">(0.11);
-  const TAHUN_UMR = [
-    { value: "2022", label: "2022" },
-    { value: "2023", label: "2023" },
-    { value: "2024", label: "2024" },
-  ];
-  const [tahunUMR, setTahunUMR] = useState("2023");
-  const PROVINSI_UMR = [
-    { value: "Aceh", label: "Aceh" },
-    { value: "Sumatera Utara", label: "Sumatera Utara" },
-    { value: "Sumatera Barat", label: "Sumatera Barat" },
-    { value: "Riau", label: "Riau" },
-    { value: "Jambi", label: "Jambi" },
-    { value: "Sumatera Selatan", label: "Sumatera Selatan" },
-    { value: "Bengkulu", label: "Bengkulu" },
-    { value: "Lampung", label: "Lampung" },
-    { value: "Bangka Belitung", label: "Bangka Belitung" },
-    { value: "Kepulauan Riau", label: "Kepulauan Riau" },
-    { value: "DKI Jakarta", label: "DKI Jakarta" },
-    { value: "Jawa Barat", label: "Jawa Barat" },
-    { value: "Jawa Tengah", label: "Jawa Tengah" },
-    { value: "DI. Yogyakarta", label: "DI. Yogyakarta" },
-    { value: "Jawa Timur", label: "Jawa Timur" },
-    { value: "Banten", label: "Banten" },
-    { value: "Bali", label: "Bali" },
-    { value: "Nusa Tenggara Barat", label: "Nusa Tenggara Barat" },
-    { value: "Nusa Tenggara Timur", label: "Nusa Tenggara Timur" },
-    { value: "Kalimantan Barat", label: "Kalimantan Barat" },
-    { value: "Kalimantan Tengah", label: "Kalimantan Tengah" },
-    { value: "Kalimantan Selatan", label: "Kalimantan Selatan" },
-    { value: "Kalimantan Timur", label: "Kalimantan Timur" },
-    { value: "Kalimantan Utara", label: "Kalimantan Utara" },
-    { value: "Sulawesi Utara", label: "Sulawesi Utara" },
-    { value: "Sulawesi Tengah", label: "Sulawesi Tengah" },
-    { value: "Sulawesi Selatan", label: "Sulawesi Selatan" },
-    { value: "Sulawesi Tenggara", label: "Sulawesi Tenggara" },
-    { value: "Gorontalo", label: "Gorontalo" },
-    { value: "Sulawesi Barat", label: "Sulawesi Barat" },
-    { value: "Maluku", label: "Maluku" },
-    { value: "Maluku Utara", label: "Maluku Utara" },
-    { value: "Papua Barat", label: "Papua Barat" },
-    { value: "Papua", label: "Papua" },
-  ];
-  const [provinsiUMR, setProvinsiUMR] = useState("DKI Jakarta");
-  const [jumlahStaff, setJumlahStaff] = useState<number | "">(1);
+
+  const handleKotaKabupatenHilangFokus = async () => {
+    // setMemuatChatGPT
+    setMemuatChatGPT(!memuatChatGPT);
+    // persingkat variabel
+    const tersentuh = formulir.isTouched("input.kota_kabupaten");
+    const kotor = formulir.isDirty("input.kota_kabupaten");
+    const kotaKabupaten = formulir.values.input.kota_kabupaten;
+    // cek jika input kota kabupaten touched, dirty dan tidak "" atau undefined
+    if (
+      tersentuh &&
+      kotor &&
+      kotaKabupaten !== "" &&
+      kotaKabupaten !== undefined
+    ) {
+      // set placeholder role dan prompt chatgpt serta join list_provinsi
+      const [list_provinsi, kueri] = rubahPlaceholderKueriChatGPT(
+        //deep clone struktur objek chatGPT yang mengandung state
+        structuredClone(chatGPT),
+        kotaKabupaten,
+        props,
+        formulir
+      );
+
+      // kueri chatgpt untuk mendapatkan rentang populasi dan provinsi UMR
+      const respon = await kueriChatGPT(
+        kueri.klien,
+        kueri.kueri,
+        list_provinsi
+      );
+
+      if (respon) {
+        console.log(respon);
+      }
+    }
+    // clear setMemuatChatGPT
+    setMemuatChatGPT(!memuatChatGPT);
+    // console.log(formulir.getInputProps("input.kota_kabupaten").value);
+  };
+
   const handlerJumlahStaff = useRef<NumberInputHandlers>();
-  const [biayaAtkUtilitas, setBiayaAtkUtilitas] = useState<number | "">(0.06);
-  const [biayaSewa, setBiayaSewa] = useState<number | "">("");
-  const [lamaSewa, setLamaSewa] = useState<number | "">(1);
   const handlerJumlahTahunSewa = useRef<NumberInputHandlers>();
-  const [biayaFitOut, setBiayaFitOut] = useState<number | "">("");
 
   return (
     <>
@@ -254,59 +374,60 @@ export const InputPopUpKelayakanTokoBaru = ({
                   <IconNumber />
                   <Text>{formulir.getInputProps("proposal_id").value}</Text>
                 </Group>
-                <Chip.Group value={versiTerpilih}>
+                <Chip.Group
+                  value={formulir.getInputProps("versi_proposal").value}
+                >
                   <Group spacing="xs" align="flex-end" position="right">
-                    <Chip
-                      value="1"
-                      size="xs"
-                      onClick={() => setVersiTerpilih("1")}
-                      color="teal"
-                      variant="filled"
-                      radius="sm"
-                    >
-                      1
-                    </Chip>
-                    <Chip
-                      value="2"
-                      size="xs"
-                      onClick={() => setVersiTerpilih("2")}
-                      color="teal"
-                      variant="filled"
-                      radius="sm"
-                    >
-                      2
-                    </Chip>
-                    <Chip
-                      value="3"
-                      size="xs"
-                      onClick={() => setVersiTerpilih("3")}
-                      color="teal"
-                      variant="filled"
-                      radius="sm"
-                    >
-                      3
-                    </Chip>
+                    {dataInputItem.versiTerpilih.map((versi) => (
+                      <Chip
+                        value={versi}
+                        size="xs"
+                        onClick={() =>
+                          formulir.setFieldValue("versi_proposal", versi)
+                        }
+                        variant="filled"
+                        radius="sm"
+                        key={versi}
+                        styles={{
+                          label: {
+                            "&[data-checked]": {
+                              "&:not([data-disabled])": {
+                                backgroundColor: theme.colors.blue[5],
+                                ...theme.fn.hover({
+                                  backgroundColor: theme.colors.blue[5],
+                                }),
+                              },
+                            },
+                          },
+                        }}
+                        disabled={statusDisabilitasInput.versi_proposal}
+                      >
+                        {versi}
+                      </Chip>
+                    ))}
                   </Group>
                 </Chip.Group>
               </Flex>
             </Grid.Col>
             <Grid.Col span={12} pt={5} pb={0}>
               <Center>
-                <Text>model v1:</Text>
+                <Text>
+                  model {formulir.getInputProps("input.versi_model").value}:
+                </Text>
               </Center>
             </Grid.Col>
             <Grid.Col span={12} pt={5} pb={0}>
               <Center>
-                <Text>leaveoneout_n_30_Model_DNN_3_Layer_RELU_128_128</Text>
+                <Text>{formulir.getInputProps("input.nama_model").value}</Text>
               </Center>
             </Grid.Col>
           </Grid>
-          <Grid grow h={650} justify="space-around" mt={30}>
+          <Grid grow h={630} justify="space-around" mt={30}>
             <ScrollArea.Autosize
               type="hover"
               offsetScrollbars
               scrollbarSize={10}
-              h={650}
+              h={615}
               w="100%"
               styles={{
                 root: {
@@ -346,16 +467,18 @@ export const InputPopUpKelayakanTokoBaru = ({
                     transitionTimingFunction="ease"
                     radius="xs"
                     size="xs"
-                    // color={theme.colors.blue[5]}
                     pl={0}
                     pr={0}
                     sx={{ width: "100%" }}
-                    data={["Our Daily Dose", "Fisik Football", "Fisik Sport"]}
+                    {...formulir.getInputProps("input.sbu")}
+                    value={formulir.getInputProps("input.sbu").value}
+                    data={dataInputItem.sbuItem}
                     styles={{
                       indicator: {
-                        backgroundColor: theme.colors.blue[9],
+                        backgroundColor: theme.colors.blue[5],
                       },
                     }}
+                    disabled={statusDisabilitasInput.sbu}
                   />
                 </Flex>
                 <Flex
@@ -381,6 +504,21 @@ export const InputPopUpKelayakanTokoBaru = ({
                         textAlign: "center",
                       },
                     }}
+                    {...formulir.getInputProps("input.kota_kabupaten")}
+                    value={formulir.values.input.kota_kabupaten}
+                    onChange={(e) =>
+                      handlePerubahanKotaKabupaten(e.target.value)
+                    }
+                    onBlur={() => handleKotaKabupatenHilangFokus()}
+                    disabled={statusDisabilitasInput.kota_kabupaten}
+                    rightSection={
+                      memuatChatGPT ? (
+                        <>
+                          Memuat Chat GPT {chatGPT.klien.model_gpt}
+                          ... <Loader size="xs" />
+                        </>
+                      ) : undefined
+                    }
                   />
                 </Flex>
                 <Flex
@@ -394,16 +532,17 @@ export const InputPopUpKelayakanTokoBaru = ({
                     <Text>Rentang Populasi</Text>
                   </Group>
                   <Slider
-                    value={rentangPopulasi}
-                    onChange={setRentangPopulasi}
                     step={20}
-                    marks={RENTANG_POPULASI}
+                    marks={dataInputItem.rentangPopulasi}
                     thumbSize={32}
                     size={2}
                     sx={{ width: "100%" }}
                     styles={{
                       bar: {
-                        backgroundColor: theme.colors.blue[5],
+                        backgroundColor: statusDisabilitasInput.rentang_populasi
+                          ? theme.colors.dark[3]
+                          : theme.colors.blue[5],
+                        height: rem(3),
                       },
                       thumb: {
                         borderWidth: rem(2),
@@ -412,17 +551,26 @@ export const InputPopUpKelayakanTokoBaru = ({
                         borderColor: theme.colors.blue[5],
                       },
                       mark: {
-                        width: rem(6),
-                        height: rem(6),
-                        borderRadius: rem(6),
-                        transform: `translateX(-${rem(3)}) translateY(-${rem(
-                          2
+                        width: rem(20),
+                        height: rem(20),
+                        borderRadius: rem(20),
+                        transform: `translateX(-${rem(10)}) translateY(-${rem(
+                          9
                         )})`,
-                        borderColor: theme.colors.dark[2],
+                        borderColor: statusDisabilitasInput.rentang_populasi
+                          ? theme.colors.dark[3]
+                          : theme.colors.blue[5],
+                        backgroundColor: statusDisabilitasInput.rentang_populasi
+                          ? theme.colors.dark[5]
+                          : theme.colors.blue[1],
                       },
                       markFilled: {
-                        borderColor: theme.colors.blue[5],
-                        backgroundColor: theme.colors.blue[5],
+                        borderColor: statusDisabilitasInput.rentang_populasi
+                          ? theme.colors.dark[3]
+                          : theme.colors.blue[5],
+                        backgroundColor: statusDisabilitasInput.rentang_populasi
+                          ? theme.colors.dark[2]
+                          : theme.colors.blue[5],
                       },
                       label: {
                         display: "none",
@@ -435,6 +583,8 @@ export const InputPopUpKelayakanTokoBaru = ({
                     thumbChildren={<IconMoodTongueWink2 size="2rem" />}
                     pt={20}
                     pb={35}
+                    {...formulir.getInputProps("input.rentang_populasi")}
+                    disabled={statusDisabilitasInput.rentang_populasi}
                   />
                 </Flex>
                 <Flex
@@ -448,15 +598,15 @@ export const InputPopUpKelayakanTokoBaru = ({
                     <Text>Kelas Mall</Text>
                   </Group>
                   <Rating
-                    emptySymbol={mallIconKosong}
-                    fullSymbol={mallIconTerpilih}
+                    emptySymbol={dataInputItem.kelasMall.iconSemua}
+                    fullSymbol={dataInputItem.kelasMall.iconTerpilih}
                     highlightSelectedOnly
-                    value={kelasMall}
-                    onChange={setKelasMall}
                     count={4}
                     styles={{
                       label: {},
                     }}
+                    {...formulir.getInputProps("input.kelas_mall")}
+                    readOnly={statusDisabilitasInput.kelas_mall}
                   />
                 </Flex>
                 <Flex
@@ -473,7 +623,6 @@ export const InputPopUpKelayakanTokoBaru = ({
                     description="Luas toko hanya perlu dituliskan dalam format koma menggunakan dot seperti 2000.56"
                     hideControls
                     placeholder="contoh: 2000.56"
-                    defaultValue={luasToko}
                     parser={(nilai) => nilai.replace(/\s?|(,*)/g, "")}
                     formatter={(nilai) =>
                       !Number.isNaN(parseFloat(nilai))
@@ -484,7 +633,6 @@ export const InputPopUpKelayakanTokoBaru = ({
                         : ""
                     }
                     precision={2}
-                    onChange={setLuasToko}
                     variant="unstyled"
                     sx={{
                       width: "100%",
@@ -497,6 +645,8 @@ export const InputPopUpKelayakanTokoBaru = ({
                         textAlign: "center",
                       },
                     }}
+                    {...formulir.getInputProps("input.luas_toko")}
+                    disabled={statusDisabilitasInput.luas_toko}
                   />
                 </Flex>
                 <Flex
@@ -513,7 +663,6 @@ export const InputPopUpKelayakanTokoBaru = ({
                     description="Prediksi penjualan kotor (Sales) toko per bulan menurut input user"
                     hideControls
                     placeholder="contoh: 30100200"
-                    defaultValue={penjualanUser}
                     parser={(nilai) => nilai.replace(/\s?|(,*)/g, "")}
                     formatter={(nilai) =>
                       !Number.isNaN(parseFloat(nilai))
@@ -524,7 +673,6 @@ export const InputPopUpKelayakanTokoBaru = ({
                         : ""
                     }
                     precision={0}
-                    onChange={setPenjualanUser}
                     variant="unstyled"
                     sx={{
                       width: "100%",
@@ -537,6 +685,8 @@ export const InputPopUpKelayakanTokoBaru = ({
                         textAlign: "center",
                       },
                     }}
+                    {...formulir.getInputProps("input.prediksi_penjualan_user")}
+                    disabled={statusDisabilitasInput.prediksi_penjualan_user}
                   />
                 </Flex>
                 <Flex
@@ -552,7 +702,6 @@ export const InputPopUpKelayakanTokoBaru = ({
                   <NumberInput
                     description="Pengaturan nilai rata - rata margin penjualan per bulan untuk toko yang diinput oleh user, dituliskan dalam format koma menggunakan dot seperti 0.33745"
                     placeholder="contoh: 0.33745"
-                    defaultValue={marginPenjualan}
                     max={1}
                     parser={(nilai) => nilai.replace(/\s?|(,*)/g, "")}
                     formatter={(nilai) =>
@@ -564,7 +713,6 @@ export const InputPopUpKelayakanTokoBaru = ({
                         : ""
                     }
                     precision={4}
-                    onChange={setMarginPenjualan}
                     variant="unstyled"
                     sx={{
                       width: "100%",
@@ -577,6 +725,8 @@ export const InputPopUpKelayakanTokoBaru = ({
                         textAlign: "center",
                       },
                     }}
+                    {...formulir.getInputProps("input.margin_penjualan")}
+                    disabled={statusDisabilitasInput.margin_penjualan}
                   />
                 </Flex>
                 <Flex
@@ -593,7 +743,6 @@ export const InputPopUpKelayakanTokoBaru = ({
                     description="Nilai Pajak Pertambahan Nilai yang berlaku saat ini, ditulis dengan format koma menggunakan dot seperti 0.11"
                     hideControls
                     placeholder="contoh: 0.11"
-                    defaultValue={ppn}
                     max={1}
                     parser={(nilai) => nilai.replace(/\s?|(,*)/g, "")}
                     formatter={(nilai) =>
@@ -605,7 +754,6 @@ export const InputPopUpKelayakanTokoBaru = ({
                         : ""
                     }
                     precision={4}
-                    onChange={setPPN}
                     variant="unstyled"
                     sx={{
                       width: "100%",
@@ -618,6 +766,8 @@ export const InputPopUpKelayakanTokoBaru = ({
                         textAlign: "center",
                       },
                     }}
+                    {...formulir.getInputProps("input.ppn")}
+                    disabled={statusDisabilitasInput.ppn}
                   />
                 </Flex>
               </Grid.Col>
@@ -639,9 +789,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                   </Group>
                   <Select
                     placeholder="Pilih Tahun UMR"
-                    data={TAHUN_UMR}
-                    value={tahunUMR}
-                    onChange={(nilai) => nilai !== null && setTahunUMR(nilai)}
+                    data={dataInputItem.tahunUMR}
                     variant="unstyled"
                     sx={{ width: "100%", borderBottom: "dashed 1px" }}
                     styles={{
@@ -659,6 +807,8 @@ export const InputPopUpKelayakanTokoBaru = ({
                         textAlign: "center",
                       },
                     }}
+                    {...formulir.getInputProps("input.tahun_umr")}
+                    disabled={statusDisabilitasInput.tahun_umr}
                   />
                 </Flex>
                 <Flex
@@ -673,11 +823,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                   </Group>
                   <Select
                     placeholder="Pilih Provinsi UMR"
-                    data={PROVINSI_UMR}
-                    value={provinsiUMR}
-                    onChange={(nilai) =>
-                      nilai !== null && setProvinsiUMR(nilai)
-                    }
+                    data={dataInputItem.provinsiUMR[0]}
                     variant="unstyled"
                     sx={{ width: "100%", borderBottom: "dashed 1px" }}
                     styles={{
@@ -695,6 +841,8 @@ export const InputPopUpKelayakanTokoBaru = ({
                         textAlign: "center",
                       },
                     }}
+                    {...formulir.getInputProps("input.provinsi_umr")}
+                    disabled={statusDisabilitasInput.provinsi_umr}
                   />
                 </Flex>
                 <Flex
@@ -716,15 +864,14 @@ export const InputPopUpKelayakanTokoBaru = ({
                         handlerJumlahStaff.current.decrement()
                       }
                       maw="4%"
+                      disabled={statusDisabilitasInput.jumlah_staff}
                     >
                       -
                     </ActionIcon>
                     <NumberInput
                       hideControls
                       placeholder="contoh: 1"
-                      defaultValue={jumlahStaff}
                       handlersRef={handlerJumlahStaff}
-                      onChange={(nilai) => setJumlahStaff(nilai)}
                       min={1}
                       max={10}
                       step={1}
@@ -741,6 +888,8 @@ export const InputPopUpKelayakanTokoBaru = ({
                         },
                       }}
                       miw="92%"
+                      {...formulir.getInputProps("input.jumlah_staff")}
+                      disabled={statusDisabilitasInput.jumlah_staff}
                     />
                     <ActionIcon
                       size={15}
@@ -750,6 +899,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                         handlerJumlahStaff.current.increment()
                       }
                       maw="4%"
+                      disabled={statusDisabilitasInput.jumlah_staff}
                     >
                       +
                     </ActionIcon>
@@ -769,7 +919,6 @@ export const InputPopUpKelayakanTokoBaru = ({
                     description="Biaya ATK dan utilitas dengan asumsi persentase dari Sales, ditulis dengan format koma menggunakan dot seperti 0.06"
                     hideControls
                     placeholder="contoh: 0.06"
-                    defaultValue={biayaAtkUtilitas}
                     parser={(nilai) => nilai.replace(/\s?|(,*)/g, "")}
                     formatter={(nilai) =>
                       !Number.isNaN(parseFloat(nilai))
@@ -780,7 +929,6 @@ export const InputPopUpKelayakanTokoBaru = ({
                         : ""
                     }
                     precision={4}
-                    onChange={setBiayaAtkUtilitas}
                     variant="unstyled"
                     sx={{
                       width: "100%",
@@ -793,6 +941,8 @@ export const InputPopUpKelayakanTokoBaru = ({
                         textAlign: "center",
                       },
                     }}
+                    {...formulir.getInputProps("input.biaya_oau")}
+                    disabled={statusDisabilitasInput.biaya_oau}
                   />
                 </Flex>
                 <Flex
@@ -809,7 +959,6 @@ export const InputPopUpKelayakanTokoBaru = ({
                     description="Nilai total biaya sewa dalam kontrak kerjasama atau offering"
                     hideControls
                     placeholder="contoh: 30100200.56"
-                    defaultValue={biayaSewa}
                     parser={(nilai) => nilai.replace(/\s?|(,*)/g, "")}
                     formatter={(nilai) =>
                       !Number.isNaN(parseFloat(nilai))
@@ -820,7 +969,6 @@ export const InputPopUpKelayakanTokoBaru = ({
                         : ""
                     }
                     precision={0}
-                    onChange={setBiayaSewa}
                     variant="unstyled"
                     sx={{
                       width: "100%",
@@ -833,6 +981,8 @@ export const InputPopUpKelayakanTokoBaru = ({
                         textAlign: "center",
                       },
                     }}
+                    {...formulir.getInputProps("input.biaya_sewa")}
+                    disabled={statusDisabilitasInput.biaya_sewa}
                   />
                 </Flex>
                 <Flex
@@ -854,15 +1004,14 @@ export const InputPopUpKelayakanTokoBaru = ({
                         handlerJumlahTahunSewa.current.decrement()
                       }
                       maw="4%"
+                      disabled={statusDisabilitasInput.lama_sewa}
                     >
                       -
                     </ActionIcon>
                     <NumberInput
                       hideControls
                       placeholder="contoh: 1"
-                      defaultValue={lamaSewa}
                       handlersRef={handlerJumlahTahunSewa}
-                      onChange={(nilai) => setLamaSewa(nilai)}
                       min={1}
                       max={10}
                       step={1}
@@ -879,6 +1028,8 @@ export const InputPopUpKelayakanTokoBaru = ({
                         },
                       }}
                       miw="92%"
+                      {...formulir.getInputProps("input.lama_sewa")}
+                      disabled={statusDisabilitasInput.lama_sewa}
                     />
                     <ActionIcon
                       size={15}
@@ -888,6 +1039,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                         handlerJumlahTahunSewa.current.increment()
                       }
                       maw="4%"
+                      disabled={statusDisabilitasInput.lama_sewa}
                     >
                       +
                     </ActionIcon>
@@ -907,7 +1059,6 @@ export const InputPopUpKelayakanTokoBaru = ({
                     description="Nilai total biaya untuk proses fitting out interior pada toko baru"
                     hideControls
                     placeholder="contoh: 500100200"
-                    defaultValue={biayaFitOut}
                     parser={(nilai) => nilai.replace(/\s?|(,*)/g, "")}
                     formatter={(nilai) =>
                       !Number.isNaN(parseFloat(nilai))
@@ -918,7 +1069,6 @@ export const InputPopUpKelayakanTokoBaru = ({
                         : ""
                     }
                     precision={0}
-                    onChange={setBiayaFitOut}
                     variant="unstyled"
                     sx={{
                       width: "100%",
@@ -931,6 +1081,8 @@ export const InputPopUpKelayakanTokoBaru = ({
                         textAlign: "center",
                       },
                     }}
+                    {...formulir.getInputProps("input.biaya_fitout")}
+                    disabled={statusDisabilitasInput.biaya_fitout}
                   />
                 </Flex>
               </Grid.Col>
@@ -959,8 +1111,131 @@ export const InputPopUpKelayakanTokoBaru = ({
               <Text>Fitout Expense</Text>
               <Text>Store Income</Text>
             </Grid.Col>
-            <Grid.Col span={2}>User Output</Grid.Col>
-            <Grid.Col span={2}>Model Output</Grid.Col>
+            <Grid.Col span={2}>
+              <Text>User Output</Text>
+              <Text>
+                {formulir.getInputProps("output.user_generated.sales").value}
+              </Text>
+              <Text>
+                {formulir.getInputProps("output.user_generated.ppn").value}
+              </Text>
+              <Text>
+                {
+                  formulir.getInputProps("output.user_generated.net_sales")
+                    .value
+                }
+              </Text>
+              <Text>
+                {formulir.getInputProps("output.user_generated.cogs").value}
+              </Text>
+              <Text>
+                {
+                  formulir.getInputProps("output.user_generated.gross_profit")
+                    .value
+                }
+              </Text>
+              <Text>
+                {
+                  formulir.getInputProps("output.user_generated.staff_expense")
+                    .value
+                }
+              </Text>
+              <Text>
+                {
+                  formulir.getInputProps("output.user_generated.oau_expense")
+                    .value
+                }
+              </Text>
+              <Text>
+                {
+                  formulir.getInputProps("output.user_generated.rental_expense")
+                    .value
+                }
+              </Text>
+              <Text>
+                {
+                  formulir.getInputProps("output.user_generated.fitout_expense")
+                    .value
+                }
+              </Text>
+              <Text>
+                {
+                  formulir.getInputProps("output.user_generated.store_income")
+                    .value
+                }
+              </Text>
+            </Grid.Col>
+            <Grid.Col span={2}>
+              <Text>Model Output</Text>
+              <Text>
+                {formulir.getInputProps("output.model_generated.sales").value}
+              </Text>
+              <Text>
+                {formulir.getInputProps("output.model_generated.ppn").value}
+              </Text>
+              <Text>
+                {
+                  formulir.getInputProps("output.model_generated.net_sales")
+                    .value
+                }
+              </Text>
+              <Text>
+                {formulir.getInputProps("output.model_generated.cogs").value}
+              </Text>
+              <Text>
+                {
+                  formulir.getInputProps("output.model_generated.gross_profit")
+                    .value
+                }
+              </Text>
+              <Text>
+                {
+                  formulir.getInputProps("output.model_generated.staff_expense")
+                    .value
+                }
+              </Text>
+              <Text>
+                {
+                  formulir.getInputProps("output.model_generated.oau_expense")
+                    .value
+                }
+              </Text>
+              <Text>
+                {
+                  formulir.getInputProps(
+                    "output.model_generated.rental_expense"
+                  ).value
+                }
+              </Text>
+              <Text>
+                {
+                  formulir.getInputProps(
+                    "output.model_generated.fitout_expense"
+                  ).value
+                }
+              </Text>
+              <Text>
+                {
+                  formulir.getInputProps("output.model_generated.store_income")
+                    .value
+                }
+              </Text>
+            </Grid.Col>
+          </Grid>
+          <Grid justify="space-around" mt={20}>
+            <Grid.Col span={12}>
+              <Center>
+                <Title order={2}>Remark</Title>
+              </Center>
+            </Grid.Col>
+            <Grid.Col span={12} px={65}>
+              <Textarea
+                autosize
+                minRows={15}
+                maxRows={15}
+                {...formulir.getInputProps("remark")}
+              ></Textarea>
+            </Grid.Col>
           </Grid>
         </Grid.Col>
       </Grid>
@@ -997,16 +1272,7 @@ export const InputPopUpKelayakanTokoBaru = ({
             </Button>
             <Button
               variant="outline"
-              onClick={() =>
-                setProps((stateSebelumnya) => ({
-                  ...stateSebelumnya,
-                  popUp: {
-                    togglePopUp: false,
-                    judulPopUp: "",
-                    dataPopUp: undefined,
-                  },
-                }))
-              }
+              onClick={() => prosesSimpanKelayakanTokoBaru(formulir)}
               styles={{
                 root: {
                   color: theme.colors.blue[8],
@@ -1020,21 +1286,22 @@ export const InputPopUpKelayakanTokoBaru = ({
                   fontSize: "20px",
                 },
               }}
+              type="submit"
             >
               Simpan
             </Button>
             <Button
               variant="outline"
-              onClick={() =>
-                setProps((stateSebelumnya) => ({
-                  ...stateSebelumnya,
-                  popUp: {
-                    togglePopUp: false,
-                    judulPopUp: "",
-                    dataPopUp: undefined,
-                  },
-                }))
-              }
+              // onClick={() =>
+              //   setProps((stateSebelumnya) => ({
+              //     ...stateSebelumnya,
+              //     popUp: {
+              //       togglePopUp: false,
+              //       judulPopUp: "",
+              //       dataPopUp: undefined,
+              //     },
+              //   }))
+              // }
               styles={{
                 root: {
                   color: theme.colors.green[8],
@@ -1048,6 +1315,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                   fontSize: "20px",
                 },
               }}
+              type="submit"
             >
               Kirim
             </Button>

@@ -8,7 +8,8 @@ use serde::de::DeserializeOwned;
 use std::error::Error;
 
 use crate::struktur::{
-    InputItemKelayakanTokoBaru, InputItemUMRKelayakanTokoBaru, LabelNilaiInputItem, Model, Pengguna,
+    InputItemKelayakanTokoBaru, InputItemUMRKelayakanTokoBaru, InputModel, LabelValueInputItem,
+    Model, Pengguna,
 };
 use crate::{fungsi::rahasia, struktur::ProposalTokoBaru};
 
@@ -74,24 +75,34 @@ pub async fn get_all_proposal_toko_baru() -> Result<Option<Vec<ProposalTokoBaru>
     }
 }
 
-pub async fn get_all_input_item_toko_baru(
+pub async fn get_all_input_item_model_toko_baru(
 ) -> Result<Option<InputItemKelayakanTokoBaru>, Box<dyn Error>> {
     let database = bc_database().await?;
     let koleksi_model = database.collection::<Model>(rahasia::KOLEKSI_MODEL);
     let koleksi_statistik_nasional =
         database.collection::<InputItemUMRKelayakanTokoBaru>(rahasia::KOLEKSI_STATISTIK_NASIONAL);
 
-    let mut filter = doc! { "nama_model": "leaveoneout_n_30_Model_DNN_3_Layer_RELU_128_128"};
+    let mut filter = doc! { "latest": true};
 
     let hasil_kueri_model = koleksi_model
         .find_one(filter, None)
         .await
         .expect("Gagal memuat data input_item dari mongodb");
 
+    let mut input_nama_model_url: String = "".to_string();
+    let mut input_nama_model: String = "".to_string();
+    let mut input_versi: String = "".to_string();
+    let mut input_mean: String = "".to_string();
+    let mut input_std: String = "".to_string();
     let mut input_item_sbu: Vec<String> = Vec::new();
-    let mut input_item_rentang_populasi: Vec<LabelNilaiInputItem> = Vec::new();
-    let mut input_item_kelas_mall: Vec<LabelNilaiInputItem> = Vec::new();
+    let mut input_item_rentang_populasi: Vec<LabelValueInputItem> = Vec::new();
+    let mut input_item_kelas_mall: Vec<LabelValueInputItem> = Vec::new();
     if let Some(model) = hasil_kueri_model {
+        input_nama_model_url = model.nama_model_url;
+        input_nama_model = model.nama_model;
+        input_versi = model.versi;
+        input_mean = model.mean;
+        input_std = model.std;
         input_item_sbu = model.sbu;
         input_item_rentang_populasi = model.rentang_populasi_er;
         input_item_kelas_mall = model.kelas_mall_er;
@@ -115,6 +126,13 @@ pub async fn get_all_input_item_toko_baru(
             rentang_populasi_item: input_item_rentang_populasi,
             kelas_mall_item: input_item_kelas_mall,
             umr_item: kumpulan_data_umr,
+            model: InputModel {
+                nama_model_url: input_nama_model_url,
+                nama_model: input_nama_model,
+                versi: input_versi,
+                mean: input_mean,
+                std: input_std,
+            },
         };
         Ok(Some(input_item_final))
     } else {

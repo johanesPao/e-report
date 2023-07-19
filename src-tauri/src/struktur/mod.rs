@@ -255,30 +255,45 @@ struct RemarkProposal {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LabelNilaiInputItem {
+pub struct LabelValueInputItem {
     label: String,
-    nilai: i32,
+    value: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Model {
+    pub nama_model_url: String,
+    pub nama_model: String,
+    pub versi: String,
+    pub mean: String,
+    pub std: String,
     pub sbu: Vec<String>,
-    pub rentang_populasi_er: Vec<LabelNilaiInputItem>,
-    pub kelas_mall_er: Vec<LabelNilaiInputItem>,
+    pub rentang_populasi_er: Vec<LabelValueInputItem>,
+    pub kelas_mall_er: Vec<LabelValueInputItem>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InputItemUMRKelayakanTokoBaru {
     pub tahun_data: i32,
-    pub data: Vec<LabelNilaiInputItem>,
+    pub data: Vec<LabelValueInputItem>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct InputModel {
+    pub nama_model_url: String,
+    pub nama_model: String,
+    pub versi: String,
+    pub mean: String,
+    pub std: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InputItemKelayakanTokoBaru {
     pub sbu_item: Vec<String>,
-    pub rentang_populasi_item: Vec<LabelNilaiInputItem>,
-    pub kelas_mall_item: Vec<LabelNilaiInputItem>,
+    pub rentang_populasi_item: Vec<LabelValueInputItem>,
+    pub kelas_mall_item: Vec<LabelValueInputItem>,
     pub umr_item: Vec<InputItemUMRKelayakanTokoBaru>,
+    pub model: InputModel,
 }
 
 pub trait DataFrameSerial {
@@ -1267,4 +1282,45 @@ pub enum HasilKueriKetersediaanStok {
 
 pub enum HasilKueriLabaRugiToko {
     DataLabaRugiTokoEnum(Vec<DataLabaRugiToko>),
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct KlienKonfigChatGPT {
+    pub endpoint_api: String,
+    pub kunci_api: String,
+    pub model_gpt: String,
+    pub n: f32,
+    pub temperature: f32,
+    pub top_p: f32,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct RolePromptChatGPT {
+    pub role: Vec<RoleKontenChatGPT>,
+    pub prompt: RoleKontenChatGPT,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct RoleKontenChatGPT {
+    pub role: String,
+    pub content: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct KotaKabupatenPopulasiProvinsiKontenChatGPT {
+    pub kota_eksis: RolePromptChatGPT,
+    pub populasi_kota_kabupaten: RolePromptChatGPT,
+    pub provinsi_kota_kabupaten: RolePromptChatGPT,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct HasilKotaKabupatenChatGPT {
+    pub populasi_kota_kabupaten: HasilChatGPT,
+    pub provinsi_kota_kabupaten: HasilChatGPT,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct HasilChatGPT {
+    pub status: bool,
+    pub konten: String,
 }
