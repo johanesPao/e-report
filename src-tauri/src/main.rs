@@ -968,9 +968,12 @@ async fn kueri_kota_kabupaten_chatgpt(
                         let regex_populasi = Regex::new(r"\w[0-9.,]*\|[0-9]*").unwrap();
                         let kecocokan = match regex_populasi.find(respon_populasi.as_str()) {
                             // regex menemukan kecocokan
-                            Some(populasi) => HasilChatGPT {
-                                status: true,
-                                konten: populasi
+                            Some(populasi_tahun) => {
+                                let populasi = populasi_tahun.as_str().split("|").collect::<Vec<_>>()[0];
+                                HasilChatGPT {
+                                    status: true,
+                                    konten: populasi.to_string()
+                                }
                             },
                             None => HasilChatGPT {
                                 status: false,
@@ -987,7 +990,7 @@ async fn kueri_kota_kabupaten_chatgpt(
                 let hasil_provinsi = match fungsi::ai::kueri(&klien_konfig, kueri.provinsi_kota_kabupaten).await {
                     Ok(respon_provinsi) => {
                         // cek jika provinsi ada dalam list_provinsi
-                        if list_provinsi.iter().any(|&provinsi| provinsi == respon_provinsi) {
+                        if list_provinsi.iter().any(|provinsi| provinsi == &respon_provinsi) {
                             // set HasilChatGPT true
                             HasilChatGPT {
                                 status: true,

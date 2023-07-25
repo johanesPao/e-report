@@ -127,7 +127,7 @@ export const kueriChatGPT = async (
   const respon: string = await invoke("kueri_kota_kabupaten_chatgpt", {
     klienKonfig: klienChatGPT,
     kueri: kueri,
-    list_provinsi: list_provinsi,
+    listProvinsi: list_provinsi,
   });
   const hasil = JSON.parse(respon);
 
