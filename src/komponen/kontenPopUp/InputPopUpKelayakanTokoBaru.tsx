@@ -21,13 +21,13 @@ import {
   rem,
   useMantineTheme,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
+import { UseFormReturnType, useForm } from "@mantine/form";
 import {
   StateKelayakanTokoBaru,
   generateProposalID,
-  kueriChatGPT,
+  handleKotaKabupatenHilangFokus,
+  handlePerubahanKotaKabupaten,
   prosesSimpanKelayakanTokoBaru,
-  rubahPlaceholderKueriChatGPT,
 } from "../../fungsi/halaman/kelayakanTokoBaru";
 import {
   EModePopUpKelayakanTokoBaru,
@@ -37,7 +37,6 @@ import {
   IDisabilitasInputKelayakanTokoBaru,
   IRentangPopulasiInputItem,
   IUMRInputItem,
-  toTitle,
 } from "../../fungsi/basic";
 import {
   IconBriefcase,
@@ -199,7 +198,7 @@ export const InputPopUpKelayakanTokoBaru = ({
       nama_model: "",
       sbu: "",
       kota_kabupaten: "",
-      rentang_populasi: 0,
+      rentang_populasi: -1,
       kelas_mall: 0,
       luas_toko: undefined,
       prediksi_penjualan_user: undefined,
@@ -307,52 +306,77 @@ export const InputPopUpKelayakanTokoBaru = ({
     }
   }, []);
 
-  const handlePerubahanKotaKabupaten = (nilai: string) => {
-    // set nilai formulir.values.
-    formulir.setFieldValue(
-      "input.kota_kabupaten",
-      nilai !== "" && nilai !== undefined ? toTitle(nilai) : ""
+  const preprocessingModelInput = (
+    formulir: UseFormReturnType<Formulir, (values: Formulir) => Formulir>
+  ) => {
+    const sqmScaled =
+      formulir.values.input.luas_toko !== undefined &&
+      (formulir.values.input.luas_toko -
+        parseFloat(props.inputItem.model.mean)) /
+        parseFloat(props.inputItem.model.std);
+    console.log(
+      formulir.values.input.sbu,
+      formulir.values.input.rentang_populasi,
+      formulir.values.input.kelas_mall,
+      formulir.values.input.luas_toko
     );
+    const instances = [
+      sqmScaled,
+      formulir.values.input.sbu === props.inputItem.sbuItem[0] ? 1 : 0,
+      formulir.values.input.sbu === props.inputItem.sbuItem[1] ? 1 : 0,
+      formulir.values.input.sbu === props.inputItem.sbuItem[2] ? 1 : 0,
+      formulir.values.input.kelas_mall !== undefined &&
+        formulir.values.input.kelas_mall - 1,
+      formulir.values.input.rentang_populasi !== undefined &&
+        (formulir.values.input.rentang_populasi === 0
+          ? 0
+          : formulir.values.input.rentang_populasi / 20),
+    ];
+    console.log(instances);
   };
 
-  const handleKotaKabupatenHilangFokus = async () => {
-    // setMemuatChatGPT
-    setMemuatChatGPT(!memuatChatGPT);
-    // persingkat variabel
-    const tersentuh = formulir.isTouched("input.kota_kabupaten");
-    const kotor = formulir.isDirty("input.kota_kabupaten");
-    const kotaKabupaten = formulir.values.input.kota_kabupaten;
-    // cek jika input kota kabupaten touched, dirty dan tidak "" atau undefined
+  const monitorInputModel = () => {
+    // jika semua input model tidak sama dengan initialValue
     if (
-      tersentuh &&
-      kotor &&
-      kotaKabupaten !== "" &&
-      kotaKabupaten !== undefined
+      formulir.values.input.sbu !== initialValueFormulir.input.sbu &&
+      formulir.values.input.rentang_populasi !==
+        initialValueFormulir.input.rentang_populasi &&
+      formulir.values.input.kelas_mall !==
+        initialValueFormulir.input.kelas_mall &&
+      formulir.values.input.luas_toko !== initialValueFormulir.input.luas_toko
     ) {
-      // set placeholder role dan prompt chatgpt serta join list_provinsi
-      const [list_provinsi, kueri] = rubahPlaceholderKueriChatGPT(
-        //deep clone struktur objek chatGPT yang mengandung state
-        structuredClone(chatGPT),
-        kotaKabupaten,
-        props,
-        formulir
-      );
-
-      // kueri chatgpt untuk mendapatkan rentang populasi dan provinsi UMR
-      const respon = await kueriChatGPT(
-        kueri.klien,
-        kueri.kueri,
-        list_provinsi
-      );
-
-      if (respon) {
-        console.log(respon);
+      // jika nilai input berubah (dirty), lakukan evaluasi
+      if (
+        [
+          formulir.isDirty("input.sbu"),
+          formulir.isDirty("input.rentang_populasi"),
+          formulir.isDirty("input.kelas_mall"),
+          formulir.isDirty("input.luas_toko"),
+        ].every((status) => status === true)
+      ) {
+        // console.log nilai
+        console.log(
+          typeof formulir.values.input.sbu,
+          formulir.values.input.rentang_populasi,
+          formulir.values.input.kelas_mall,
+          formulir.values.input.luas_toko
+        );
+        console.log("evaluasi");
+        // konversi nilai - nilai input sesuai dengan input untuk model (preprocessing input)\
+        preprocessingModelInput(formulir);
       }
     }
-    // clear setMemuatChatGPT
-    setMemuatChatGPT(!memuatChatGPT);
-    // console.log(formulir.getInputProps("input.kota_kabupaten").value);
   };
+
+  // Monitor nilai dari sbu, rentang_populasi, kelas_mall dan luas_toko
+  useEffect(() => {
+    monitorInputModel();
+  }, [
+    formulir.values.input.sbu,
+    formulir.values.input.rentang_populasi,
+    formulir.values.input.kelas_mall,
+    formulir.values.input.luas_toko,
+  ]);
 
   const handlerJumlahStaff = useRef<NumberInputHandlers>();
   const handlerJumlahTahunSewa = useRef<NumberInputHandlers>();
@@ -382,9 +406,9 @@ export const InputPopUpKelayakanTokoBaru = ({
                       <Chip
                         value={versi}
                         size="xs"
-                        onClick={() =>
-                          formulir.setFieldValue("versi_proposal", versi)
-                        }
+                        onClick={() => {
+                          formulir.setFieldValue("versi_proposal", versi);
+                        }}
                         variant="filled"
                         radius="sm"
                         key={versi}
@@ -507,18 +531,31 @@ export const InputPopUpKelayakanTokoBaru = ({
                     {...formulir.getInputProps("input.kota_kabupaten")}
                     value={formulir.values.input.kota_kabupaten}
                     onChange={(e) =>
-                      handlePerubahanKotaKabupaten(e.target.value)
+                      handlePerubahanKotaKabupaten(e.target.value, formulir)
                     }
-                    onBlur={() => handleKotaKabupatenHilangFokus()}
+                    onBlur={() =>
+                      handleKotaKabupatenHilangFokus(
+                        setMemuatChatGPT,
+                        formulir,
+                        chatGPT,
+                        props,
+                        statusDisabilitasInput,
+                        setStatusDisabilitasInput
+                      )
+                    }
                     disabled={statusDisabilitasInput.kota_kabupaten}
                     rightSection={
                       memuatChatGPT ? (
                         <>
-                          Memuat Chat GPT {chatGPT.klien.model_gpt}
-                          ... <Loader size="xs" />
+                          <Text pr={"0.5rem"} c={theme.colors.gray[7]}>
+                            memuat chat GPT {chatGPT.klien.model_gpt}
+                            ...
+                          </Text>
+                          <Loader size="xs" color={theme.colors.blue[5]} />
                         </>
-                      ) : undefined
+                      ) : null
                     }
+                    rightSectionWidth="lg"
                   />
                 </Flex>
                 <Flex
