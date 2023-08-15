@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use std::collections::HashMap;
 
+use db::mongo::simpan_proposal;
 use polars::prelude::*;
 use regex::Regex;
 use serde_json::{self, json};
@@ -1043,6 +1044,12 @@ async fn prediksi_penjualan_toko_baru(instance: Vec<f32>, model_url: String) -> 
     }
 }
 
+#[tauri::command]
+async fn simpan_proposal_toko_baru(proposal: ProposalTokoBaru) -> Result<String, String> {
+    simpan_proposal(proposal).await.expect("Gagal menyimpan proposal ke dalam koleksi proposal");
+    Ok(json!({"status": true}).to_string())
+}
+
 #[tokio::main]
 async fn main() {
     tauri::Builder::default()
@@ -1059,7 +1066,8 @@ async fn main() {
             ambil_semua_proposal_toko_baru,
             ambil_input_item_model_kelayakan_toko_baru,
             kueri_kota_kabupaten_chatgpt,
-            prediksi_penjualan_toko_baru
+            prediksi_penjualan_toko_baru,
+            simpan_proposal_toko_baru
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

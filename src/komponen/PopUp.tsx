@@ -1,10 +1,4 @@
-import {
-  Modal,
-  Text,
-  Title,
-  useMantineColorScheme,
-  useMantineTheme,
-} from "@mantine/core";
+import { Modal, Title, useMantineTheme } from "@mantine/core";
 import { StateKelayakanTokoBaru } from "../fungsi/halaman/kelayakanTokoBaru";
 import { useAppSelector } from "../state/hook";
 import { getHalaman } from "../fitur_state/event";

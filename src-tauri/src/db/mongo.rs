@@ -1,10 +1,11 @@
 use futures::stream::TryStreamExt;
 use mongodb::{
-    bson::{doc, Document},
+    bson::{doc, to_document, Document},
     options::ClientOptions,
     Client, Database,
 };
 use serde::de::DeserializeOwned;
+use serde_json::json;
 use std::error::Error;
 
 use crate::struktur::{
@@ -152,4 +153,18 @@ pub async fn param_bc() -> Result<Option<Document>, Box<dyn Error>> {
         Some(dokumen) => Ok(dokumen),
         None => Ok(None),
     }
+}
+
+pub async fn simpan_proposal(proposal: ProposalTokoBaru) -> Result<String, Box<dyn Error>> {
+    let database = bc_database()
+        .await
+        .expect("Gagal membuka koneksi dengan server mongo");
+    let koleksi_proposal = database.collection(rahasia::KOLEKSI_PROPOSAL_TOKO_BARU);
+    let dokumen =
+        to_document(&proposal).expect("Gagal merubah struct proposal menjadi dokumen BSON");
+    koleksi_proposal
+        .insert_one(dokumen, None)
+        .await
+        .expect("Gagal menambahkan proposal ke dalam koleksi proposal");
+    Ok(json!({"status": true}).to_string())
 }
