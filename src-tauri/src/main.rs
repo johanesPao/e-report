@@ -1,5 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+use std::collections::HashMap;
+
 use polars::prelude::*;
 use regex::Regex;
 use serde_json::{self, json};
@@ -950,12 +952,6 @@ async fn kueri_kota_kabupaten_chatgpt(
     kueri: KotaKabupatenPopulasiProvinsiKontenChatGPT,
     list_provinsi: Vec<String>,
 ) -> Result<String, String> {
-    // let hasil_kota_eksis = match fungsi::ai::kueri(&klien_konfig, kueri.kota_eksis).await {
-    //     Ok(respon) => respon,
-    //     Err(e) => {
-    //         format!("Terjadi kesalahan saat melakukan kueri ChatGPT: {}", e)
-    //     }
-    // };
     // cek kota kabupaten eksis
     let hasil_kueri = match fungsi::ai::kueri(&klien_konfig, kueri.kota_eksis).await {
         // jika kota kabupaten eksis
@@ -1022,30 +1018,29 @@ async fn kueri_kota_kabupaten_chatgpt(
           }
     };
     Ok(hasil_kueri?)
-    // Err(json!({"status": false, "konten": format!("Terjadi kesalahan saat melakukan kueri ChatGPT")}).to_string());
+}
 
-    // let hasil_populasi = match fungsi::ai::kueri(&klien_konfig, kueri.populasi_kota_kabupaten).await
-    // {
-    //     Ok(respon) => respon,
-    //     Err(e) => {
-    //         format!("Terjadi kesalahan saat melakukan kueri ChatGPT: {}", e)
-    //     }
+#[tauri::command]
+async fn prediksi_penjualan_toko_baru(instance: Vec<f32>, model_url: String) -> Result<String, String> {
+    println!("{:?}", instance);
+    println!("{}", model_url);
+    let mut input_instance = HashMap::new();
+    input_instance.insert("instances", vec![instance]);
+    // let input = InputPrediksiPenjualanTokoBaru {
+    //     instances: Vec::from(instance)
     // };
-    // let hasil_provinsi = match fungsi::ai::kueri(&klien_konfig, kueri.provinsi_kota_kabupaten).await
-    // {
-    //     Ok(respon) => respon,
-    //     Err(e) => {
-    //         format!("Terjadi kesalahan saat melakukan kueri ChatGPT: {}", e)
-    //     }
-    // };
-    // let hasil_kueri = HasilKotaKabupatenChatGPT {
-    //     kota_eksis: hasil_kota_eksis,
-    //     populasi_kota_kabupaten: hasil_populasi,
-    //     provinsi_kota_kabupaten: hasil_provinsi,
-    // };
-    // return Ok(serde_json::to_string(&hasil_kueri)
-    //     .map_err(|e| format!("Kesalahan dalam melakukan serialisasi hasil_kueri: {}", e))?);
-    // Err("Err".as_str())
+    let klien = reqwest::Client::new();
+    let respon = klien.post(model_url)
+        .json(&input_instance)
+        .send()
+        .await
+        .expect("Gagal melakukan komunikasi dengan model endpoint");
+    if respon.status().is_success() {
+        let konten = respon.text().await.expect("Gagal membaca respon body");
+        Ok(json!({"status": true, "konten": konten}).to_string())
+    } else {
+        Err(json!({"status": false, "konten": "Respon status bukan 200"}).to_string())
+    }
 }
 
 #[tokio::main]
@@ -1063,7 +1058,8 @@ async fn main() {
             handle_data_laba_rugi_toko,
             ambil_semua_proposal_toko_baru,
             ambil_input_item_model_kelayakan_toko_baru,
-            kueri_kota_kabupaten_chatgpt
+            kueri_kota_kabupaten_chatgpt,
+            prediksi_penjualan_toko_baru
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1324,3 +1324,23 @@ pub struct HasilChatGPT {
     pub status: bool,
     pub konten: String,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ArrayPrediksiPenjualanTokoBaru {
+    pub sqm_scaled: f32,
+    pub fisik_football: i32,
+    pub fisik_sport: i32,
+    pub our_daily_dose: i32,
+    pub kelas_mall: i32,
+    pub rentang_populasi: i32
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct InputPrediksiPenjualanTokoBaru {
+    pub instances: Vec<ArrayPrediksiPenjualanTokoBaru>
+}
+
+// #[derive(Serialize, Deserialize)]
+// pub enum NilaiBoolean {
+
+// }

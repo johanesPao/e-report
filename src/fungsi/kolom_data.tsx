@@ -2,7 +2,6 @@ import {
   MRT_ColumnDef,
   MRT_ShowHideColumnsButton,
   MRT_ToggleFiltersButton,
-  MantineReactTableProps,
 } from "mantine-react-table";
 import {
   DataKetersediaanStok,

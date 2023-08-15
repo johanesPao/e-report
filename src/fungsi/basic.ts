@@ -499,6 +499,11 @@ export enum EPlaceholderTeks {
   "LIST_PROVINSI_GPT" = "[list_provinsi]",
 }
 
+export enum EModeTeksOutputNewStore {
+  "INCOME" = "income",
+  "EXPENSE" = "expense",
+}
+
 export enum EHalaman {
   "PENJUALAN" = "penjualan",
   "PENERIMAAN_BARANG" = "penerimaanBarang",

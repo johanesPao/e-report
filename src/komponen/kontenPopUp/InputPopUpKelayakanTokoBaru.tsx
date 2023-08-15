@@ -18,19 +18,24 @@ import {
   TextInput,
   Textarea,
   Title,
+  Tooltip,
   rem,
   useMantineTheme,
 } from "@mantine/core";
 import { UseFormReturnType, useForm } from "@mantine/form";
 import {
+  kalkulasiStoreIncome,
   StateKelayakanTokoBaru,
   generateProposalID,
   handleKotaKabupatenHilangFokus,
   handlePerubahanKotaKabupaten,
+  monitorInputPrediksiModel,
   prosesSimpanKelayakanTokoBaru,
+  renderOutput,
 } from "../../fungsi/halaman/kelayakanTokoBaru";
 import {
   EModePopUpKelayakanTokoBaru,
+  EModeTeksOutputNewStore,
   Formulir,
   IChatGPT,
   IDataInputItemKelayakanTokoBaru,
@@ -155,28 +160,67 @@ export const InputPopUpKelayakanTokoBaru = ({
         switch (nilai) {
           case 1:
             return (
-              <IconBuildingSkyscraper
+              <Tooltip
+                label="Mall Kelas 1"
+                withArrow
+                transitionProps={{ transition: "rotate-right", duration: 400 }}
+                position="right"
+                pos="fixed"
                 color={theme.colors.lime[7]}
-                {...defaultProps}
-              />
+              >
+                <IconBuildingSkyscraper
+                  color={theme.colors.lime[7]}
+                  {...defaultProps}
+                />
+              </Tooltip>
             );
           case 2:
             return (
-              <IconBuilding color={theme.colors.yellow[7]} {...defaultProps} />
+              <Tooltip
+                label="Mall Kelas 2"
+                withArrow
+                transitionProps={{ transition: "rotate-right", duration: 400 }}
+                position="right"
+                pos="fixed"
+                color={theme.colors.yellow[7]}
+              >
+                <IconBuilding
+                  color={theme.colors.yellow[7]}
+                  {...defaultProps}
+                />
+              </Tooltip>
             );
           case 3:
             return (
-              <IconBuildingEstate
+              <Tooltip
+                label="Mall Kelas 3"
+                withArrow
+                transitionProps={{ transition: "rotate-right", duration: 400 }}
+                position="right"
+                pos="fixed"
                 color={theme.colors.orange[7]}
-                {...defaultProps}
-              />
+              >
+                <IconBuildingEstate
+                  color={theme.colors.orange[7]}
+                  {...defaultProps}
+                />
+              </Tooltip>
             );
           case 4:
             return (
-              <IconBuildingStore
+              <Tooltip
+                label="Mall Kelas 4/Non Mall"
+                withArrow
+                transitionProps={{ transition: "rotate-right", duration: 400 }}
+                position="right"
+                pos="fixed"
                 color={theme.colors.red[7]}
-                {...defaultProps}
-              />
+              >
+                <IconBuildingStore
+                  color={theme.colors.red[7]}
+                  {...defaultProps}
+                />
+              </Tooltip>
             );
         }
       },
@@ -306,77 +350,20 @@ export const InputPopUpKelayakanTokoBaru = ({
     }
   }, []);
 
-  const preprocessingModelInput = (
-    formulir: UseFormReturnType<Formulir, (values: Formulir) => Formulir>
-  ) => {
-    const sqmScaled =
-      formulir.values.input.luas_toko !== undefined &&
-      (formulir.values.input.luas_toko -
-        parseFloat(props.inputItem.model.mean)) /
-        parseFloat(props.inputItem.model.std);
-    console.log(
-      formulir.values.input.sbu,
-      formulir.values.input.rentang_populasi,
-      formulir.values.input.kelas_mall,
-      formulir.values.input.luas_toko
-    );
-    const instances = [
-      sqmScaled,
-      formulir.values.input.sbu === props.inputItem.sbuItem[0] ? 1 : 0,
-      formulir.values.input.sbu === props.inputItem.sbuItem[1] ? 1 : 0,
-      formulir.values.input.sbu === props.inputItem.sbuItem[2] ? 1 : 0,
-      formulir.values.input.kelas_mall !== undefined &&
-        formulir.values.input.kelas_mall - 1,
-      formulir.values.input.rentang_populasi !== undefined &&
-        (formulir.values.input.rentang_populasi === 0
-          ? 0
-          : formulir.values.input.rentang_populasi / 20),
-    ];
-    console.log(instances);
-  };
-
-  const monitorInputModel = () => {
-    // jika semua input model tidak sama dengan initialValue
-    if (
-      formulir.values.input.sbu !== initialValueFormulir.input.sbu &&
-      formulir.values.input.rentang_populasi !==
-        initialValueFormulir.input.rentang_populasi &&
-      formulir.values.input.kelas_mall !==
-        initialValueFormulir.input.kelas_mall &&
-      formulir.values.input.luas_toko !== initialValueFormulir.input.luas_toko
-    ) {
-      // jika nilai input berubah (dirty), lakukan evaluasi
-      if (
-        [
-          formulir.isDirty("input.sbu"),
-          formulir.isDirty("input.rentang_populasi"),
-          formulir.isDirty("input.kelas_mall"),
-          formulir.isDirty("input.luas_toko"),
-        ].every((status) => status === true)
-      ) {
-        // console.log nilai
-        console.log(
-          typeof formulir.values.input.sbu,
-          formulir.values.input.rentang_populasi,
-          formulir.values.input.kelas_mall,
-          formulir.values.input.luas_toko
-        );
-        console.log("evaluasi");
-        // konversi nilai - nilai input sesuai dengan input untuk model (preprocessing input)\
-        preprocessingModelInput(formulir);
-      }
-    }
-  };
-
-  // Monitor nilai dari sbu, rentang_populasi, kelas_mall dan luas_toko
+  // Render Prediksi Sales
   useEffect(() => {
-    monitorInputModel();
+    monitorInputPrediksiModel(formulir, props);
   }, [
     formulir.values.input.sbu,
     formulir.values.input.rentang_populasi,
     formulir.values.input.kelas_mall,
     formulir.values.input.luas_toko,
   ]);
+
+  // Render teks Output
+  useEffect(() => {
+    kalkulasiStoreIncome(formulir, props);
+  }, [formulir.values.output]);
 
   const handlerJumlahStaff = useRef<NumberInputHandlers>();
   const handlerJumlahTahunSewa = useRef<NumberInputHandlers>();
@@ -502,6 +489,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                         backgroundColor: theme.colors.blue[5],
                       },
                     }}
+                    // onClick={() => monitorInputPrediksiModel(formulir, props)}
                     disabled={statusDisabilitasInput.sbu}
                   />
                 </Flex>
@@ -540,7 +528,8 @@ export const InputPopUpKelayakanTokoBaru = ({
                         chatGPT,
                         props,
                         statusDisabilitasInput,
-                        setStatusDisabilitasInput
+                        setStatusDisabilitasInput,
+                        initialValueFormulir
                       )
                     }
                     disabled={statusDisabilitasInput.kota_kabupaten}
@@ -621,6 +610,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                     pt={20}
                     pb={35}
                     {...formulir.getInputProps("input.rentang_populasi")}
+                    // onChange={() => monitorInputPrediksiModel(formulir, props)}
                     disabled={statusDisabilitasInput.rentang_populasi}
                   />
                 </Flex>
@@ -643,6 +633,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                       label: {},
                     }}
                     {...formulir.getInputProps("input.kelas_mall")}
+                    // onClick={() => monitorInputPrediksiModel(formulir, props)}
                     readOnly={statusDisabilitasInput.kelas_mall}
                   />
                 </Flex>
@@ -683,6 +674,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                       },
                     }}
                     {...formulir.getInputProps("input.luas_toko")}
+                    // onBlur={() => monitorInputPrediksiModel(formulir, props)}
                     disabled={statusDisabilitasInput.luas_toko}
                   />
                 </Flex>
@@ -723,6 +715,12 @@ export const InputPopUpKelayakanTokoBaru = ({
                       },
                     }}
                     {...formulir.getInputProps("input.prediksi_penjualan_user")}
+                    onChange={(nilai) =>
+                      formulir.setFieldValue(
+                        "output.user_generated.sales",
+                        nilai
+                      )
+                    }
                     disabled={statusDisabilitasInput.prediksi_penjualan_user}
                   />
                 </Flex>
@@ -1150,113 +1148,110 @@ export const InputPopUpKelayakanTokoBaru = ({
             </Grid.Col>
             <Grid.Col span={2}>
               <Text>User Output</Text>
-              <Text>
-                {formulir.getInputProps("output.user_generated.sales").value}
-              </Text>
-              <Text>
-                {formulir.getInputProps("output.user_generated.ppn").value}
-              </Text>
-              <Text>
-                {
-                  formulir.getInputProps("output.user_generated.net_sales")
-                    .value
-                }
-              </Text>
-              <Text>
-                {formulir.getInputProps("output.user_generated.cogs").value}
-              </Text>
-              <Text>
-                {
-                  formulir.getInputProps("output.user_generated.gross_profit")
-                    .value
-                }
-              </Text>
-              <Text>
-                {
-                  formulir.getInputProps("output.user_generated.staff_expense")
-                    .value
-                }
-              </Text>
-              <Text>
-                {
-                  formulir.getInputProps("output.user_generated.oau_expense")
-                    .value
-                }
-              </Text>
-              <Text>
-                {
-                  formulir.getInputProps("output.user_generated.rental_expense")
-                    .value
-                }
-              </Text>
-              <Text>
-                {
-                  formulir.getInputProps("output.user_generated.fitout_expense")
-                    .value
-                }
-              </Text>
-              <Text>
-                {
-                  formulir.getInputProps("output.user_generated.store_income")
-                    .value
-                }
-              </Text>
+              {renderOutput(
+                formulir.getInputProps("output.user_generated.sales").value,
+                EModeTeksOutputNewStore.INCOME
+              )}
+              {renderOutput(
+                formulir.getInputProps("output.user_generated.ppn").value,
+                EModeTeksOutputNewStore.EXPENSE
+              )}
+
+              {renderOutput(
+                formulir.getInputProps("output.user_generated.net_sales").value,
+                EModeTeksOutputNewStore.INCOME
+              )}
+
+              {renderOutput(
+                formulir.getInputProps("output.user_generated.cogs").value,
+                EModeTeksOutputNewStore.EXPENSE
+              )}
+
+              {renderOutput(
+                formulir.getInputProps("output.user_generated.gross_profit")
+                  .value,
+                EModeTeksOutputNewStore.INCOME
+              )}
+
+              {renderOutput(
+                formulir.getInputProps("output.user_generated.staff_expense")
+                  .value,
+                EModeTeksOutputNewStore.EXPENSE
+              )}
+
+              {renderOutput(
+                formulir.getInputProps("output.user_generated.oau_expense")
+                  .value,
+                EModeTeksOutputNewStore.EXPENSE
+              )}
+
+              {renderOutput(
+                formulir.getInputProps("output.user_generated.rental_expense")
+                  .value,
+                EModeTeksOutputNewStore.EXPENSE
+              )}
+
+              {renderOutput(
+                formulir.getInputProps("output.user_generated.fitout_expense")
+                  .value,
+                EModeTeksOutputNewStore.EXPENSE
+              )}
+
+              {renderOutput(
+                formulir.getInputProps("output.user_generated.store_income")
+                  .value,
+                EModeTeksOutputNewStore.INCOME
+              )}
             </Grid.Col>
             <Grid.Col span={2}>
-              <Text>Model Output</Text>
-              <Text>
-                {formulir.getInputProps("output.model_generated.sales").value}
-              </Text>
-              <Text>
-                {formulir.getInputProps("output.model_generated.ppn").value}
-              </Text>
-              <Text>
-                {
-                  formulir.getInputProps("output.model_generated.net_sales")
-                    .value
-                }
-              </Text>
-              <Text>
-                {formulir.getInputProps("output.model_generated.cogs").value}
-              </Text>
-              <Text>
-                {
-                  formulir.getInputProps("output.model_generated.gross_profit")
-                    .value
-                }
-              </Text>
-              <Text>
-                {
-                  formulir.getInputProps("output.model_generated.staff_expense")
-                    .value
-                }
-              </Text>
-              <Text>
-                {
-                  formulir.getInputProps("output.model_generated.oau_expense")
-                    .value
-                }
-              </Text>
-              <Text>
-                {
-                  formulir.getInputProps(
-                    "output.model_generated.rental_expense"
-                  ).value
-                }
-              </Text>
-              <Text>
-                {
-                  formulir.getInputProps(
-                    "output.model_generated.fitout_expense"
-                  ).value
-                }
-              </Text>
-              <Text>
-                {
-                  formulir.getInputProps("output.model_generated.store_income")
-                    .value
-                }
-              </Text>
+              Model Output
+              {renderOutput(
+                formulir.getInputProps("output.model_generated.sales").value,
+                EModeTeksOutputNewStore.INCOME
+              )}
+              {renderOutput(
+                formulir.getInputProps("output.model_generated.ppn").value,
+                EModeTeksOutputNewStore.EXPENSE
+              )}
+              {renderOutput(
+                formulir.getInputProps("output.model_generated.net_sales")
+                  .value,
+                EModeTeksOutputNewStore.INCOME
+              )}
+              {renderOutput(
+                formulir.getInputProps("output.model_generated.cogs").value,
+                EModeTeksOutputNewStore.EXPENSE
+              )}
+              {renderOutput(
+                formulir.getInputProps("output.model_generated.gross_profit")
+                  .value,
+                EModeTeksOutputNewStore.INCOME
+              )}
+              {renderOutput(
+                formulir.getInputProps("output.model_generated.staff_expense")
+                  .value,
+                EModeTeksOutputNewStore.EXPENSE
+              )}
+              {renderOutput(
+                formulir.getInputProps("output.model_generated.oau_expense")
+                  .value,
+                EModeTeksOutputNewStore.EXPENSE
+              )}
+              {renderOutput(
+                formulir.getInputProps("output.model_generated.rental_expense")
+                  .value,
+                EModeTeksOutputNewStore.EXPENSE
+              )}
+              {renderOutput(
+                formulir.getInputProps("output.model_generated.fitout_expense")
+                  .value,
+                EModeTeksOutputNewStore.EXPENSE
+              )}
+              {renderOutput(
+                formulir.getInputProps("output.model_generated.store_income")
+                  .value,
+                EModeTeksOutputNewStore.INCOME
+              )}
             </Grid.Col>
           </Grid>
           <Grid justify="space-around" mt={20}>

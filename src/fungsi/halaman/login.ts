@@ -531,25 +531,29 @@ export const prosesLogin = async (
           console.log("Tidak terhubung ke BC.");
           return;
         }
-        LogRocket.identify(nama, {
-          name: nama,
-          email: hasil.email,
-          departemen: hasil.departemen,
-          peran: hasil.peran,
-        });
-        notifications.show({
-          title: "Login Sukses",
-          message: `Selamat datang kembali ${nama} di e-Report!`,
-          autoClose: 5000,
-          color: "teal",
-          icon: React.createElement(IconCheck, { size: "1.1rem" }),
-          withCloseButton: false,
-        });
-        dispatch(setProsesAuth(false));
       } catch (e) {
         console.log(`Gagal memuat parameter BC dari back-end. ${e}`);
       }
+    } else {
+      // Tidak terhubung ke BC
+      dispatch(setKonekKeBC(false));
+
     }
+    LogRocket.identify(nama, {
+      name: nama,
+      email: hasil.email,
+      departemen: hasil.departemen,
+      peran: hasil.peran,
+    });
+    notifications.show({
+      title: "Login Sukses",
+      message: `Selamat datang kembali ${nama} di e-Report!`,
+      autoClose: 5000,
+      color: "teal",
+      icon: React.createElement(IconCheck, { size: "1.1rem" }),
+      withCloseButton: false,
+    });
+    dispatch(setProsesAuth(false));
     navigasi("konten");
   }
 };

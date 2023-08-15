@@ -26,7 +26,7 @@ import {
   ambilInputItemModelKelayakanTokoBaru,
   ambilProposal,
 } from "../fungsi/halaman/kelayakanTokoBaru";
-import { EHalaman } from "../fungsi/basic";
+import { EHalaman, resetAplikasi } from "../fungsi/basic";
 
 const Konten = () => {
   const navigasi = useNavigate();
@@ -186,7 +186,6 @@ const Konten = () => {
     }
 
     proposalDanInput();
-    console.log(stateKelayakanTokoBaru.inputItem);
   }, []);
 
   useEffect(() => {
@@ -198,6 +197,8 @@ const Konten = () => {
   const handleNavlinkClick = (halamanBaru: string) => {
     dispatch(setHalaman(halamanBaru));
   };
+
+  // resetAplikasi(dispatch);
 
   const renderKonten = () => {
     switch (halaman) {
