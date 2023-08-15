@@ -528,6 +528,41 @@ export enum EModePopUpKelayakanTokoBaru {
   "HAPUS" = "hapus",
 }
 
+export interface IAksenWarnaPopUp {
+  header: string;
+  mayor: string;
+  minor: string;
+  teksLoading: string;
+  disable: IAksenWarnaDisable;
+  kelasMall: IAksenWarnaIconKelasMall;
+  tombolBatal: IAksenWarnaTombol;
+  tombolSimpan: IAksenWarnaTombol;
+  tombolKirim: IAksenWarnaTombol;
+}
+
+interface IAksenWarnaDisable {
+  mayor: string;
+  mid: string;
+  minor: string;
+}
+
+interface IAksenWarnaTombol {
+  utama: string;
+  hover: IAksenWarnaTombolHover;
+}
+
+interface IAksenWarnaTombolHover {
+  background: string;
+  teks: string;
+}
+
+interface IAksenWarnaIconKelasMall {
+  kelasSatu: string;
+  kelasDua: string;
+  kelasTiga: string;
+  kelasEmpat: string;
+}
+
 export const unduhTabelKeExcel = (data: any[], halaman: string) => {
   let file: string;
   switch (halaman) {

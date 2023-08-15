@@ -22,7 +22,7 @@ import {
   rem,
   useMantineTheme,
 } from "@mantine/core";
-import { UseFormReturnType, useForm } from "@mantine/form";
+import { useForm } from "@mantine/form";
 import {
   kalkulasiStoreIncome,
   StateKelayakanTokoBaru,
@@ -37,6 +37,7 @@ import {
   EModePopUpKelayakanTokoBaru,
   EModeTeksOutputNewStore,
   Formulir,
+  IAksenWarnaPopUp,
   IChatGPT,
   IDataInputItemKelayakanTokoBaru,
   IDisabilitasInputKelayakanTokoBaru,
@@ -73,9 +74,11 @@ import { getParameterBc } from "../../fitur_state/dataParam";
 export const InputPopUpKelayakanTokoBaru = ({
   props,
   setProps,
+  aksenWarna,
 }: {
   props: StateKelayakanTokoBaru;
   setProps: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>;
+  aksenWarna: IAksenWarnaPopUp;
 }) => {
   const theme = useMantineTheme();
   const parameterBc = useAppSelector(getParameterBc);
@@ -166,10 +169,10 @@ export const InputPopUpKelayakanTokoBaru = ({
                 transitionProps={{ transition: "rotate-right", duration: 400 }}
                 position="right"
                 pos="fixed"
-                color={theme.colors.lime[7]}
+                color={aksenWarna.kelasMall.kelasSatu}
               >
                 <IconBuildingSkyscraper
-                  color={theme.colors.lime[7]}
+                  color={aksenWarna.kelasMall.kelasSatu}
                   {...defaultProps}
                 />
               </Tooltip>
@@ -182,10 +185,10 @@ export const InputPopUpKelayakanTokoBaru = ({
                 transitionProps={{ transition: "rotate-right", duration: 400 }}
                 position="right"
                 pos="fixed"
-                color={theme.colors.yellow[7]}
+                color={aksenWarna.kelasMall.kelasDua}
               >
                 <IconBuilding
-                  color={theme.colors.yellow[7]}
+                  color={aksenWarna.kelasMall.kelasDua}
                   {...defaultProps}
                 />
               </Tooltip>
@@ -198,10 +201,10 @@ export const InputPopUpKelayakanTokoBaru = ({
                 transitionProps={{ transition: "rotate-right", duration: 400 }}
                 position="right"
                 pos="fixed"
-                color={theme.colors.orange[7]}
+                color={aksenWarna.kelasMall.kelasTiga}
               >
                 <IconBuildingEstate
-                  color={theme.colors.orange[7]}
+                  color={aksenWarna.kelasMall.kelasTiga}
                   {...defaultProps}
                 />
               </Tooltip>
@@ -214,10 +217,10 @@ export const InputPopUpKelayakanTokoBaru = ({
                 transitionProps={{ transition: "rotate-right", duration: 400 }}
                 position="right"
                 pos="fixed"
-                color={theme.colors.red[7]}
+                color={aksenWarna.kelasMall.kelasEmpat}
               >
                 <IconBuildingStore
-                  color={theme.colors.red[7]}
+                  color={aksenWarna.kelasMall.kelasEmpat}
                   {...defaultProps}
                 />
               </Tooltip>
@@ -403,9 +406,9 @@ export const InputPopUpKelayakanTokoBaru = ({
                           label: {
                             "&[data-checked]": {
                               "&:not([data-disabled])": {
-                                backgroundColor: theme.colors.blue[5],
+                                backgroundColor: aksenWarna.mayor,
                                 ...theme.fn.hover({
-                                  backgroundColor: theme.colors.blue[5],
+                                  backgroundColor: aksenWarna.mayor,
                                 }),
                               },
                             },
@@ -443,11 +446,11 @@ export const InputPopUpKelayakanTokoBaru = ({
               styles={{
                 root: {
                   border: "solid 2px",
-                  borderColor: theme.colors.blue[5],
+                  borderColor: aksenWarna.mayor,
                 },
                 scrollbar: {
                   '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
-                    backgroundColor: theme.colors.blue[5],
+                    backgroundColor: aksenWarna.mayor,
                   },
                   '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb':
                     {
@@ -486,7 +489,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                     data={dataInputItem.sbuItem}
                     styles={{
                       indicator: {
-                        backgroundColor: theme.colors.blue[5],
+                        backgroundColor: aksenWarna.mayor,
                       },
                     }}
                     // onClick={() => monitorInputPrediksiModel(formulir, props)}
@@ -512,7 +515,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                     styles={{
                       input: {
                         fontSize: "20px",
-                        color: theme.colors.blue[5],
+                        color: aksenWarna.mayor,
                         textAlign: "center",
                       },
                     }}
@@ -536,11 +539,11 @@ export const InputPopUpKelayakanTokoBaru = ({
                     rightSection={
                       memuatChatGPT ? (
                         <>
-                          <Text pr={"0.5rem"} c={theme.colors.gray[7]}>
+                          <Text pr={"0.5rem"} c={aksenWarna.teksLoading}>
                             memuat chat GPT {chatGPT.klien.model_gpt}
                             ...
                           </Text>
-                          <Loader size="xs" color={theme.colors.blue[5]} />
+                          <Loader size="xs" color={aksenWarna.mayor} />
                         </>
                       ) : null
                     }
@@ -566,15 +569,15 @@ export const InputPopUpKelayakanTokoBaru = ({
                     styles={{
                       bar: {
                         backgroundColor: statusDisabilitasInput.rentang_populasi
-                          ? theme.colors.dark[3]
-                          : theme.colors.blue[5],
+                          ? aksenWarna.disable.mid
+                          : aksenWarna.mayor,
                         height: rem(3),
                       },
                       thumb: {
                         borderWidth: rem(2),
                         padding: rem(1),
-                        backgroundColor: theme.colors.blue[5],
-                        borderColor: theme.colors.blue[5],
+                        backgroundColor: aksenWarna.mayor,
+                        borderColor: aksenWarna.mayor,
                       },
                       mark: {
                         width: rem(20),
@@ -584,19 +587,19 @@ export const InputPopUpKelayakanTokoBaru = ({
                           9
                         )})`,
                         borderColor: statusDisabilitasInput.rentang_populasi
-                          ? theme.colors.dark[3]
-                          : theme.colors.blue[5],
+                          ? aksenWarna.disable.mid
+                          : aksenWarna.mayor,
                         backgroundColor: statusDisabilitasInput.rentang_populasi
-                          ? theme.colors.dark[5]
-                          : theme.colors.blue[1],
+                          ? aksenWarna.disable.mayor
+                          : aksenWarna.minor,
                       },
                       markFilled: {
                         borderColor: statusDisabilitasInput.rentang_populasi
-                          ? theme.colors.dark[3]
-                          : theme.colors.blue[5],
+                          ? aksenWarna.disable.mid
+                          : aksenWarna.mayor,
                         backgroundColor: statusDisabilitasInput.rentang_populasi
-                          ? theme.colors.dark[2]
-                          : theme.colors.blue[5],
+                          ? aksenWarna.disable.minor
+                          : aksenWarna.mayor,
                       },
                       label: {
                         display: "none",
@@ -669,7 +672,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                     styles={{
                       input: {
                         fontSize: "20px",
-                        color: theme.colors.blue[5],
+                        color: aksenWarna.mayor,
                         textAlign: "center",
                       },
                     }}
@@ -710,7 +713,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                     styles={{
                       input: {
                         fontSize: "20px",
-                        color: theme.colors.blue[5],
+                        color: aksenWarna.mayor,
                         textAlign: "center",
                       },
                     }}
@@ -756,7 +759,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                     styles={{
                       input: {
                         fontSize: "20px",
-                        color: theme.colors.blue[5],
+                        color: aksenWarna.mayor,
                         textAlign: "center",
                       },
                     }}
@@ -797,7 +800,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                     styles={{
                       input: {
                         fontSize: "20px",
-                        color: theme.colors.blue[5],
+                        color: aksenWarna.mayor,
                         textAlign: "center",
                       },
                     }}
@@ -830,15 +833,15 @@ export const InputPopUpKelayakanTokoBaru = ({
                     styles={{
                       item: {
                         "&[data-selected]": {
-                          backgroundColor: theme.colors.blue[5],
+                          backgroundColor: aksenWarna.mayor,
                           ...theme.fn.hover({
-                            backgroundColor: theme.colors.blue[5],
+                            backgroundColor: aksenWarna.mayor,
                           }),
                         },
                       },
                       input: {
                         fontSize: "20px",
-                        color: theme.colors.blue[5],
+                        color: aksenWarna.mayor,
                         textAlign: "center",
                       },
                     }}
@@ -864,15 +867,15 @@ export const InputPopUpKelayakanTokoBaru = ({
                     styles={{
                       item: {
                         "&[data-selected]": {
-                          backgroundColor: theme.colors.blue[5],
+                          backgroundColor: aksenWarna.mayor,
                           ...theme.fn.hover({
-                            backgroundColor: theme.colors.blue[5],
+                            backgroundColor: aksenWarna.mayor,
                           }),
                         },
                       },
                       input: {
                         fontSize: "20px",
-                        color: theme.colors.blue[5],
+                        color: aksenWarna.mayor,
                         textAlign: "center",
                       },
                     }}
@@ -918,7 +921,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                       styles={{
                         input: {
                           fontSize: "20px",
-                          color: theme.colors.blue[5],
+                          color: aksenWarna.mayor,
                           textAlign: "center",
                         },
                       }}
@@ -972,7 +975,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                     styles={{
                       input: {
                         fontSize: "20px",
-                        color: theme.colors.blue[5],
+                        color: aksenWarna.mayor,
                         textAlign: "center",
                       },
                     }}
@@ -1012,7 +1015,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                     styles={{
                       input: {
                         fontSize: "20px",
-                        color: theme.colors.blue[5],
+                        color: aksenWarna.mayor,
                         textAlign: "center",
                       },
                     }}
@@ -1058,7 +1061,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                       styles={{
                         input: {
                           fontSize: "20px",
-                          color: theme.colors.blue[5],
+                          color: aksenWarna.mayor,
                           textAlign: "center",
                         },
                       }}
@@ -1112,7 +1115,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                     styles={{
                       input: {
                         fontSize: "20px",
-                        color: theme.colors.blue[5],
+                        color: aksenWarna.mayor,
                         textAlign: "center",
                       },
                     }}
@@ -1288,11 +1291,11 @@ export const InputPopUpKelayakanTokoBaru = ({
               }
               styles={{
                 root: {
-                  color: theme.colors.red[8],
-                  borderColor: theme.colors.red[8],
+                  color: aksenWarna.tombolBatal.utama,
+                  borderColor: aksenWarna.tombolBatal.utama,
                   ...theme.fn.hover({
-                    backgroundColor: theme.colors.red[8],
-                    color: theme.colors.dark[9],
+                    backgroundColor: aksenWarna.tombolBatal.hover.background,
+                    color: aksenWarna.tombolBatal.hover.teks,
                   }),
                 },
                 label: {
@@ -1307,11 +1310,11 @@ export const InputPopUpKelayakanTokoBaru = ({
               onClick={() => prosesSimpanKelayakanTokoBaru(formulir)}
               styles={{
                 root: {
-                  color: theme.colors.blue[8],
-                  borderColor: theme.colors.blue[8],
+                  color: aksenWarna.tombolSimpan.utama,
+                  borderColor: aksenWarna.tombolSimpan.utama,
                   ...theme.fn.hover({
-                    backgroundColor: theme.colors.blue[8],
-                    color: theme.colors.dark[9],
+                    backgroundColor: aksenWarna.tombolSimpan.hover.background,
+                    color: aksenWarna.tombolSimpan.hover.teks,
                   }),
                 },
                 label: {
@@ -1336,11 +1339,11 @@ export const InputPopUpKelayakanTokoBaru = ({
               // }
               styles={{
                 root: {
-                  color: theme.colors.green[8],
-                  borderColor: theme.colors.green[8],
+                  color: aksenWarna.tombolKirim.utama,
+                  borderColor: aksenWarna.tombolKirim.utama,
                   ...theme.fn.hover({
-                    backgroundColor: theme.colors.green[8],
-                    color: theme.colors.dark[9],
+                    backgroundColor: aksenWarna.tombolKirim.hover.background,
+                    color: aksenWarna.tombolKirim.hover.teks,
                   }),
                 },
                 label: {

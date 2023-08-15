@@ -26,7 +26,7 @@ import {
   ambilInputItemModelKelayakanTokoBaru,
   ambilProposal,
 } from "../fungsi/halaman/kelayakanTokoBaru";
-import { EHalaman, resetAplikasi } from "../fungsi/basic";
+import { EHalaman } from "../fungsi/basic";
 
 const Konten = () => {
   const navigasi = useNavigate();
