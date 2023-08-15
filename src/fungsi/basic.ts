@@ -346,7 +346,7 @@ export type DataTabelKelayakanTokoBaru = {
   submit_by: string;
   dibuat: Date;
   diedit: Date;
-  status: string;
+  status: EStatusProposalTokoBaru;
 };
 
 export interface Formulir {
@@ -497,6 +497,13 @@ export interface IChatGPTKueri {
 export enum EPlaceholderTeks {
   "NAMA_KOTA_GPT" = "[nama_kota]",
   "LIST_PROVINSI_GPT" = "[list_provinsi]",
+}
+
+export enum EStatusProposalTokoBaru {
+  "DRAFT" = 0,
+  "SUBMIT",
+  "DITOLAK",
+  "DITERIMA",
 }
 
 export enum EModeTeksOutputNewStore {

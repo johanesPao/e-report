@@ -11,13 +11,22 @@ import {
   DataStok,
   DataTabelKelayakanTokoBaru,
   EModePopUpKelayakanTokoBaru,
+  EStatusProposalTokoBaru,
   unduhTabelKeExcel,
 } from "./basic";
 import { StatePenjualan } from "./halaman/penjualan";
 import { StatePenerimaanBarang } from "./halaman/penerimaanBarang";
 import { StateStok } from "./halaman/stok";
 import { StateKetersediaanStok } from "./halaman/ketersediaanStok";
-import { ActionIcon, Box, Button, Stack, Title, Tooltip } from "@mantine/core";
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Button,
+  Stack,
+  Title,
+  Tooltip,
+} from "@mantine/core";
 import {
   IconDownload,
   IconHomeCheck,
@@ -213,87 +222,101 @@ export const buatPropsTabel = (
         renderRowActions: ({ row }: MantineReactTableProps) => {
           return (
             <Box sx={{ display: "flex", flexWrap: "nowrap", gap: "8px" }}>
-              <Tooltip
-                label={`Approval atau Rejection untuk Proposal ${row.original.proposal_id}`}
-                withArrow
-                transitionProps={{ transition: "rotate-left", duration: 300 }}
-                position="left"
-                pos="fixed"
-                color="teal"
-              >
-                <ActionIcon
-                  variant="light"
-                  color={"green"}
-                  onClick={() => {
-                    if (setProps !== undefined) {
-                      setProps((stateSebelumnya) => ({
-                        ...stateSebelumnya,
-                        popUp: {
-                          togglePopUp: true,
-                          judulPopUp: `Persetujuan ${row.original.proposal_id}`,
-                          modePopUp: EModePopUpKelayakanTokoBaru.PERSETUJUAN,
-                        },
-                      }));
-                    }
-                  }}
+              {/* Approval hanya ada jika status proposal 1 (SUBMIT) */}
+              {row.original.status == EStatusProposalTokoBaru.SUBMIT ? (
+                <Tooltip
+                  label={`Approval atau Rejection untuk Proposal ${row.original.proposal_id}`}
+                  withArrow
+                  transitionProps={{ transition: "rotate-left", duration: 300 }}
+                  position="left"
+                  pos="fixed"
+                  color="teal"
                 >
-                  <IconHomeCheck />
-                </ActionIcon>
-              </Tooltip>
-              <Tooltip
-                label={`Sunting Perubahan untuk Proposal ${row.original.proposal_id}`}
-                withArrow
-                transitionProps={{ transition: "rotate-left", duration: 300 }}
-                position="left"
-                pos="fixed"
-                color="orange"
-              >
-                <ActionIcon
-                  variant="light"
-                  color={"orange"}
-                  onClick={() => {
-                    if (setProps !== undefined) {
-                      setProps((stateSebelumnya) => ({
-                        ...stateSebelumnya,
-                        popUp: {
-                          togglePopUp: true,
-                          judulPopUp: `Sunting ${row.original.proposal_id}`,
-                          modePopUp: EModePopUpKelayakanTokoBaru.SUNTING,
-                        },
-                      }));
-                    }
-                  }}
-                >
-                  <IconHomeQuestion />
-                </ActionIcon>
-              </Tooltip>
-              <Tooltip
-                label={`Hapus Proposal ${row.original.proposal_id}?`}
-                withArrow
-                transitionProps={{ transition: "rotate-left", duration: 300 }}
-                position="left"
-                pos="fixed"
-                color="red"
-              >
-                <ActionIcon
-                  variant="light"
-                  color={"red"}
-                  onClick={() => {
-                    if (setProps !== undefined) {
-                      setProps((stateSebelumnya) => ({
-                        ...stateSebelumnya,
-                        popUp: {
-                          togglePopUp: true,
-                          judulPopUp: `Hapus ${row.original.proposal_id}`,
-                          modePopUp: EModePopUpKelayakanTokoBaru.HAPUS,
-                        },
-                      }));
-                    }
-                  }}
-                >
-                  <IconHomeX />
-                </ActionIcon>
-              </Tooltip>
+                  <ActionIcon
+                    variant="light"
+                    color={"green"}
+                    onClick={() => {
+                      if (setProps !== undefined) {
+                        setProps((stateSebelumnya) => ({
+                          ...stateSebelumnya,
+                          popUp: {
+                            togglePopUp: true,
+                            judulPopUp: `Persetujuan ${row.original.proposal_id}`,
+                            modePopUp: EModePopUpKelayakanTokoBaru.PERSETUJUAN,
+                          },
+                        }));
+                      }
+                    }}
+                  >
+                    <IconHomeCheck />
+                  </ActionIcon>
+                </Tooltip>
+              ) : null}
+              {/* SUNTING atau HAPUS hanya ada jika status proposal 0 (DRAFT) */}
+              {row.original.status == EStatusProposalTokoBaru.DRAFT ? (
+                <>
+                  <Tooltip
+                    label={`Sunting Perubahan untuk Proposal ${row.original.proposal_id}`}
+                    withArrow
+                    transitionProps={{
+                      transition: "rotate-left",
+                      duration: 300,
+                    }}
+                    position="left"
+                    pos="fixed"
+                    color="orange"
+                  >
+                    <ActionIcon
+                      variant="light"
+                      color={"orange"}
+                      onClick={() => {
+                        if (setProps !== undefined) {
+                          setProps((stateSebelumnya) => ({
+                            ...stateSebelumnya,
+                            popUp: {
+                              togglePopUp: true,
+                              judulPopUp: `Sunting ${row.original.proposal_id}`,
+                              modePopUp: EModePopUpKelayakanTokoBaru.SUNTING,
+                            },
+                          }));
+                        }
+                      }}
+                    >
+                      <IconHomeQuestion />
+                    </ActionIcon>
+                  </Tooltip>
+                  <Tooltip
+                    label={`Hapus Proposal ${row.original.proposal_id}?`}
+                    withArrow
+                    transitionProps={{
+                      transition: "rotate-left",
+                      duration: 300,
+                    }}
+                    position="left"
+                    pos="fixed"
+                    color="red"
+                  >
+                    <ActionIcon
+                      variant="light"
+                      color={"red"}
+                      onClick={() => {
+                        if (setProps !== undefined) {
+                          setProps((stateSebelumnya) => ({
+                            ...stateSebelumnya,
+                            popUp: {
+                              togglePopUp: true,
+                              judulPopUp: `Hapus ${row.original.proposal_id}`,
+                              modePopUp: EModePopUpKelayakanTokoBaru.HAPUS,
+                            },
+                          }));
+                        }
+                      }}
+                    >
+                      <IconHomeX />
+                    </ActionIcon>
+                  </Tooltip>
+                </>
+              ) : null}
             </Box>
           );
         },
@@ -1185,6 +1208,57 @@ export const definisiKolomKelayakanTokoBaru = () => {
       filterFn: "fuzzy",
     },
     {
+      accessorKey: "status",
+      accessorFn: (baris: any) => {
+        // Template Badge
+        const statusBadge = (
+          statusTeks: string,
+          warnaKiri: string,
+          warnaKanan: string
+        ) => {
+          return (
+            <Badge
+              variant="gradient"
+              gradient={{ from: warnaKiri, to: warnaKanan }}
+            >
+              {statusTeks}
+            </Badge>
+          );
+        };
+        let statusTeks: string;
+        let warnaKiri: string;
+        let warnaKanan: string;
+        switch (baris.status) {
+          case EStatusProposalTokoBaru.DRAFT:
+            statusTeks = "DRAFT";
+            warnaKiri = "orange";
+            warnaKanan = "red";
+            break;
+          case EStatusProposalTokoBaru.SUBMIT:
+            statusTeks = "SUBMITTED";
+            warnaKiri = "indigo";
+            warnaKanan = "cyan";
+            break;
+          case EStatusProposalTokoBaru.DITOLAK:
+            statusTeks = "REJECTED";
+            warnaKiri = "red";
+            warnaKanan = "black";
+            break;
+          case EStatusProposalTokoBaru.DITERIMA:
+            statusTeks = "APPROVED";
+            warnaKiri = "lime";
+            warnaKanan = "green";
+            break;
+          default:
+            return;
+        }
+        return statusBadge(statusTeks, warnaKiri, warnaKanan);
+      },
+      header: "Status Proposal",
+      enableColumnActions: true,
+      filterFn: "fuzzy",
+    },
+    {
       accessorKey: "sbu",
       header: "SBU",
       enableColumnActions: true,
@@ -1204,7 +1278,7 @@ export const definisiKolomKelayakanTokoBaru = () => {
     },
     {
       // accessorKey: "luas_toko",
-      accessorFn: (baris) => {
+      accessorFn: (baris: any) => {
         const luas_toko = baris.luas_toko + " m²";
         return luas_toko;
       },
@@ -1267,12 +1341,6 @@ export const definisiKolomKelayakanTokoBaru = () => {
       filterVariant: "date-range",
       sortingFn: "datetime",
       Cell: ({ cell }) => cell.getValue<Date>()?.toDateString(),
-    },
-    {
-      accessorKey: "status",
-      header: "Status Proposal",
-      enableColumnActions: true,
-      filterFn: "fuzzy",
     },
   ];
 
