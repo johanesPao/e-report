@@ -2,9 +2,11 @@ import { invoke } from "@tauri-apps/api/tauri";
 import {
   DataKelayakanTokoBaru,
   DataTabelKelayakanTokoBaru,
+  EModePopUpKelayakanTokoBaru,
   EModeTeksOutputNewStore,
   EPlaceholderTeks,
   Formulir,
+  IAksenWarnaPopUp,
   IChatGPT,
   IChatGPTClient,
   IDisabilitasInputKelayakanTokoBaru,
@@ -14,11 +16,18 @@ import {
   IPopUpProps,
   toTitle,
 } from "../basic";
-import { Text } from "@mantine/core";
+import {
+  Button,
+  Group,
+  Modal,
+  Text,
+  Title,
+  useMantineTheme,
+} from "@mantine/core";
 import { setDataKelayakanTokoBaru } from "../../fitur_state/dataBank";
 import { UseFormReturnType } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import React from "react";
+import React, { useState } from "react";
 import { IconExclamationMark, IconX } from "@tabler/icons-react";
 
 export interface StateKelayakanTokoBaru {
@@ -79,10 +88,139 @@ export const generateProposalID = (props: StateKelayakanTokoBaru) => {
   return proposalIdSelanjutnya;
 };
 
-export const prosesSimpanKelayakanTokoBaru = (
+export const cekFormValid = (
   formulir: UseFormReturnType<Formulir, (values: Formulir) => Formulir>
 ) => {
-  console.log(formulir);
+  // shortcut formulir
+  const nilai = formulir.values;
+  const nilaiInput = nilai.input;
+  const nilaiOutputUser = nilai.output.user_generated;
+  const nilaiOutputModel = nilai.output.model_generated;
+  // Cek Field yang dibutuhkan
+  return (
+    // cek nilai input
+    nilai.proposal_id !== "" &&
+    nilai.versi_proposal !== "" &&
+    nilaiInput.nama_model !== "" &&
+    nilaiInput.versi_model !== "" &&
+    nilaiInput.sbu !== "" &&
+    nilaiInput.kota_kabupaten !== "" &&
+    nilaiInput.rentang_populasi !== -1 &&
+    nilaiInput.kelas_mall !== 0 &&
+    nilaiInput.luas_toko !== undefined &&
+    nilaiInput.luas_toko > 0 &&
+    nilaiInput.margin_penjualan !== undefined &&
+    nilaiInput.margin_penjualan > 0 &&
+    nilaiInput.ppn !== undefined &&
+    nilaiInput.ppn > 0 &&
+    nilaiInput.tahun_umr !== "" &&
+    nilaiInput.provinsi_umr !== "" &&
+    nilaiInput.jumlah_staff !== undefined &&
+    nilaiInput.jumlah_staff > 0 &&
+    nilaiInput.biaya_oau !== undefined &&
+    nilaiInput.biaya_oau > 0 &&
+    nilaiInput.biaya_sewa !== undefined &&
+    nilaiInput.biaya_sewa > 0 &&
+    nilaiInput.lama_sewa !== undefined &&
+    nilaiInput.lama_sewa > 0 &&
+    nilaiInput.biaya_fitout !== undefined &&
+    nilaiInput.biaya_fitout > 0 &&
+    // cek hanya nilai output langsung yang bukan merupakan turunan
+    nilaiOutputUser.sales !== 0 &&
+    nilaiOutputUser.ppn !== 0 &&
+    nilaiOutputUser.cogs !== 0 &&
+    nilaiOutputUser.staff_expense !== 0 &&
+    nilaiOutputUser.oau_expense !== 0 &&
+    nilaiOutputUser.rental_expense !== 0 &&
+    nilaiOutputUser.fitout_expense !== 0 &&
+    nilaiOutputModel.sales !== 0 &&
+    nilaiOutputModel.ppn !== 0 &&
+    nilaiOutputModel.cogs !== 0 &&
+    nilaiOutputModel.staff_expense !== 0 &&
+    nilaiOutputModel.oau_expense !== 0 &&
+    nilaiOutputModel.rental_expense !== 0 &&
+    nilaiOutputModel.fitout_expense !== 0
+  );
+};
+
+export const KonfirmasiProposal = (
+  konfirmasiPopUp: boolean,
+  setKonfirmasiPopUp: React.Dispatch<React.SetStateAction<boolean>>,
+  valid: boolean,
+  formulir: UseFormReturnType<Formulir, (values: Formulir) => Formulir>,
+  aksenWarna: IAksenWarnaPopUp,
+  modePopUp: string
+) => {
+  // // Cek modePopUp dan validasi berdasar modePopUp
+  // switch (modePopUp) {
+  //   case EModePopUpKelayakanTokoBaru.PENAMBAHAN:
+  //     setValid(cekFormValid(formulir));
+  // }
+  // Jika terdapat kesalahan, ubah aksenWarna
+  if (!valid) {
+    const theme = useMantineTheme();
+    aksenWarna = {
+      ...aksenWarna,
+      header: theme.colors.red[9],
+    };
+  }
+
+  // Konten PopUp Formulir tidak valid
+  const TidakValid = (
+    setKonfirmasiPopUp: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    return (
+      <>
+        <Group>
+          Terdapat kesalahan pada pengisian data formulir, mohon pastikan
+          kembali data yang anda isi.
+        </Group>
+        <Group>
+          <Button onClick={() => setKonfirmasiPopUp(false)}>Oke</Button>
+        </Group>
+      </>
+    );
+  };
+
+  // Konten PopUp Formulir valid
+  const RenderKonfirmasi = (
+    setKonfirmasiPopUp: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    return (
+      <>
+        <Group>Anda akan menambahkan data proposal ...</Group>
+        <Group>
+          <Button>Lanjutkan</Button>
+          <Button onClick={() => setKonfirmasiPopUp(false)}>Batal</Button>
+        </Group>
+      </>
+    );
+  };
+
+  return (
+    <Modal.Root
+      opened={konfirmasiPopUp}
+      onClose={() => setKonfirmasiPopUp(false)}
+      centered
+      radius="md"
+    >
+      <Modal.Overlay blur={1} />
+      <Modal.Content>
+        <Modal.Header sx={{ backgroundColor: aksenWarna.header }} p={10}>
+          <Modal.Title>
+            <Title order={4} color="white">
+              Konfirmasi
+            </Title>
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body m={15}>
+          {!valid
+            ? TidakValid(setKonfirmasiPopUp)
+            : RenderKonfirmasi(setKonfirmasiPopUp)}
+        </Modal.Body>
+      </Modal.Content>
+    </Modal.Root>
+  );
 };
 
 // fungsi untuk mereplace placeholder role dan content dari chatGPT kueri
@@ -261,7 +399,7 @@ export const handleKotaKabupatenHilangFokus = async (
       input: {
         ...stateSebelumnya.input,
         rentang_populasi: -1,
-        provinsi_umr: "Dki Jakarta",
+        provinsi_umr: "DKI Jakarta",
       },
     }));
     // selain dua skenario di atas, lakukan evaluasi rentang_populasi dan provinsi_umr

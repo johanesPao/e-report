@@ -369,7 +369,6 @@ interface InputFormulir {
   rentang_populasi?: number;
   kelas_mall?: number;
   luas_toko?: number;
-  prediksi_penjualan_user?: number;
   margin_penjualan?: number;
   ppn?: number;
   tahun_umr?: string;
@@ -382,7 +381,7 @@ interface InputFormulir {
 }
 
 interface OutputFormulir {
-  sales: number;
+  sales?: number;
   ppn: number;
   net_sales: number;
   cogs: number;

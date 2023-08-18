@@ -30,8 +30,9 @@ import {
   handleKotaKabupatenHilangFokus,
   handlePerubahanKotaKabupaten,
   monitorInputPrediksiModel,
-  prosesSimpanKelayakanTokoBaru,
   renderOutput,
+  KonfirmasiProposal,
+  cekFormValid,
 } from "../../fungsi/halaman/kelayakanTokoBaru";
 import {
   EModePopUpKelayakanTokoBaru,
@@ -248,7 +249,6 @@ export const InputPopUpKelayakanTokoBaru = ({
       rentang_populasi: -1,
       kelas_mall: 0,
       luas_toko: undefined,
-      prediksi_penjualan_user: undefined,
       margin_penjualan: 0.35,
       ppn: 0.11,
       tahun_umr: new Date().getFullYear().toString(),
@@ -261,7 +261,7 @@ export const InputPopUpKelayakanTokoBaru = ({
     },
     output: {
       user_generated: {
-        sales: 0,
+        sales: undefined,
         ppn: 0,
         net_sales: 0,
         cogs: 0,
@@ -318,6 +318,12 @@ export const InputPopUpKelayakanTokoBaru = ({
 
   // Loader TextInput Kota Kabupaten
   const [memuatChatGPT, setMemuatChatGPT] = useState(false);
+
+  // Loader PopUp konfirmasi
+  const [konfirmasiPopUp, setKonfirmasiPopUp] = useState(false);
+
+  // Validitas Formulir
+  const [valid, setValid] = useState(false);
 
   // State Input Item berdasar mode pop up
   useEffect(() => {
@@ -717,7 +723,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                         textAlign: "center",
                       },
                     }}
-                    {...formulir.getInputProps("input.prediksi_penjualan_user")}
+                    {...formulir.getInputProps("output.user_generated.sales")}
                     onChange={(nilai) =>
                       formulir.setFieldValue(
                         "output.user_generated.sales",
@@ -1152,7 +1158,10 @@ export const InputPopUpKelayakanTokoBaru = ({
             <Grid.Col span={2}>
               <Text>User Output</Text>
               {renderOutput(
-                formulir.getInputProps("output.user_generated.sales").value,
+                formulir.getInputProps("output.user_generated.sales").value !==
+                  undefined
+                  ? formulir.getInputProps("output.user_generated.sales").value
+                  : 0,
                 EModeTeksOutputNewStore.INCOME
               )}
               {renderOutput(
@@ -1307,7 +1316,10 @@ export const InputPopUpKelayakanTokoBaru = ({
             </Button>
             <Button
               variant="outline"
-              onClick={() => prosesSimpanKelayakanTokoBaru(formulir)}
+              onClick={() => {
+                setValid(cekFormValid(formulir));
+                setKonfirmasiPopUp(true);
+              }}
               styles={{
                 root: {
                   color: aksenWarna.tombolSimpan.utama,
@@ -1355,6 +1367,14 @@ export const InputPopUpKelayakanTokoBaru = ({
               Kirim
             </Button>
           </Group>
+          {KonfirmasiProposal(
+            konfirmasiPopUp,
+            setKonfirmasiPopUp,
+            valid,
+            formulir,
+            aksenWarna,
+            props.popUp.modePopUp!
+          )}
         </Grid.Col>
       </Grid>
     </>
