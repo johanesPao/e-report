@@ -2,9 +2,13 @@ import { invoke } from "@tauri-apps/api/tauri";
 import {
   DataKelayakanTokoBaru,
   DataTabelKelayakanTokoBaru,
+  EKelasMallProposalToko,
+  EKelasMallStringProposalToko,
   EModePopUpKelayakanTokoBaru,
   EModeTeksOutputNewStore,
   EPlaceholderTeks,
+  EStatusProposalTokoBaru,
+  ETindakanProposalTokoBaru,
   Formulir,
   IAksenWarnaPopUp,
   IChatGPT,
@@ -14,6 +18,7 @@ import {
   IKotaKabupatenKueriChatGPT,
   IModelKelayakanTokoBaru,
   IPopUpProps,
+  IProposalToko,
   toTitle,
 } from "../basic";
 import {
@@ -27,8 +32,7 @@ import {
 import { setDataKelayakanTokoBaru } from "../../fitur_state/dataBank";
 import { UseFormReturnType } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import React, { useState } from "react";
-import { IconExclamationMark, IconX } from "@tabler/icons-react";
+import { IconCheck, IconExclamationMark, IconX } from "@tabler/icons-react";
 
 export interface StateKelayakanTokoBaru {
   tampilanTabel: DataTabelKelayakanTokoBaru[];
@@ -127,14 +131,14 @@ export const cekFormValid = (
     nilaiInput.biaya_fitout > 0 &&
     // cek hanya nilai output langsung yang bukan merupakan turunan
     nilaiOutputUser.sales !== 0 &&
-    nilaiOutputUser.ppn !== 0 &&
+    nilaiOutputUser.vat !== 0 &&
     nilaiOutputUser.cogs !== 0 &&
     nilaiOutputUser.staff_expense !== 0 &&
     nilaiOutputUser.oau_expense !== 0 &&
     nilaiOutputUser.rental_expense !== 0 &&
     nilaiOutputUser.fitout_expense !== 0 &&
     nilaiOutputModel.sales !== 0 &&
-    nilaiOutputModel.ppn !== 0 &&
+    nilaiOutputModel.vat !== 0 &&
     nilaiOutputModel.cogs !== 0 &&
     nilaiOutputModel.staff_expense !== 0 &&
     nilaiOutputModel.oau_expense !== 0 &&
@@ -149,13 +153,11 @@ export const KonfirmasiProposal = (
   valid: boolean,
   formulir: UseFormReturnType<Formulir, (values: Formulir) => Formulir>,
   aksenWarna: IAksenWarnaPopUp,
-  modePopUp: string
+  props: StateKelayakanTokoBaru,
+  tindakanProposal: ETindakanProposalTokoBaru,
+  pengguna: string,
+  setProps: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>
 ) => {
-  // // Cek modePopUp dan validasi berdasar modePopUp
-  // switch (modePopUp) {
-  //   case EModePopUpKelayakanTokoBaru.PENAMBAHAN:
-  //     setValid(cekFormValid(formulir));
-  // }
   // Jika terdapat kesalahan, ubah aksenWarna
   if (!valid) {
     const theme = useMantineTheme();
@@ -163,6 +165,118 @@ export const KonfirmasiProposal = (
       ...aksenWarna,
       header: theme.colors.red[9],
     };
+  }
+
+  // Jika formulir valid, map input output dengan interface IProposalToko
+  let proposalToko: IProposalToko = {} as IProposalToko;
+  if (valid) {
+    // shortcut
+    const form = formulir.values;
+    const input = form.input;
+    const user = form.output.user_generated;
+    const model = form.output.model_generated;
+    // mapping status tindakan
+    let status: EStatusProposalTokoBaru = EStatusProposalTokoBaru.DRAFT;
+    switch (tindakanProposal) {
+      case ETindakanProposalTokoBaru.SIMPAN:
+        status = EStatusProposalTokoBaru.DRAFT;
+        break;
+      case ETindakanProposalTokoBaru.KIRIM:
+        status = EStatusProposalTokoBaru.SUBMIT;
+        break;
+      case ETindakanProposalTokoBaru.DITOLAK:
+        status = EStatusProposalTokoBaru.DITOLAK;
+        break;
+      case ETindakanProposalTokoBaru.DITERIMA:
+        status = EStatusProposalTokoBaru.DITERIMA;
+        break;
+      default:
+        break;
+    }
+    // mapping kelas_mall ke dalam string
+    let kelas_mall: EKelasMallStringProposalToko =
+      EKelasMallStringProposalToko["Mall Kelas 1"];
+    switch (input.kelas_mall) {
+      case EKelasMallProposalToko["Mall Kelas 1"]:
+        kelas_mall = EKelasMallStringProposalToko["Mall Kelas 1"];
+        break;
+      case EKelasMallProposalToko["Mall Kelas 2"]:
+        kelas_mall = EKelasMallStringProposalToko["Mall Kelas 2"];
+        break;
+      case EKelasMallProposalToko["Mall Kelas 3"]:
+        kelas_mall = EKelasMallStringProposalToko["Mall Kelas 3"];
+        break;
+      case EKelasMallProposalToko["Mall Kelas 4/Non Mall"]:
+        kelas_mall = EKelasMallStringProposalToko["Mall Kelas 4/Non Mall"];
+        break;
+      default:
+        break;
+    }
+    // map input output dengan interface IProposalToko
+    proposalToko = {
+      proposal_id: form.proposal_id,
+      versi: parseInt(form.versi_proposal),
+      data: {
+        input: {
+          nama_model: input.nama_model!,
+          versi_model: input.versi_model!,
+          sbu: input.sbu!,
+          kota_kabupaten: input.kota_kabupaten!,
+          rentang_populasi:
+            props.inputItem.rentangPopulasiItem[input.rentang_populasi! / 20]
+              .label,
+          kelas_mall,
+          luas_toko: input.luas_toko!,
+          prediksi_model: model.sales!,
+          prediksi_user: user.sales!,
+          margin_penjualan: input.margin_penjualan!,
+          ppn: input.ppn!,
+          tahun_umr: parseInt(input.tahun_umr!),
+          provinsi_umr: input.provinsi_umr!,
+          jumlah_staff: input.jumlah_staff!,
+          biaya_atk_utilitas: input.biaya_oau!,
+          biaya_sewa: input.biaya_sewa!,
+          lama_sewa: input.lama_sewa!,
+          biaya_fitout: input.biaya_fitout!,
+        },
+        output: {
+          user_generated: {
+            vat: user.vat,
+            net_sales: user.net_sales,
+            cogs: user.cogs,
+            gross_profit: user.gross_profit,
+            staff_expense: user.staff_expense,
+            oau_expense: user.oau_expense,
+            rental_expense: user.rental_expense,
+            fitout_expense: user.fitout_expense,
+            store_income: user.store_income,
+          },
+          model_generated: {
+            vat: model.vat,
+            net_sales: model.net_sales,
+            cogs: model.cogs,
+            gross_profit: model.gross_profit,
+            staff_expense: model.staff_expense,
+            oau_expense: model.oau_expense,
+            rental_expense: model.rental_expense,
+            fitout_expense: model.fitout_expense,
+            store_income: model.store_income,
+          },
+        },
+        log_output: [],
+        remark: {
+          konten: form.remark,
+        },
+        dibuat:
+          props.popUp.modePopUp === EModePopUpKelayakanTokoBaru.PENAMBAHAN
+            ? new Date().toISOString()
+            : props.dataKelayakanTokoBaru[0].dibuat.toISOString(),
+        diedit: new Date().toISOString(),
+        pengguna: pengguna,
+        status,
+      },
+    };
+    console.log(proposalToko);
   }
 
   // Konten PopUp Formulir tidak valid
@@ -184,17 +298,52 @@ export const KonfirmasiProposal = (
 
   // Konten PopUp Formulir valid
   const RenderKonfirmasi = (
-    setKonfirmasiPopUp: React.Dispatch<React.SetStateAction<boolean>>
+    setKonfirmasiPopUp: React.Dispatch<React.SetStateAction<boolean>>,
+    proposal: IProposalToko
   ) => {
     return (
       <>
-        <Group>Anda akan menambahkan data proposal ...</Group>
         <Group>
-          <Button>Lanjutkan</Button>
+          Anda akan menambahkan data proposal {formulir.values.proposal_id}
+        </Group>
+        <Group>
+          <Button onClick={() => simpanProposal(proposal)}>Lanjutkan</Button>
           <Button onClick={() => setKonfirmasiPopUp(false)}>Batal</Button>
         </Group>
       </>
     );
+  };
+
+  // Tulis dokumen ke database mongo
+  const simpanProposal = async (proposal: IProposalToko) => {
+    const respon: string = await invoke("simpan_proposal_toko_baru", {
+      proposal,
+    });
+    const hasil = JSON.parse(respon);
+    if (hasil.status) {
+      // Tutup popup konfirmasi dan formulir
+      setKonfirmasiPopUp(false);
+      setProps((stateSebelumnya) => ({
+        ...stateSebelumnya,
+        popUp: {
+          togglePopUp: false,
+          judulPopUp: "",
+          dataPopUp: undefined,
+        },
+      }));
+      // Beritahukan pengguna bahwa dokumen berhasil disimpan
+      notifications.show({
+        title: "Sukses",
+        message: `Proposal toko dengan Proposal ID ${proposal.proposal_id} versi ${proposal.versi} berhasil ditambahkan`,
+        autoClose: 3000,
+        color: "green",
+        icon: <IconCheck />,
+        withCloseButton: false,
+        // Refresh tabel
+      });
+    } else {
+      // Beritahukan pengguna bahwa terjadi kesalahan dalam proses menyimpan dokumen
+    }
   };
 
   return (
@@ -216,7 +365,7 @@ export const KonfirmasiProposal = (
         <Modal.Body m={15}>
           {!valid
             ? TidakValid(setKonfirmasiPopUp)
-            : RenderKonfirmasi(setKonfirmasiPopUp)}
+            : RenderKonfirmasi(setKonfirmasiPopUp, proposalToko)}
         </Modal.Body>
       </Modal.Content>
     </Modal.Root>
@@ -780,7 +929,7 @@ export const kalkulasiStoreIncome = (
     output: {
       user_generated: {
         ...stateSebelumnya.output!.user_generated,
-        ppn: ugPPN,
+        vat: ugPPN,
         net_sales: ugNetSales,
         cogs: ugCOGS,
         gross_profit: ugGrossProfit,
@@ -792,7 +941,7 @@ export const kalkulasiStoreIncome = (
       },
       model_generated: {
         ...stateSebelumnya.output!.model_generated,
-        ppn: mgPPN,
+        vat: mgPPN,
         net_sales: mgNetSales,
         cogs: mgCOGS,
         gross_profit: mgGrossProfit,

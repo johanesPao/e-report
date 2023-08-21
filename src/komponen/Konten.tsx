@@ -185,8 +185,10 @@ const Konten = () => {
       await ambilInputItemModelKelayakanTokoBaru(setStateKelayakanTokoBaru);
     }
 
-    proposalDanInput();
-  }, []);
+    if (!stateKelayakanTokoBaru.popUp.togglePopUp) {
+      proposalDanInput();
+    }
+  }, [stateKelayakanTokoBaru.popUp.togglePopUp]);
 
   useEffect(() => {
     if (!sesiAktif) {

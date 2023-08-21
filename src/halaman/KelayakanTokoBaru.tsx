@@ -1,13 +1,9 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { DataTabelKelayakanTokoBaru } from "../fungsi/basic";
 import { Tabel } from "../komponen/Tabel";
 import { MRT_ColumnDef } from "mantine-react-table";
 import { definisiKolomKelayakanTokoBaru } from "../fungsi/kolom_data";
-import { useAppDispatch } from "../state/hook";
-import {
-  StateKelayakanTokoBaru,
-  ambilProposal,
-} from "../fungsi/halaman/kelayakanTokoBaru";
+import { StateKelayakanTokoBaru } from "../fungsi/halaman/kelayakanTokoBaru";
 import { Center, Title } from "@mantine/core";
 import { PopUp } from "../komponen/PopUp";
 
@@ -18,8 +14,6 @@ const KelayakanTokoBaru = ({
   props: StateKelayakanTokoBaru;
   setProps: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>;
 }) => {
-  const dispatch = useAppDispatch();
-
   const definisiKolom = useMemo<MRT_ColumnDef<DataTabelKelayakanTokoBaru>[]>(
     () => definisiKolomKelayakanTokoBaru(),
     []

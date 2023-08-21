@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, Utc};
 use mongodb::bson::DateTime;
 use polars::prelude::*;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -206,6 +206,55 @@ struct DataInputOutputProposalTokoBaru {
     diedit: DateTime,
     pengguna: String,
     status: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct BuatProposalTokoBaru {
+    proposal_id: String,
+    versi: i32,
+    data: BuatDataInputOutputProposalTokoBaru,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct BuatDataInputOutputProposalTokoBaru {
+    input: InputProposalTokoBaru,
+    output: UserModelOutputProposalTokoBaru,
+    log_output: Vec<String>,
+    remark: RemarkProposal,
+    dibuat: String,
+    diedit: String,
+    pengguna: String,
+    status: i32,
+}
+
+impl BuatProposalTokoBaru {
+    pub fn konversi_date_time(self) -> ProposalTokoBaru {
+        let dibuat = chrono::DateTime::parse_from_rfc3339(self.data.dibuat.as_str())
+            .unwrap()
+            .with_timezone(&Utc);
+        let diedit = chrono::DateTime::parse_from_rfc3339(self.data.diedit.as_str())
+            .unwrap()
+            .with_timezone(&Utc);
+
+        let data = DataInputOutputProposalTokoBaru {
+            input: self.data.input,
+            output: self.data.output,
+            log_output: self.data.log_output,
+            remark: self.data.remark,
+            dibuat: dibuat.into(),
+            diedit: diedit.into(),
+            pengguna: self.data.pengguna,
+            status: self.data.status,
+        };
+
+        let proposal = ProposalTokoBaru {
+            proposal_id: self.proposal_id,
+            versi: self.versi,
+            data,
+        };
+
+        proposal
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -1332,12 +1381,12 @@ pub struct ArrayPrediksiPenjualanTokoBaru {
     pub fisik_sport: i32,
     pub our_daily_dose: i32,
     pub kelas_mall: i32,
-    pub rentang_populasi: i32
+    pub rentang_populasi: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InputPrediksiPenjualanTokoBaru {
-    pub instances: Vec<ArrayPrediksiPenjualanTokoBaru>
+    pub instances: Vec<ArrayPrediksiPenjualanTokoBaru>,
 }
 
 // #[derive(Serialize, Deserialize)]

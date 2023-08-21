@@ -37,6 +37,7 @@ import {
 import {
   EModePopUpKelayakanTokoBaru,
   EModeTeksOutputNewStore,
+  ETindakanProposalTokoBaru,
   Formulir,
   IAksenWarnaPopUp,
   IChatGPT,
@@ -71,6 +72,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useAppSelector } from "../../state/hook";
 import { getParameterBc } from "../../fitur_state/dataParam";
+import { getNamaPengguna } from "../../fitur_state/pengguna";
 
 export const InputPopUpKelayakanTokoBaru = ({
   props,
@@ -83,6 +85,7 @@ export const InputPopUpKelayakanTokoBaru = ({
 }) => {
   const theme = useMantineTheme();
   const parameterBc = useAppSelector(getParameterBc);
+  const pengguna = useAppSelector(getNamaPengguna);
   const chatGPT: IChatGPT = {
     klien: {
       endpoint_api: parameterBc.chatgpt.endpoint_api,
@@ -262,7 +265,7 @@ export const InputPopUpKelayakanTokoBaru = ({
     output: {
       user_generated: {
         sales: undefined,
-        ppn: 0,
+        vat: 0,
         net_sales: 0,
         cogs: 0,
         gross_profit: 0,
@@ -274,7 +277,7 @@ export const InputPopUpKelayakanTokoBaru = ({
       },
       model_generated: {
         sales: 0,
-        ppn: 0,
+        vat: 0,
         net_sales: 0,
         cogs: 0,
         gross_profit: 0,
@@ -321,6 +324,11 @@ export const InputPopUpKelayakanTokoBaru = ({
 
   // Loader PopUp konfirmasi
   const [konfirmasiPopUp, setKonfirmasiPopUp] = useState(false);
+
+  // Tindakan PopUp
+  const [tindakanPopUp, setTindakanPopUp] = useState(
+    ETindakanProposalTokoBaru.KIRIM
+  );
 
   // Validitas Formulir
   const [valid, setValid] = useState(false);
@@ -1165,7 +1173,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                 EModeTeksOutputNewStore.INCOME
               )}
               {renderOutput(
-                formulir.getInputProps("output.user_generated.ppn").value,
+                formulir.getInputProps("output.user_generated.vat").value,
                 EModeTeksOutputNewStore.EXPENSE
               )}
 
@@ -1222,7 +1230,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                 EModeTeksOutputNewStore.INCOME
               )}
               {renderOutput(
-                formulir.getInputProps("output.model_generated.ppn").value,
+                formulir.getInputProps("output.model_generated.vat").value,
                 EModeTeksOutputNewStore.EXPENSE
               )}
               {renderOutput(
@@ -1318,6 +1326,7 @@ export const InputPopUpKelayakanTokoBaru = ({
               variant="outline"
               onClick={() => {
                 setValid(cekFormValid(formulir));
+                setTindakanPopUp(ETindakanProposalTokoBaru.SIMPAN);
                 setKonfirmasiPopUp(true);
               }}
               styles={{
@@ -1367,14 +1376,19 @@ export const InputPopUpKelayakanTokoBaru = ({
               Kirim
             </Button>
           </Group>
-          {KonfirmasiProposal(
-            konfirmasiPopUp,
-            setKonfirmasiPopUp,
-            valid,
-            formulir,
-            aksenWarna,
-            props.popUp.modePopUp!
-          )}
+          {konfirmasiPopUp
+            ? KonfirmasiProposal(
+                konfirmasiPopUp,
+                setKonfirmasiPopUp,
+                valid,
+                formulir,
+                aksenWarna,
+                props,
+                tindakanPopUp,
+                pengguna,
+                setProps
+              )
+            : null}
         </Grid.Col>
       </Grid>
     </>

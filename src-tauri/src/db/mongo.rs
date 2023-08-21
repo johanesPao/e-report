@@ -9,8 +9,8 @@ use serde_json::json;
 use std::error::Error;
 
 use crate::struktur::{
-    InputItemKelayakanTokoBaru, InputItemUMRKelayakanTokoBaru, InputModel, LabelValueInputItem,
-    Model, Pengguna,
+    BuatProposalTokoBaru, InputItemKelayakanTokoBaru, InputItemUMRKelayakanTokoBaru, InputModel,
+    LabelValueInputItem, Model, Pengguna,
 };
 use crate::{fungsi::rahasia, struktur::ProposalTokoBaru};
 
@@ -155,13 +155,14 @@ pub async fn param_bc() -> Result<Option<Document>, Box<dyn Error>> {
     }
 }
 
-pub async fn simpan_proposal(proposal: ProposalTokoBaru) -> Result<String, Box<dyn Error>> {
+pub async fn simpan_proposal(proposal: BuatProposalTokoBaru) -> Result<String, Box<dyn Error>> {
     let database = bc_database()
         .await
         .expect("Gagal membuka koneksi dengan server mongo");
     let koleksi_proposal = database.collection(rahasia::KOLEKSI_PROPOSAL_TOKO_BARU);
-    let dokumen =
-        to_document(&proposal).expect("Gagal merubah struct proposal menjadi dokumen BSON");
+    let konversi_proposal = proposal.konversi_date_time();
+    let dokumen = to_document(&konversi_proposal)
+        .expect("Gagal merubah struct proposal menjadi dokumen BSON");
     koleksi_proposal
         .insert_one(dokumen, None)
         .await

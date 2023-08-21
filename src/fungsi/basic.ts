@@ -382,7 +382,7 @@ interface InputFormulir {
 
 interface OutputFormulir {
   sales?: number;
-  ppn: number;
+  vat: number;
   net_sales: number;
   cogs: number;
   gross_profit: number;
@@ -416,7 +416,7 @@ export interface IPopUpProps {
   togglePopUp: boolean;
   judulPopUp?: string;
   dataPopUp?: Record<string, any> | Record<string, any>[];
-  modePopUp?: string;
+  modePopUp?: EModePopUpKelayakanTokoBaru;
 }
 
 export interface ILabelValueInputItem {
@@ -493,6 +493,65 @@ export interface IChatGPTKueri {
   prompt: Record<string, any>;
 }
 
+export interface IProposalToko {
+  proposal_id: string;
+  versi: number;
+  data: IDataProposalToko;
+}
+
+interface IDataProposalToko {
+  input: IInputProposalToko;
+  output: IUserModelOutputProposalToko;
+  log_output: string[];
+  remark: IRemarkProposalToko;
+  dibuat: string; //toISOString()
+  diedit: string; //toISOString()
+  pengguna: string;
+  status: EStatusProposalTokoBaru;
+}
+
+interface IInputProposalToko {
+  nama_model: string;
+  versi_model: string;
+  sbu: string;
+  kota_kabupaten: string;
+  rentang_populasi: string;
+  kelas_mall: string;
+  luas_toko: number;
+  prediksi_model: number;
+  prediksi_user: number;
+  margin_penjualan: number;
+  ppn: number;
+  tahun_umr: number;
+  provinsi_umr: string;
+  jumlah_staff: number;
+  biaya_atk_utilitas: number;
+  biaya_sewa: number;
+  lama_sewa: number;
+  biaya_fitout: number;
+}
+
+interface IUserModelOutputProposalToko {
+  user_generated: IOutputProposalToko;
+  model_generated: IOutputProposalToko;
+}
+
+interface IOutputProposalToko {
+  vat: number;
+  net_sales: number;
+  cogs: number;
+  gross_profit: number;
+  staff_expense: number;
+  oau_expense: number;
+  rental_expense: number;
+  fitout_expense: number;
+  store_income: number;
+}
+
+interface IRemarkProposalToko {
+  konten: string;
+}
+
 export enum EPlaceholderTeks {
   "NAMA_KOTA_GPT" = "[nama_kota]",
   "LIST_PROVINSI_GPT" = "[list_provinsi]",
@@ -501,6 +560,13 @@ export enum EPlaceholderTeks {
 export enum EStatusProposalTokoBaru {
   "DRAFT" = 0,
   "SUBMIT",
+  "DITOLAK",
+  "DITERIMA",
+}
+
+export enum ETindakanProposalTokoBaru {
+  "SIMPAN" = 0,
+  "KIRIM",
   "DITOLAK",
   "DITERIMA",
 }
@@ -525,6 +591,20 @@ export enum EModePopUpKelayakanTokoBaru {
   "PERSETUJUAN" = "persetujuan",
   "SUNTING" = "sunting",
   "HAPUS" = "hapus",
+}
+
+export enum EKelasMallProposalToko {
+  "Mall Kelas 1" = 1,
+  "Mall Kelas 2",
+  "Mall Kelas 3",
+  "Mall Kelas 4/Non Mall",
+}
+
+export enum EKelasMallStringProposalToko {
+  "Mall Kelas 1" = "Mall Kelas 1",
+  "Mall Kelas 2" = "Mall Kelas 2",
+  "Mall Kelas 3" = "Mall Kelas 3",
+  "Mall Kelas 4/Non Mall" = "Mall Kelas 4/Non Mall",
 }
 
 export interface IAksenWarnaPopUp {

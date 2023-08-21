@@ -1045,8 +1045,14 @@ async fn prediksi_penjualan_toko_baru(instance: Vec<f32>, model_url: String) -> 
 }
 
 #[tauri::command]
-async fn simpan_proposal_toko_baru(proposal: ProposalTokoBaru) -> Result<String, String> {
-    simpan_proposal(proposal).await.expect("Gagal menyimpan proposal ke dalam koleksi proposal");
+async fn simpan_proposal_toko_baru(proposal: BuatProposalTokoBaru) -> Result<String, String> {
+    simpan_proposal(proposal)
+    .await
+    .expect(
+        json!({"status": false, "konten": "Gagal menyimpan proposal ke dalam koleksi proposal"})
+        .to_string()
+        .as_str()
+    );
     Ok(json!({"status": true}).to_string())
 }
 
