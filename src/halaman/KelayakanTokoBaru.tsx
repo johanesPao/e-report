@@ -1,19 +1,24 @@
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { DataTabelKelayakanTokoBaru } from "../fungsi/basic";
 import { Tabel } from "../komponen/Tabel";
 import { MRT_ColumnDef } from "mantine-react-table";
 import { definisiKolomKelayakanTokoBaru } from "../fungsi/kolom_data";
 import { StateKelayakanTokoBaru } from "../fungsi/halaman/kelayakanTokoBaru";
 import { Center, Title } from "@mantine/core";
-import { PopUp } from "../komponen/PopUp";
+import { PopUp, StatePopUp } from "../komponen/PopUp";
+import { useAppSelector } from "../state/hook";
+import { getDataTabelKelayakanTokoBaru } from "../fitur_state/dataBank";
 
 const KelayakanTokoBaru = ({
   props,
-  setProps,
+  popUp,
+  setPopUp,
 }: {
   props: StateKelayakanTokoBaru;
-  setProps: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>;
+  popUp: StatePopUp;
+  setPopUp: React.Dispatch<React.SetStateAction<StatePopUp>>;
 }) => {
+  const data = useAppSelector(getDataTabelKelayakanTokoBaru);
   const definisiKolom = useMemo<MRT_ColumnDef<DataTabelKelayakanTokoBaru>[]>(
     () => definisiKolomKelayakanTokoBaru(),
     []
@@ -32,11 +37,11 @@ const KelayakanTokoBaru = ({
             arrKolom={definisiKolom}
             arrData={props.tampilanTabel}
             memuatData={props.muatTabelKelayakanTokoBaru}
-            setProps={setProps}
+            setPopUp={setPopUp}
           />
         )}
       </div>
-      <PopUp props={props} setProps={setProps} />
+      <PopUp data={data} props={props} popUp={popUp} setPopUp={setPopUp} />
     </>
   );
 };

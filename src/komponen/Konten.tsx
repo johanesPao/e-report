@@ -27,6 +27,7 @@ import {
   ambilProposal,
 } from "../fungsi/halaman/kelayakanTokoBaru";
 import { EHalaman, resetAplikasi } from "../fungsi/basic";
+import { StatePopUp } from "./PopUp";
 
 const Konten = () => {
   const navigasi = useNavigate();
@@ -179,16 +180,23 @@ const Konten = () => {
     initialStateKelayakanTokoBaru
   );
 
+  // POP UP
+  const initialStatePopUp: StatePopUp = {
+    togglePopUp: false,
+  };
+
+  const [popUp, setPopUp] = useState(initialStatePopUp);
+
   useEffect(() => {
     async function proposalDanInput() {
       await ambilProposal(dispatch, setStateKelayakanTokoBaru);
       await ambilInputItemModelKelayakanTokoBaru(setStateKelayakanTokoBaru);
     }
 
-    if (!stateKelayakanTokoBaru.popUp.togglePopUp) {
+    if (!popUp.togglePopUp) {
       proposalDanInput();
     }
-  }, [stateKelayakanTokoBaru.popUp.togglePopUp]);
+  }, [popUp.togglePopUp]);
 
   useEffect(() => {
     if (!sesiAktif) {
@@ -237,7 +245,8 @@ const Konten = () => {
         return (
           <KelayakanTokoBaru
             props={stateKelayakanTokoBaru}
-            setProps={setStateKelayakanTokoBaru}
+            popUp={popUp}
+            setPopUp={setPopUp}
           />
         );
       default:

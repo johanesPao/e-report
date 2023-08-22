@@ -33,6 +33,7 @@ import { setDataKelayakanTokoBaru } from "../../fitur_state/dataBank";
 import { UseFormReturnType } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconExclamationMark, IconX } from "@tabler/icons-react";
+import { StatePopUp } from "../../komponen/PopUp";
 
 export interface StateKelayakanTokoBaru {
   tampilanTabel: DataTabelKelayakanTokoBaru[];
@@ -156,7 +157,8 @@ export const KonfirmasiProposal = (
   props: StateKelayakanTokoBaru,
   tindakanProposal: ETindakanProposalTokoBaru,
   pengguna: string,
-  setProps: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>
+  popUp: StatePopUp,
+  setPopUp: React.Dispatch<React.SetStateAction<StatePopUp>>
 ) => {
   // Jika terdapat kesalahan, ubah aksenWarna
   if (!valid) {
@@ -268,7 +270,7 @@ export const KonfirmasiProposal = (
           konten: form.remark,
         },
         dibuat:
-          props.popUp.modePopUp === EModePopUpKelayakanTokoBaru.PENAMBAHAN
+          popUp.modeProposal === EModePopUpKelayakanTokoBaru.PENAMBAHAN
             ? new Date().toISOString()
             : props.dataKelayakanTokoBaru[0].dibuat.toISOString(),
         diedit: new Date().toISOString(),
@@ -289,8 +291,10 @@ export const KonfirmasiProposal = (
           Terdapat kesalahan pada pengisian data formulir, mohon pastikan
           kembali data yang anda isi.
         </Group>
-        <Group>
-          <Button onClick={() => setKonfirmasiPopUp(false)}>Oke</Button>
+        <Group grow>
+          <Button mt="md" onClick={() => setKonfirmasiPopUp(false)}>
+            Oke
+          </Button>
         </Group>
       </>
     );
@@ -306,7 +310,7 @@ export const KonfirmasiProposal = (
         <Group>
           Anda akan menambahkan data proposal {formulir.values.proposal_id}
         </Group>
-        <Group>
+        <Group grow mt="md">
           <Button onClick={() => simpanProposal(proposal)}>Lanjutkan</Button>
           <Button onClick={() => setKonfirmasiPopUp(false)}>Batal</Button>
         </Group>
@@ -320,21 +324,24 @@ export const KonfirmasiProposal = (
       proposal,
     });
     const hasil = JSON.parse(respon);
+    // Tutup popup konfirmasi
+    setKonfirmasiPopUp(false);
     if (hasil.status) {
-      // Tutup popup konfirmasi dan formulir
-      setKonfirmasiPopUp(false);
-      setProps((stateSebelumnya) => ({
+      // Tutup formulir
+      setPopUp((stateSebelumnya) => ({
         ...stateSebelumnya,
-        popUp: {
-          togglePopUp: false,
-          judulPopUp: "",
-          dataPopUp: undefined,
-        },
+        togglePopUp: false,
       }));
       // Beritahukan pengguna bahwa dokumen berhasil disimpan
       notifications.show({
         title: "Sukses",
-        message: `Proposal toko dengan Proposal ID ${proposal.proposal_id} versi ${proposal.versi} berhasil ditambahkan`,
+        message: `Proposal toko dengan Proposal ID ${
+          proposal.proposal_id
+        } versi ${proposal.versi} berhasil ditambahkan sebagai  ${
+          proposal.data.status === EStatusProposalTokoBaru.DRAFT
+            ? `DRAFT`
+            : `SUBMITTED`
+        }`,
         autoClose: 3000,
         color: "green",
         icon: <IconCheck />,
@@ -343,6 +350,15 @@ export const KonfirmasiProposal = (
       });
     } else {
       // Beritahukan pengguna bahwa terjadi kesalahan dalam proses menyimpan dokumen
+      notifications.show({
+        title: "Gagal",
+        message: `Terjadi kesalahan saat proses penyimpanan proposal dilakukan`,
+        autoClose: 3000,
+        color: "red",
+        icon: <IconX />,
+        withCloseButton: false,
+        // Refresh tabel
+      });
     }
   };
 
@@ -351,6 +367,7 @@ export const KonfirmasiProposal = (
       opened={konfirmasiPopUp}
       onClose={() => setKonfirmasiPopUp(false)}
       centered
+      transitionProps={{ transition: "slide-down", duration: 300 }}
       radius="md"
     >
       <Modal.Overlay blur={1} />

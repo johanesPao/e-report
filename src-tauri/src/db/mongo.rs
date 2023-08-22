@@ -169,3 +169,17 @@ pub async fn simpan_proposal(proposal: BuatProposalTokoBaru) -> Result<String, B
         .expect("Gagal menambahkan proposal ke dalam koleksi proposal");
     Ok(json!({"status": true}).to_string())
 }
+
+pub async fn hapus_proposal_id(proposal_id: &str) -> Result<String, Box<dyn Error>> {
+    let database = bc_database()
+        .await
+        .expect("Gagal membuka koneksi dengan server mongo");
+    let koleksi_proposal =
+        database.collection::<ProposalTokoBaru>(rahasia::KOLEKSI_PROPOSAL_TOKO_BARU);
+    let filter = doc! {"proposal_id": proposal_id};
+    let hasil_kueri = koleksi_proposal
+        .delete_many(filter, None)
+        .await
+        .expect("Gagal menghapus proposal pada server mongo");
+    Ok(json!({"status": true, "konten": hasil_kueri.deleted_count}).to_string())
+}

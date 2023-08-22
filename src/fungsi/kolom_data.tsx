@@ -34,7 +34,7 @@ import {
   IconHomeX,
   IconPlus,
 } from "@tabler/icons-react";
-import { StateKelayakanTokoBaru } from "./halaman/kelayakanTokoBaru";
+import { StatePopUp } from "../komponen/PopUp";
 
 export interface TableProps {
   enableColumnFilterModes?: boolean;
@@ -64,14 +64,13 @@ export interface TableProps {
     table: any;
   }) => React.ReactNode | void;
   state?: { [key: string]: any };
-  setProps?: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>;
 }
 
 export const buatPropsTabel = (
   halaman: string,
   data: any[],
   memuat: boolean,
-  setProps?: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>
+  setPopUp?: React.Dispatch<React.SetStateAction<StatePopUp>>
 ) => {
   let props: TableProps;
   // Default props
@@ -184,14 +183,12 @@ export const buatPropsTabel = (
         },
         renderTopToolbarCustomActions: () => {
           const popUpPenambahanProposal = () => {
-            if (setProps !== undefined) {
-              setProps((stateSebelumnya) => ({
+            if (setPopUp !== undefined) {
+              setPopUp((stateSebelumnya) => ({
                 ...stateSebelumnya,
-                popUp: {
-                  togglePopUp: true,
-                  judulPopUp: "Proposal Toko Baru",
-                  modePopUp: EModePopUpKelayakanTokoBaru.PENAMBAHAN,
-                },
+                togglePopUp: true,
+                judulPopUp: "Proposal Toko Baru",
+                modeProposal: EModePopUpKelayakanTokoBaru.PENAMBAHAN,
               }));
             }
           };
@@ -236,14 +233,12 @@ export const buatPropsTabel = (
                     variant="light"
                     color={"green"}
                     onClick={() => {
-                      if (setProps !== undefined) {
-                        setProps((stateSebelumnya) => ({
+                      if (setPopUp !== undefined) {
+                        setPopUp((stateSebelumnya) => ({
                           ...stateSebelumnya,
-                          popUp: {
-                            togglePopUp: true,
-                            judulPopUp: `Persetujuan ${row.original.proposal_id}`,
-                            modePopUp: EModePopUpKelayakanTokoBaru.PERSETUJUAN,
-                          },
+                          togglePopUp: true,
+                          judulPopUp: `Persetujuan ${row.original.proposal_id}`,
+                          modeProposal: EModePopUpKelayakanTokoBaru.PERSETUJUAN,
                         }));
                       }
                     }}
@@ -270,14 +265,12 @@ export const buatPropsTabel = (
                       variant="light"
                       color={"orange"}
                       onClick={() => {
-                        if (setProps !== undefined) {
-                          setProps((stateSebelumnya) => ({
+                        if (setPopUp !== undefined) {
+                          setPopUp((stateSebelumnya) => ({
                             ...stateSebelumnya,
-                            popUp: {
-                              togglePopUp: true,
-                              judulPopUp: `Sunting ${row.original.proposal_id}`,
-                              modePopUp: EModePopUpKelayakanTokoBaru.SUNTING,
-                            },
+                            togglePopUp: true,
+                            judulPopUp: `Sunting ${row.original.proposal_id}`,
+                            modeProposal: EModePopUpKelayakanTokoBaru.SUNTING,
                           }));
                         }
                       }}
@@ -300,14 +293,13 @@ export const buatPropsTabel = (
                       variant="light"
                       color={"red"}
                       onClick={() => {
-                        if (setProps !== undefined) {
-                          setProps((stateSebelumnya) => ({
+                        if (setPopUp !== undefined) {
+                          setPopUp((stateSebelumnya) => ({
                             ...stateSebelumnya,
-                            popUp: {
-                              togglePopUp: true,
-                              judulPopUp: `Hapus ${row.original.proposal_id}`,
-                              modePopUp: EModePopUpKelayakanTokoBaru.HAPUS,
-                            },
+                            togglePopUp: true,
+                            judulPopUp: `Hapus ${row.original.proposal_id}`,
+                            modeProposal: EModePopUpKelayakanTokoBaru.HAPUS,
+                            proposalID: row.original.proposal_id,
                           }));
                         }
                       }}
@@ -329,6 +321,12 @@ export const buatPropsTabel = (
             pageSize: 15,
             pageIndex: 0,
           },
+          sorting: [
+            {
+              id: "proposal_id",
+              desc: true,
+            },
+          ],
           density: "xs",
         },
       };

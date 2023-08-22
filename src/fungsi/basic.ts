@@ -417,6 +417,7 @@ export interface IPopUpProps {
   judulPopUp?: string;
   dataPopUp?: Record<string, any> | Record<string, any>[];
   modePopUp?: EModePopUpKelayakanTokoBaru;
+  proposalID?: string;
 }
 
 export interface ILabelValueInputItem {
@@ -612,11 +613,17 @@ export interface IAksenWarnaPopUp {
   mayor: string;
   minor: string;
   teksLoading: string;
+  background: string;
+  judul: IAksenWarnaJudul;
   disable: IAksenWarnaDisable;
   kelasMall: IAksenWarnaIconKelasMall;
   tombolBatal: IAksenWarnaTombol;
   tombolSimpan: IAksenWarnaTombol;
   tombolKirim: IAksenWarnaTombol;
+}
+
+interface IAksenWarnaJudul {
+  teks: string;
 }
 
 interface IAksenWarnaDisable {

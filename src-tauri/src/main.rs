@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use std::collections::HashMap;
 
+use db::mongo::hapus_proposal_id;
 use db::mongo::simpan_proposal;
 use polars::prelude::*;
 use regex::Regex;
@@ -1056,6 +1057,18 @@ async fn simpan_proposal_toko_baru(proposal: BuatProposalTokoBaru) -> Result<Str
     Ok(json!({"status": true}).to_string())
 }
 
+#[tauri::command]
+async fn hapus_proposal_toko(proposal_id: String) -> Result<String, String> {
+    hapus_proposal_id(&proposal_id)
+    .await
+    .expect(
+        json!({"status": false, "konten": "Terjadi kesalahan saat menghapus proposal dari server mongo"})
+        .to_string()
+        .as_str()
+    );
+    Ok(json!({"status": true}).to_string())
+}
+
 #[tokio::main]
 async fn main() {
     tauri::Builder::default()
@@ -1073,7 +1086,8 @@ async fn main() {
             ambil_input_item_model_kelayakan_toko_baru,
             kueri_kota_kabupaten_chatgpt,
             prediksi_penjualan_toko_baru,
-            simpan_proposal_toko_baru
+            simpan_proposal_toko_baru,
+            hapus_proposal_toko
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -3,23 +3,59 @@ import { StateKelayakanTokoBaru } from "../fungsi/halaman/kelayakanTokoBaru";
 import { useAppSelector } from "../state/hook";
 import { getHalaman } from "../fitur_state/event";
 import { InputPopUpKelayakanTokoBaru } from "./kontenPopUp/InputPopUpKelayakanTokoBaru";
-import { EModePopUpKelayakanTokoBaru, IAksenWarnaPopUp } from "../fungsi/basic";
+import {
+  DataKelayakanTokoBaru,
+  EHalaman,
+  EModePopUpKelayakanTokoBaru,
+  IAksenWarnaPopUp,
+} from "../fungsi/basic";
+import { HapusProposal } from "./kontenPopUp/HapusProposal";
+
+export interface StatePopUp {
+  togglePopUp: boolean;
+  judulPopUp?: string;
+  modeProposal?: EModePopUpKelayakanTokoBaru;
+  proposalID?: string;
+}
 
 export const PopUp = ({
+  data,
   props,
-  setProps,
+  popUp,
+  setPopUp,
 }: {
+  data: DataKelayakanTokoBaru[];
   props: StateKelayakanTokoBaru;
-  setProps: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>;
+  popUp: StatePopUp;
+  setPopUp: React.Dispatch<React.SetStateAction<StatePopUp>>;
 }) => {
   const theme = useMantineTheme();
   const halaman = useAppSelector(getHalaman);
+  // ukuranWindow
+  let ukuranWindow = "100%";
+  switch (halaman) {
+    case EHalaman.KELAYAKAN_TOKO_BARU:
+      switch (popUp.modeProposal) {
+        case EModePopUpKelayakanTokoBaru.HAPUS:
+          ukuranWindow = "auto";
+          break;
+        default:
+          break;
+      }
+      break;
+    default:
+      break;
+  }
   // default aksenWarna
   let aksenWarna: IAksenWarnaPopUp = {
     header: theme.colors.blue[9],
     mayor: theme.colors.blue[5],
     minor: theme.colors.blue[1],
     teksLoading: theme.colors.gray[7],
+    background: theme.colors.dark[8],
+    judul: {
+      teks: theme.colors.gray[0],
+    },
     disable: {
       mayor: theme.colors.dark[5],
       mid: theme.colors.dark[3],
@@ -55,7 +91,7 @@ export const PopUp = ({
   };
 
   // Modifikasi aksen warna
-  switch (props.popUp.modePopUp) {
+  switch (popUp.modeProposal) {
     case EModePopUpKelayakanTokoBaru.SUNTING:
       aksenWarna = {
         ...aksenWarna,
@@ -70,6 +106,10 @@ export const PopUp = ({
         header: theme.colors.red[9],
         mayor: theme.colors.red[5],
         minor: theme.colors.red[1],
+        background: theme.colors.red[9],
+        judul: {
+          teks: theme.colors.gray[0],
+        },
       };
       break;
     case EModePopUpKelayakanTokoBaru.PERSETUJUAN:
@@ -80,22 +120,36 @@ export const PopUp = ({
         minor: theme.colors.lime[1],
       };
       break;
-    // EModePopUpKelayakanTokoBaru.PENAMBAHAN menggunakan aksenWarna default
     default:
       break;
   }
 
   const renderInput = () => {
     switch (halaman) {
+      // PopUp pada Kelayakan Toko Baru
       case "kelayakanTokoBaru":
-        // return PopUp Toko Baru
-        return (
-          <InputPopUpKelayakanTokoBaru
-            props={props}
-            setProps={setProps}
-            aksenWarna={aksenWarna}
-          />
-        );
+        switch (popUp.modeProposal) {
+          // jika mode penghapusan proposal
+          case EModePopUpKelayakanTokoBaru.HAPUS:
+            return (
+              <HapusProposal data={data} popUp={popUp} setPopUp={setPopUp} />
+            );
+          // mode lainnya dalam kelayakanTokoBaru
+          case EModePopUpKelayakanTokoBaru.PENAMBAHAN ||
+            EModePopUpKelayakanTokoBaru.SUNTING ||
+            EModePopUpKelayakanTokoBaru.PERSETUJUAN:
+            return (
+              <InputPopUpKelayakanTokoBaru
+                props={props}
+                aksenWarna={aksenWarna}
+                popUp={popUp}
+                setPopUp={setPopUp}
+              />
+            );
+          default:
+            return null;
+        }
+      // PopUp pada halaman lainnya
       default: {
         return null;
       }
@@ -103,34 +157,34 @@ export const PopUp = ({
   };
 
   return (
-    <Modal.Root
-      opened={props.popUp.togglePopUp}
-      onClose={() =>
-        setProps((stateSebelumnya) => ({
-          ...stateSebelumnya,
-          popUp: {
+    <>
+      <Modal.Root
+        opened={popUp.togglePopUp}
+        onClose={() =>
+          setPopUp((stateSebelumnya) => ({
+            ...stateSebelumnya,
             togglePopUp: false,
-            judulPopUp: "",
-            dataPopUp: undefined,
-          },
-        }))
-      }
-      size="100%"
-      centered
-      transitionProps={{ transition: "slide-down", duration: 500 }}
-      radius="md"
-    >
-      <Modal.Overlay blur={1} />
-      <Modal.Content>
-        <Modal.Header sx={{ backgroundColor: aksenWarna.header }} p={10}>
-          <Modal.Title>
-            <Title order={4} color="white">
-              {props.popUp.judulPopUp}
-            </Title>
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body m={15}>{renderInput()}</Modal.Body>
-      </Modal.Content>
-    </Modal.Root>
+          }))
+        }
+        size={ukuranWindow}
+        centered
+        transitionProps={{ transition: "slide-down", duration: 300 }}
+        radius="md"
+      >
+        <Modal.Overlay blur={1} />
+        <Modal.Content>
+          <Modal.Header sx={{ backgroundColor: aksenWarna.header }} p={10}>
+            <Modal.Title>
+              <Title order={4} color={aksenWarna.judul.teks}>
+                {popUp.judulPopUp}
+              </Title>
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body p={15} sx={{ backgroundColor: aksenWarna.background }}>
+            {renderInput()}
+          </Modal.Body>
+        </Modal.Content>
+      </Modal.Root>
+    </>
   );
 };

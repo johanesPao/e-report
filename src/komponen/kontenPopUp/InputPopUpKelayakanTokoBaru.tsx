@@ -73,15 +73,18 @@ import { useEffect, useRef, useState } from "react";
 import { useAppSelector } from "../../state/hook";
 import { getParameterBc } from "../../fitur_state/dataParam";
 import { getNamaPengguna } from "../../fitur_state/pengguna";
+import { StatePopUp } from "../PopUp";
 
 export const InputPopUpKelayakanTokoBaru = ({
   props,
-  setProps,
   aksenWarna,
+  popUp,
+  setPopUp,
 }: {
   props: StateKelayakanTokoBaru;
-  setProps: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>;
   aksenWarna: IAksenWarnaPopUp;
+  popUp: StatePopUp;
+  setPopUp: React.Dispatch<React.SetStateAction<StatePopUp>>;
 }) => {
   const theme = useMantineTheme();
   const parameterBc = useAppSelector(getParameterBc);
@@ -335,7 +338,7 @@ export const InputPopUpKelayakanTokoBaru = ({
 
   // State Input Item berdasar mode pop up
   useEffect(() => {
-    switch (props.popUp.modePopUp) {
+    switch (popUp.modeProposal) {
       case EModePopUpKelayakanTokoBaru.PENAMBAHAN: {
         // set initialValueFormulir.proposal_id
         const proposalID = generateProposalID(props);
@@ -1297,13 +1300,11 @@ export const InputPopUpKelayakanTokoBaru = ({
             <Button
               variant="outline"
               onClick={() =>
-                setProps((stateSebelumnya) => ({
+                setPopUp((stateSebelumnya) => ({
                   ...stateSebelumnya,
-                  popUp: {
-                    togglePopUp: false,
-                    judulPopUp: "",
-                    dataPopUp: undefined,
-                  },
+                  togglePopUp: false,
+                  judulPopUp: "",
+                  // dataPopUp: undefined,
                 }))
               }
               styles={{
@@ -1348,16 +1349,11 @@ export const InputPopUpKelayakanTokoBaru = ({
             </Button>
             <Button
               variant="outline"
-              // onClick={() =>
-              //   setProps((stateSebelumnya) => ({
-              //     ...stateSebelumnya,
-              //     popUp: {
-              //       togglePopUp: false,
-              //       judulPopUp: "",
-              //       dataPopUp: undefined,
-              //     },
-              //   }))
-              // }
+              onClick={() => {
+                setValid(cekFormValid(formulir));
+                setTindakanPopUp(ETindakanProposalTokoBaru.KIRIM);
+                setKonfirmasiPopUp(true);
+              }}
               styles={{
                 root: {
                   color: aksenWarna.tombolKirim.utama,
@@ -1376,19 +1372,18 @@ export const InputPopUpKelayakanTokoBaru = ({
               Kirim
             </Button>
           </Group>
-          {konfirmasiPopUp
-            ? KonfirmasiProposal(
-                konfirmasiPopUp,
-                setKonfirmasiPopUp,
-                valid,
-                formulir,
-                aksenWarna,
-                props,
-                tindakanPopUp,
-                pengguna,
-                setProps
-              )
-            : null}
+          {KonfirmasiProposal(
+            konfirmasiPopUp,
+            setKonfirmasiPopUp,
+            valid,
+            formulir,
+            aksenWarna,
+            props,
+            tindakanPopUp,
+            pengguna,
+            popUp,
+            setPopUp
+          )}
         </Grid.Col>
       </Grid>
     </>
