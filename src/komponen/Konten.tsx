@@ -158,10 +158,6 @@ const Konten = () => {
     tampilanTabel: [],
     dataKelayakanTokoBaru: [],
     muatTabelKelayakanTokoBaru: false,
-    popUp: {
-      togglePopUp: false,
-      judulPopUp: undefined,
-    },
     inputItem: {
       sbuItem: [],
       rentangPopulasiItem: [],

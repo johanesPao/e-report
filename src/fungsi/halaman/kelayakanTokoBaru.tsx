@@ -17,8 +17,8 @@ import {
   IInputItemKelayakanTokoBaru,
   IKotaKabupatenKueriChatGPT,
   IModelKelayakanTokoBaru,
-  IPopUpProps,
   IProposalToko,
+  TLabelValueInputItem,
   toTitle,
 } from "../basic";
 import {
@@ -39,7 +39,6 @@ export interface StateKelayakanTokoBaru {
   tampilanTabel: DataTabelKelayakanTokoBaru[];
   dataKelayakanTokoBaru: DataKelayakanTokoBaru[];
   muatTabelKelayakanTokoBaru: boolean;
-  popUp: IPopUpProps;
   inputItem: IInputItemKelayakanTokoBaru;
 }
 
@@ -272,7 +271,7 @@ export const KonfirmasiProposal = (
         dibuat:
           popUp.modeProposal === EModePopUpKelayakanTokoBaru.PENAMBAHAN
             ? new Date().toISOString()
-            : props.dataKelayakanTokoBaru[0].dibuat.toISOString(),
+            : props.dataKelayakanTokoBaru[0].data.dibuat.toISOString(),
         diedit: new Date().toISOString(),
         pengguna: pengguna,
         status,
@@ -512,6 +511,73 @@ export const ambilProposal = async (
     ...stateSebelumnya,
     muatTabelKelayakanTokoBaru: false,
   }));
+};
+
+// fungsi untuk melakukan pengecekan nilai dalam input item
+const cekItemDalamArray = (item: any, array: any[]) => {
+  // jika item tidak ada dalam array, berikan notifikasi kepada pengguna
+  if (!array.includes(item)) {
+    notifications.show({
+      title: `Input Item Tidak Sama`,
+      message: `Item ${item.toString()} yang sebelumnya terdapat pada proposal kini tidak tersedia.`,
+      autoClose: false,
+      color: "yellow",
+      icon: <IconExclamationMark />,
+      withCloseButton: true,
+    });
+    // return false
+    return false;
+  } else {
+    // else return true
+    return true;
+  }
+};
+
+export const setItemSBU = (item: string, array: string[]) => {
+  // jika item ada dalam array
+  if (cekItemDalamArray(item, array)) {
+    // kembalikan nilai item
+    return item;
+  } else {
+    // jika item tidak ada dalam array, kembalikan ""
+    return "";
+  }
+};
+
+export const setItemRentangPopulasi = (
+  item: string,
+  array: TLabelValueInputItem[]
+) => {
+  // map value dan label ke dalam array
+  const arrayLabel = array.map((item) => item.label);
+  const arrayNilai = array.map((item) => item.value as number);
+  // jika item ada dalam array
+  if (cekItemDalamArray(item, arrayLabel)) {
+    // kembalikan nilai pada indeks dimana arrayLabel === item
+    return arrayNilai[arrayLabel.indexOf(item)];
+  } else {
+    // jika item tidak ada dalam array, kembalikan -1
+    return -1;
+  }
+};
+
+export const setItemKelasMall = (item: string, array: string[]) => {
+  // Untuk Item Kelas Mall cukup kompleks karena Input Item
+  // ini merupakan komponen Rating pada @mantine/core.
+  // Komponen Rating memiliki 2 props utama yaitu emptySymbol
+  // dan fullSymbol yang merupakan tipe variabel
+  // React.ReactNode | ((value: number) => React.ReactNode)
+  // sehingga kita tidak dapat mengevaluasi array properti ini
+  // dengan nilai kelas_mall pada proposal
+  // Namun kita hanya perlu mengembalikan angka 0 jika nilai
+  // kelas_mall pada proposal tidak terdapat pada inputItem
+  // kelas_mall saat ini dan angka indeks yang dimulai dari
+  // 1 hingga array.length jika nilai terdapat pada inputItem
+  if (cekItemDalamArray(item, array)) {
+    return array.indexOf(item) + 1;
+  } else {
+    return 0;
+  }
 };
 
 export const handlePerubahanKotaKabupaten = (
@@ -792,6 +858,7 @@ const preprocessingModelInput = (
         ? 0
         : formulir.values.input.rentang_populasi / 20),
   ];
+  console.log(instances);
   return instances;
 };
 

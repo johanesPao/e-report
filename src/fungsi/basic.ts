@@ -45,13 +45,9 @@ import {
 } from "../fitur_state/pengguna";
 
 export const toTitle = (kalimat: string) => {
-  return kalimat
-    .toLowerCase()
-    .split(" ")
-    .map((kata) => {
-      return kata.replace(kata[0], kata[0].toUpperCase());
-    })
-    .join(" ");
+  return kalimat.replace(/\w\S*/g, (teks) => {
+    return teks.charAt(0).toUpperCase() + teks.substring(1).toLowerCase();
+  });
 };
 
 export const resetAplikasi = (dispatch: any) => {
@@ -279,17 +275,17 @@ export type DataKelayakanTokoBaru = {
   proposal_id: string;
   versi: number;
   data: DataProposalTokoBaru;
+};
+
+type DataProposalTokoBaru = {
+  input: InputProposalTokoBaru;
+  output: OutputProposalTokoBaru;
   log_output: string[];
   remark: RemarkProposal;
   dibuat: Date;
   diedit: Date;
   pengguna: string;
   status: number;
-};
-
-type DataProposalTokoBaru = {
-  input: InputProposalTokoBaru;
-  output: OutputProposalTokoBaru;
 };
 
 type InputProposalTokoBaru = {
@@ -420,31 +416,21 @@ export interface IPopUpProps {
   proposalID?: string;
 }
 
-export interface ILabelValueInputItem {
+export type TLabelValueInputItem = {
   label: string;
   value: string | number;
-}
-
-export interface IRentangPopulasiInputItem {
-  label: string;
-  value: number;
-}
-
-export interface IUMRInputItem {
-  label: string;
-  value: string;
-}
+};
 
 interface UMRItem {
   nama_data: string;
   tahun_data: number;
-  data: ILabelValueInputItem[];
+  data: TLabelValueInputItem[];
 }
 
 export interface IInputItemKelayakanTokoBaru {
   sbuItem: string[];
-  rentangPopulasiItem: ILabelValueInputItem[];
-  kelasMallItem: ILabelValueInputItem[];
+  rentangPopulasiItem: TLabelValueInputItem[];
+  kelasMallItem: TLabelValueInputItem[];
   umrItem: UMRItem[];
   model: IModelKelayakanTokoBaru;
 }
@@ -460,13 +446,13 @@ export interface IModelKelayakanTokoBaru {
 export interface IDataInputItemKelayakanTokoBaru {
   versiTerpilih: string[];
   sbuItem: string[];
-  rentangPopulasi: IRentangPopulasiInputItem[];
+  rentangPopulasi: TLabelValueInputItem[];
   kelasMall: {
-    iconSemua: React.ReactNode | ((nilai: number) => React.ReactNode);
-    iconTerpilih: React.ReactNode | ((nilai: number) => React.ReactNode);
+    iconSemua: (nilai: number) => React.ReactNode;
+    iconTerpilih: (nilai: number) => React.ReactNode;
   };
-  tahunUMR: IUMRInputItem[];
-  provinsiUMR: IUMRInputItem[][];
+  tahunUMR: TLabelValueInputItem[];
+  provinsiUMR: TLabelValueInputItem[][];
 }
 
 export interface IChatGPT {

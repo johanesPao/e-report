@@ -135,11 +135,12 @@ export const PopUp = ({
               <HapusProposal data={data} popUp={popUp} setPopUp={setPopUp} />
             );
           // mode lainnya dalam kelayakanTokoBaru
-          case EModePopUpKelayakanTokoBaru.PENAMBAHAN ||
-            EModePopUpKelayakanTokoBaru.SUNTING ||
-            EModePopUpKelayakanTokoBaru.PERSETUJUAN:
+          case EModePopUpKelayakanTokoBaru.PENAMBAHAN:
+          case EModePopUpKelayakanTokoBaru.SUNTING:
+          case EModePopUpKelayakanTokoBaru.PERSETUJUAN:
             return (
               <InputPopUpKelayakanTokoBaru
+                data={data}
                 props={props}
                 aksenWarna={aksenWarna}
                 popUp={popUp}

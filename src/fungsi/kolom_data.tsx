@@ -239,6 +239,7 @@ export const buatPropsTabel = (
                           togglePopUp: true,
                           judulPopUp: `Persetujuan ${row.original.proposal_id}`,
                           modeProposal: EModePopUpKelayakanTokoBaru.PERSETUJUAN,
+                          proposalID: row.original.proposal_id,
                         }));
                       }
                     }}
@@ -271,6 +272,7 @@ export const buatPropsTabel = (
                             togglePopUp: true,
                             judulPopUp: `Sunting ${row.original.proposal_id}`,
                             modeProposal: EModePopUpKelayakanTokoBaru.SUNTING,
+                            proposalID: row.original.proposal_id,
                           }));
                         }
                       }}
