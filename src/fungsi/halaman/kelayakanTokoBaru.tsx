@@ -13,6 +13,7 @@ import {
   IAksenWarnaPopUp,
   IChatGPT,
   IChatGPTClient,
+  IDataInputItemKelayakanTokoBaru,
   IDisabilitasInputKelayakanTokoBaru,
   IInputItemKelayakanTokoBaru,
   IKotaKabupatenKueriChatGPT,
@@ -596,9 +597,9 @@ export const handleKotaKabupatenHilangFokus = async (
   formulir: UseFormReturnType<Formulir, (values: Formulir) => Formulir>,
   chatGPT: IChatGPT,
   props: StateKelayakanTokoBaru,
-  statusDisabilitasInput: IDisabilitasInputKelayakanTokoBaru,
+  statusDisabilitasInput: Partial<IDisabilitasInputKelayakanTokoBaru>,
   setStatusDisabilitasInput: React.Dispatch<
-    React.SetStateAction<IDisabilitasInputKelayakanTokoBaru>
+    React.SetStateAction<Partial<IDisabilitasInputKelayakanTokoBaru>>
   >,
   initialValue: Formulir
 ) => {
@@ -1070,4 +1071,169 @@ export const renderOutput = (
       })}`}
     </Text>
   );
+};
+
+// fungsi untuk set initialValue Formulir
+export const setInitialValue = (
+  popUp: StatePopUp,
+  props: StateKelayakanTokoBaru,
+  dataInputItem: IDataInputItemKelayakanTokoBaru,
+  dataProposal?: DataKelayakanTokoBaru
+) => {
+  let formulir: Formulir;
+  switch (popUp.modeProposal) {
+    case EModePopUpKelayakanTokoBaru.PENAMBAHAN:
+      formulir = {
+        log: [],
+        proposal_id: generateProposalID(props),
+        versi_proposal: "",
+        input: {
+          versi_model: "",
+          nama_model: "",
+          sbu: "",
+          kota_kabupaten: "",
+          rentang_populasi: -1,
+          kelas_mall: 0,
+          luas_toko: undefined,
+          margin_penjualan: 0.35,
+          ppn: 0.11,
+          tahun_umr: new Date().getFullYear().toString(),
+          provinsi_umr: "DKI Jakarta",
+          jumlah_staff: 1,
+          biaya_oau: 0.06,
+          biaya_sewa: undefined,
+          lama_sewa: 1,
+          biaya_fitout: undefined,
+        },
+        output: {
+          user_generated: {
+            sales: undefined,
+            vat: 0,
+            net_sales: 0,
+            cogs: 0,
+            gross_profit: 0,
+            staff_expense: 0,
+            oau_expense: 0,
+            rental_expense: 0,
+            fitout_expense: 0,
+            store_income: 0,
+          },
+          model_generated: {
+            sales: 0,
+            vat: 0,
+            net_sales: 0,
+            cogs: 0,
+            gross_profit: 0,
+            staff_expense: 0,
+            oau_expense: 0,
+            rental_expense: 0,
+            fitout_expense: 0,
+            store_income: 0,
+          },
+        },
+        remark: "",
+      };
+      return formulir;
+    default:
+      const input = dataProposal?.data.input;
+      const output = dataProposal?.data.output;
+      const user_generated = output?.user_generated;
+      const model_generated = output?.model_generated;
+      const remark = dataProposal?.data.remark;
+      formulir = {
+        proposal_id: dataProposal?.proposal_id!,
+        versi_proposal: dataProposal?.versi.toString()!,
+        input: {
+          versi_model: input?.versi_model,
+          nama_model: input?.nama_model,
+          sbu: setItemSBU(input?.sbu!, dataInputItem.sbuItem),
+          kota_kabupaten: input?.kota_kabupaten,
+          rentang_populasi: setItemRentangPopulasi(
+            input?.rentang_populasi!,
+            dataInputItem.rentangPopulasi
+          ),
+          kelas_mall: setItemKelasMall(
+            input?.kelas_mall!,
+            props.inputItem.kelasMallItem.map((item) => {
+              return item.label;
+            })
+          ),
+          luas_toko: input?.luas_toko,
+          margin_penjualan: input?.margin_penjualan,
+          ppn: input?.ppn,
+          tahun_umr: input?.tahun_umr.toString(),
+          provinsi_umr: input?.provinsi_umr,
+          jumlah_staff: input?.jumlah_staff,
+          biaya_oau: input?.biaya_atk_utilitas,
+          biaya_sewa: input?.biaya_sewa,
+          lama_sewa: input?.lama_sewa,
+          biaya_fitout: input?.biaya_fitout,
+        },
+        output: {
+          user_generated: {
+            sales: input?.prediksi_user,
+            vat: user_generated?.vat!,
+            net_sales: user_generated?.net_sales!,
+            cogs: user_generated?.cogs!,
+            gross_profit: user_generated?.gross_profit!,
+            staff_expense: user_generated?.staff_expense!,
+            oau_expense: user_generated?.oau_expense!,
+            rental_expense: user_generated?.rental_expense!,
+            fitout_expense: user_generated?.fitout_expense!,
+            store_income: user_generated?.store_income!,
+          },
+          model_generated: {
+            sales: input?.prediksi_model,
+            vat: model_generated?.vat!,
+            net_sales: model_generated?.net_sales!,
+            cogs: model_generated?.cogs!,
+            gross_profit: model_generated?.gross_profit!,
+            staff_expense: model_generated?.staff_expense!,
+            oau_expense: model_generated?.oau_expense!,
+            rental_expense: model_generated?.rental_expense!,
+            fitout_expense: model_generated?.fitout_expense!,
+            store_income: model_generated?.store_income!,
+          },
+        },
+        remark: remark?.konten!,
+        log: dataProposal?.data.log_output!,
+      };
+      return formulir;
+  }
+};
+
+// fungsi toggle disabilitas input
+export const setDisabilitasInputAwal = (popUp: StatePopUp) => {
+  let statusAwalDisabilitasInput: Partial<IDisabilitasInputKelayakanTokoBaru> =
+    {
+      versi_proposal: false,
+      sbu: false,
+      kota_kabupaten: false,
+      rentang_populasi: false,
+      kelas_mall: false,
+      luas_toko: false,
+      prediksi_penjualan_user: false,
+      margin_penjualan: false,
+      ppn: false,
+      tahun_umr: false,
+      provinsi_umr: false,
+      jumlah_staff: false,
+      biaya_oau: false,
+      biaya_sewa: false,
+      lama_sewa: false,
+      biaya_fitout: false,
+    };
+  switch (popUp.modeProposal) {
+    case EModePopUpKelayakanTokoBaru.PENAMBAHAN:
+    case EModePopUpKelayakanTokoBaru.SUNTING:
+      statusAwalDisabilitasInput = {
+        rentang_populasi: true,
+        tahun_umr: true,
+        provinsi_umr: true,
+      };
+      break;
+    default:
+      break;
+  }
+  return statusAwalDisabilitasInput;
 };
