@@ -966,8 +966,8 @@ export const kalkulasiStoreIncome = (
       return sales * ppnRate;
     };
     // COGS
-    const kalkulasiCOGS = (sales: number, marginRate: number) => {
-      return sales * (1 - marginRate);
+    const kalkulasiCOGS = (netSales: number, marginRate: number) => {
+      return netSales * (1 - marginRate);
     };
     // Staff Expense
     const kalkulasiStaffExp = (umr: number, jumlahStaff: number) => {
@@ -1032,7 +1032,7 @@ export const kalkulasiStoreIncome = (
     const ugSales = ug.sales ? ug.sales : 0;
     const ugPPN = kalkulasiPPN(ugSales, inputPPNRate);
     const ugNetSales = ugSales - ugPPN;
-    const ugCOGS = kalkulasiCOGS(ugSales, inputMargin);
+    const ugCOGS = kalkulasiCOGS(ugNetSales, inputMargin);
     const ugGrossProfit = ugNetSales - ugCOGS;
     const ugOAUExpense = kalkulasiOAUExp(inputOAURate, ugGrossProfit);
     const ugStoreIncome = ugGrossProfit - (ugOAUExpense + GlobalExpense);
@@ -1042,7 +1042,7 @@ export const kalkulasiStoreIncome = (
     const mgSales = mg.sales ? mg.sales : 0;
     const mgPPN = kalkulasiPPN(mgSales, inputPPNRate);
     const mgNetSales = mgSales - mgPPN;
-    const mgCOGS = kalkulasiCOGS(mgSales, inputMargin);
+    const mgCOGS = kalkulasiCOGS(mgNetSales, inputMargin);
     const mgGrossProfit = mgNetSales - mgCOGS;
     const mgOAUExpense = kalkulasiOAUExp(inputOAURate, mgGrossProfit);
     const mgStoreIncome = mgGrossProfit - (mgOAUExpense + GlobalExpense);

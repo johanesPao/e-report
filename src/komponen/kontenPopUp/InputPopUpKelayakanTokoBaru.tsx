@@ -34,6 +34,8 @@ import {
   cekFormValid,
   setDisabilitasInputAwal,
   setInitialValue,
+  setItemKelasMall,
+  setItemRentangPopulasi,
 } from "../../fungsi/halaman/kelayakanTokoBaru";
 import {
   DataKelayakanTokoBaru,
@@ -301,6 +303,122 @@ export const InputPopUpKelayakanTokoBaru = ({
   // Validitas Formulir
   const [valid, setValid] = useState(false);
 
+  // toggle versi proposal jika terdapat lebih dari 1 proposal
+  const toggleVersiProposal = useCallback(
+    (versi: string) => {
+      // set nilai versi_proposal pada formulir
+      formulir.setFieldValue("versi_proposal", versi);
+
+      // jika modeProposal penambahan, return
+      if (popUp.modeProposal === EModePopUpKelayakanTokoBaru.PENAMBAHAN) {
+        return;
+      }
+
+      console.log(dataProposal);
+
+      // jika modeProposal selain penambahan, konversi versi menjadi integer
+      const versiProposalInt = parseInt(versi);
+      // tentukan indeks proposal dalam dataProposal berdasar nilai versiProposalInt
+      // pada key versi
+      const indeksProposal = dataProposal.findIndex(
+        (proposal) => proposal.versi === versiProposalInt
+      );
+      // pilih data proposal dengan versi dimaksud
+      const proposal = dataProposal[indeksProposal];
+      console.log(proposal);
+      // shortcut objek data
+      const input = proposal.data.input;
+      const output = proposal.data.output;
+      const user_generated = output.user_generated;
+      const model_generated = output.model_generated;
+      const remark = proposal.data.remark;
+      // set nilai formulir sesuai dengan nilai pada proposal dengan versi terpilih
+      formulir.setValues((stateSebelumnya) => ({
+        ...stateSebelumnya,
+        input: {
+          versi_model: input.versi_model,
+          nama_model: input.nama_model,
+          sbu: input.sbu,
+          kota_kabupaten: input.kota_kabupaten,
+          rentang_populasi: setItemRentangPopulasi(
+            popUp.togglePopUp,
+            input.rentang_populasi,
+            dataInputItem.rentangPopulasi
+          ),
+          kelas_mall: setItemKelasMall(
+            popUp.togglePopUp,
+            input.kelas_mall,
+            props.inputItem.kelasMallItem.map((item) => {
+              return item.label;
+            })
+          ),
+          luas_toko: input.luas_toko,
+          margin_penjualan: input.margin_penjualan,
+          ppn: input.ppn,
+          tahun_umr: input.tahun_umr.toString(),
+          provinsi_umr: input.provinsi_umr,
+          jumlah_staff: input.jumlah_staff,
+          biaya_oau: input.biaya_atk_utilitas,
+          biaya_sewa: input.biaya_sewa,
+          lama_sewa: input.lama_sewa,
+          biaya_fitout: input.biaya_fitout,
+        },
+        output: {
+          user_generated: {
+            sales: input.prediksi_user,
+            vat: user_generated.vat,
+            net_sales: user_generated.net_sales,
+            cogs: user_generated.cogs,
+            gross_profit: user_generated.gross_profit,
+            staff_expense: user_generated.staff_expense,
+            oau_expense: user_generated.oau_expense,
+            rental_expense: user_generated.rental_expense,
+            fitout_expense: user_generated.fitout_expense,
+            store_income: user_generated.store_income,
+          },
+          model_generated: {
+            sales: input.prediksi_model,
+            vat: model_generated.vat,
+            net_sales: model_generated.net_sales,
+            cogs: model_generated.cogs,
+            gross_profit: model_generated.gross_profit,
+            staff_expense: model_generated.staff_expense,
+            oau_expense: model_generated.oau_expense,
+            rental_expense: model_generated.rental_expense,
+            fitout_expense: model_generated.fitout_expense,
+            store_income: model_generated.store_income,
+          },
+        },
+        remark: remark.konten,
+        log: proposal.data.log_output,
+      }));
+
+      // jika versi proposal tidak sama dengan max versi proposal, disable semua input
+      const versiAkhir =
+        versiProposalInt !==
+        Math.max(...dataProposal.map((proposal) => proposal.versi));
+      const toggleDisabilitas = versiAkhir ? true : false;
+      setStatusDisabilitasInput({
+        sbu: toggleDisabilitas,
+        kota_kabupaten: toggleDisabilitas,
+        rentang_populasi: true,
+        kelas_mall: toggleDisabilitas,
+        luas_toko: toggleDisabilitas,
+        prediksi_penjualan_user: toggleDisabilitas,
+        margin_penjualan: toggleDisabilitas,
+        ppn: toggleDisabilitas,
+        tahun_umr: true,
+        provinsi_umr: true,
+        jumlah_staff: toggleDisabilitas,
+        biaya_oau: toggleDisabilitas,
+        biaya_sewa: toggleDisabilitas,
+        lama_sewa: toggleDisabilitas,
+        biaya_fitout: toggleDisabilitas,
+      });
+    },
+    [formulir.values.versi_proposal]
+  );
+
   const prediksiSales = useCallback(() => {
     monitorInputPrediksiModel(
       formulir,
@@ -399,9 +517,12 @@ export const InputPopUpKelayakanTokoBaru = ({
                       <Chip
                         value={versi}
                         size="xs"
-                        onClick={() => {
-                          formulir.setFieldValue("versi_proposal", versi);
-                        }}
+                        onClick={(nilai) =>
+                          toggleVersiProposal(nilai.currentTarget.value)
+                        }
+                        // {
+                        //   formulir.setFieldValue("versi_proposal", versi);
+                        // }}
                         variant="filled"
                         radius="sm"
                         key={versi}
