@@ -515,28 +515,26 @@ export const ambilProposal = async (
 };
 
 // fungsi untuk melakukan pengecekan nilai dalam input item
-const cekItemDalamArray = (item: any, array: any[]) => {
+const cekItemDalamArray = (popUp: boolean, item: any, array: any[]) => {
   // jika item tidak ada dalam array, berikan notifikasi kepada pengguna
-  if (!array.includes(item)) {
-    notifications.show({
-      title: `Input Item Tidak Sama`,
-      message: `Item ${item.toString()} yang sebelumnya terdapat pada proposal kini tidak tersedia.`,
-      autoClose: false,
-      color: "yellow",
-      icon: <IconExclamationMark />,
-      withCloseButton: true,
-    });
-    // return false
-    return false;
-  } else {
-    // else return true
-    return true;
+  // HACK: InputPopUpKelayakanTokoBaru akan melakukan beberapa kali
+  // rerendering pada awal popup terbuka dan saat popup tertutup. Untuk
+  // mencegah notifikasi muncul pada saat popUp ditutup, kita akan
+  // mengevaluasi state boolean dari togglePopUp
+  if (popUp) {
+    if (!array.includes(item)) {
+      // return false
+      return false;
+    } else {
+      // else return true
+      return true;
+    }
   }
 };
 
-export const setItemSBU = (item: string, array: string[]) => {
+export const setItemSBU = (popUp: boolean, item: string, array: string[]) => {
   // jika item ada dalam array
-  if (cekItemDalamArray(item, array)) {
+  if (cekItemDalamArray(popUp, item, array)) {
     // kembalikan nilai item
     return item;
   } else {
@@ -546,6 +544,7 @@ export const setItemSBU = (item: string, array: string[]) => {
 };
 
 export const setItemRentangPopulasi = (
+  popUp: boolean,
   item: string,
   array: TLabelValueInputItem[]
 ) => {
@@ -553,7 +552,7 @@ export const setItemRentangPopulasi = (
   const arrayLabel = array.map((item) => item.label);
   const arrayNilai = array.map((item) => item.value as number);
   // jika item ada dalam array
-  if (cekItemDalamArray(item, arrayLabel)) {
+  if (cekItemDalamArray(popUp, item, arrayLabel)) {
     // kembalikan nilai pada indeks dimana arrayLabel === item
     return arrayNilai[arrayLabel.indexOf(item)];
   } else {
@@ -562,7 +561,11 @@ export const setItemRentangPopulasi = (
   }
 };
 
-export const setItemKelasMall = (item: string, array: string[]) => {
+export const setItemKelasMall = (
+  popUp: boolean,
+  item: string,
+  array: string[]
+) => {
   // Untuk Item Kelas Mall cukup kompleks karena Input Item
   // ini merupakan komponen Rating pada @mantine/core.
   // Komponen Rating memiliki 2 props utama yaitu emptySymbol
@@ -574,7 +577,7 @@ export const setItemKelasMall = (item: string, array: string[]) => {
   // kelas_mall pada proposal tidak terdapat pada inputItem
   // kelas_mall saat ini dan angka indeks yang dimulai dari
   // 1 hingga array.length jika nilai terdapat pada inputItem
-  if (cekItemDalamArray(item, array)) {
+  if (cekItemDalamArray(popUp, item, array)) {
     return array.indexOf(item) + 1;
   } else {
     return 0;
@@ -826,7 +829,9 @@ export const handleKotaKabupatenHilangFokus = async (
         luas_toko: false,
       }));
       // cek input model
-      monitorInputPrediksiModel(formulir, props);
+      // TIDAK DIPERLUKAN KARENA FUNGSI DIBAWAH INI
+      // BERADA DALAM useEffect
+      // monitorInputPrediksiModel(formulir, props);
       // console.log(formulir.getInputProps("input.kota_kabupaten").value);
     } else {
       // nilai kota_kabupaten = "" atau undefined
@@ -859,7 +864,6 @@ const preprocessingModelInput = (
         ? 0
         : formulir.values.input.rentang_populasi / 20),
   ];
-  console.log(instances);
   return instances;
 };
 
@@ -877,49 +881,75 @@ const prediksi = async (
 
 export const monitorInputPrediksiModel = async (
   formulir: UseFormReturnType<Formulir, (values: Formulir) => Formulir>,
-  props: StateKelayakanTokoBaru
+  props: StateKelayakanTokoBaru,
+  modeProposal: EModePopUpKelayakanTokoBaru,
+  initialValue: Formulir
 ) => {
+  // cek jika salah satu input prediksi pada formulir dirty
   if (
-    formulir.values.input.sbu === "" ||
-    formulir.values.input.rentang_populasi === -1 ||
-    formulir.values.input.kelas_mall === 0 ||
-    // jika luas_toko = undefined atau ""
-    typeof formulir.values.input.luas_toko !== "number"
+    formulir.isDirty("input.sbu") ||
+    formulir.isDirty("input.rentang_populasi") ||
+    formulir.isDirty("input.kota_kabupaten") ||
+    formulir.isDirty("input.luas_toko")
   ) {
-    // set sales model 0
-    formulir.setFieldValue("output.model_generated.sales", 0);
-  } else {
-    // lakukan prediksi model
-    // konversi nilai - nilai input sesuai dengan input untuk model (preprocessing input)
-    const input = preprocessingModelInput(formulir, props);
-    // konstruksi endpoint model
-    const modelUrl = props.inputItem.model.namaModelUrl.replace(
-      "{versi}",
-      props.inputItem.model.versi
-    );
-    const hasilPrediksi = await prediksi(input, modelUrl);
-    if (hasilPrediksi.status) {
-      // status true
-      // RegExp konten
-      const regex_prediksi = /[0-9\.e+]+[0-9\.e+]+/g;
-      const prediksi = hasilPrediksi.konten.match(regex_prediksi);
-      if (prediksi !== null) {
-        // cek jika angka memiliki notasi eksponensial
-        const e_regex = /[e]/g;
-        formulir.setFieldValue(
-          "output.model_generated.sales",
-          prediksi[0].match(e_regex) !== null
-            ? parseFloat(Number(prediksi[0]).toPrecision())
-            : parseFloat(prediksi[0])
-        );
-      } else {
-        console.log(
-          "Tidak dapat menemukan nilai prediksi dalam prediksi.konten"
-        );
-      }
+    // cek jika salah satu nilai dari input adalah kosong
+    if (
+      formulir.values.input.sbu === "" ||
+      formulir.values.input.rentang_populasi === -1 ||
+      formulir.values.input.kelas_mall === 0 ||
+      // jika luas_toko = undefined atau string
+      typeof formulir.values.input.luas_toko !== "number"
+    ) {
+      // set sales model 0
+      formulir.setFieldValue("output.model_generated.sales", 0);
     } else {
-      // status false
-      console.log("Gagal melakukan prediksi sales dari tensorflow serving");
+      // lakukan prediksi model
+      // konversi nilai - nilai input sesuai dengan input untuk model (preprocessing input)
+      const input = preprocessingModelInput(formulir, props);
+      // konstruksi endpoint model
+      const modelUrl = props.inputItem.model.namaModelUrl.replace(
+        "{versi}",
+        props.inputItem.model.versi
+      );
+      const hasilPrediksi = await prediksi(input, modelUrl);
+      if (hasilPrediksi.status) {
+        // status true
+        // RegExp konten
+        const regex_prediksi = /[0-9\.e+]+[0-9\.e+]+/g;
+        const prediksi = hasilPrediksi.konten.match(regex_prediksi);
+        if (prediksi !== null) {
+          // cek jika angka memiliki notasi eksponensial
+          const e_regex = /[e]/g;
+          formulir.setFieldValue(
+            "output.model_generated.sales",
+            prediksi[0].match(e_regex) !== null
+              ? parseFloat(Number(prediksi[0]).toPrecision())
+              : parseFloat(prediksi[0])
+          );
+        } else {
+          console.log(
+            "Tidak dapat menemukan nilai prediksi dalam prediksi.konten"
+          );
+        }
+      } else {
+        // status false
+        console.log("Gagal melakukan prediksi sales dari tensorflow serving");
+      }
+    }
+  } else {
+    // Dalam kasus semua input adalah clean, cek apakah modeProposal
+    // adalah sunting, jika modeProposal adalah sunting dan
+    // formulir sudah tersentuh, maka kembalikan nilai sales
+    // sesuai dengan initialValue ketimbang tidak melakukan
+    // kalkulasi apapun pada sales
+    if (
+      modeProposal === EModePopUpKelayakanTokoBaru.SUNTING &&
+      formulir.isTouched()
+    ) {
+      formulir.setFieldValue(
+        "output.model_generated.sales",
+        initialValue.output.model_generated.sales
+      );
     }
   }
 };
@@ -928,116 +958,125 @@ export const kalkulasiStoreIncome = (
   formulir: UseFormReturnType<Formulir, (values: Formulir) => Formulir>,
   props: StateKelayakanTokoBaru
 ) => {
-  // Fungsi Kalkulasi
-  // PPN
-  const kalkulasiPPN = (sales: number, ppnRate: number) => {
-    return sales * ppnRate;
-  };
-  // COGS
-  const kalkulasiCOGS = (sales: number, marginRate: number) => {
-    return sales * (1 - marginRate);
-  };
-  // Staff Expense
-  const kalkulasiStaffExp = (umr: number, jumlahStaff: number) => {
-    return umr * jumlahStaff;
-  };
-  // Office and Utility Expense
-  const kalkulasiOAUExp = (oauRate: number, grossProfit: number) => {
-    return oauRate * grossProfit;
-  };
-  // Amortisasi Rental Expense
-  const kalkulasiRentalExp = (jumlahTahun: number, biayaSewaTotal: number) => {
-    return biayaSewaTotal / (jumlahTahun * 12);
-  };
-  // Amortisasi Fitout Expense
-  const kalkulasiFitoutExp = (
-    biayaFitoutTotal: number,
-    jumlahBulanAmortisasi: number = 48
-  ) => {
-    return biayaFitoutTotal / jumlahBulanAmortisasi;
-  };
+  // run this only if formulir is dirty
+  if (formulir.isDirty()) {
+    // Fungsi Kalkulasi
+    // PPN
+    const kalkulasiPPN = (sales: number, ppnRate: number) => {
+      return sales * ppnRate;
+    };
+    // COGS
+    const kalkulasiCOGS = (sales: number, marginRate: number) => {
+      return sales * (1 - marginRate);
+    };
+    // Staff Expense
+    const kalkulasiStaffExp = (umr: number, jumlahStaff: number) => {
+      return umr * jumlahStaff;
+    };
+    // Office and Utility Expense
+    const kalkulasiOAUExp = (oauRate: number, grossProfit: number) => {
+      return oauRate * grossProfit;
+    };
+    // Amortisasi Rental Expense
+    const kalkulasiRentalExp = (
+      jumlahTahun: number,
+      biayaSewaTotal: number
+    ) => {
+      return biayaSewaTotal / (jumlahTahun * 12);
+    };
+    // Amortisasi Fitout Expense
+    const kalkulasiFitoutExp = (
+      biayaFitoutTotal: number,
+      jumlahBulanAmortisasi: number = 48
+    ) => {
+      return biayaFitoutTotal / jumlahBulanAmortisasi;
+    };
 
-  // Shortcut
-  const input = formulir.values.input;
-  // Nilai Input
-  const inputPPNRate = input.ppn ? input.ppn : 0;
-  const inputMargin = input.margin_penjualan ? input.margin_penjualan : 0;
-  const inputOAURate = input.biaya_oau ? input.biaya_oau : 0;
-  const inputJumlahStaff = input.jumlah_staff ? input.jumlah_staff : 0;
-  const inputLamaSewa = input.lama_sewa ? input.lama_sewa : 0;
-  const inputBiayaSewaTotal = input.biaya_sewa ? input.biaya_sewa : 0;
-  const inputBiayaFitoutTotal = input.biaya_fitout ? input.biaya_fitout : 0;
+    // Shortcut
+    const input = formulir.values.input;
+    // Nilai Input
+    const inputPPNRate = input.ppn ? input.ppn : 0;
+    const inputMargin = input.margin_penjualan ? input.margin_penjualan : 0;
+    const inputOAURate = input.biaya_oau ? input.biaya_oau : 0;
+    const inputJumlahStaff = input.jumlah_staff ? input.jumlah_staff : 0;
+    const inputLamaSewa = input.lama_sewa ? input.lama_sewa : 0;
+    const inputBiayaSewaTotal = input.biaya_sewa ? input.biaya_sewa : 0;
+    const inputBiayaFitoutTotal = input.biaya_fitout ? input.biaya_fitout : 0;
 
-  // Index umrItem berdasar tahun_data sesuai dengan formulir.values.input.tahun_umr
-  const indeksTahunUMR = props.inputItem.umrItem.findIndex((dataUMR) => {
-    return dataUMR.tahun_data == parseInt(formulir.values.input.tahun_umr!);
-  });
-  // Index data provinsi_umr berdasar indeks tahun_data dan formulir.values.input.provinsi_umr
-  const indeksProvinsiUMR = props.inputItem.umrItem[
-    indeksTahunUMR
-  ].data.findIndex((dataProvinsiUMR) => {
-    return dataProvinsiUMR.label == formulir.values.input.provinsi_umr;
-  });
-  // Ambil nilai umr berdasar index data tahun umr dan provinsi umr di formulir.values.input.provinsu_umr
-  const inputUMR = props.inputItem.umrItem[indeksTahunUMR].data[
-    indeksProvinsiUMR
-  ].value as number;
+    // Index umrItem berdasar tahun_data sesuai dengan formulir.values.input.tahun_umr
+    const indeksTahunUMR = props.inputItem.umrItem.findIndex((dataUMR) => {
+      return dataUMR.tahun_data == parseInt(formulir.values.input.tahun_umr!);
+    });
+    // Index data provinsi_umr berdasar indeks tahun_data dan formulir.values.input.provinsi_umr
+    const indeksProvinsiUMR = props.inputItem.umrItem[
+      indeksTahunUMR
+    ].data.findIndex((dataProvinsiUMR) => {
+      return dataProvinsiUMR.label == formulir.values.input.provinsi_umr;
+    });
+    // Ambil nilai umr berdasar index data tahun umr dan provinsi umr di formulir.values.input.provinsu_umr
+    const inputUMR = props.inputItem.umrItem[indeksTahunUMR].data[
+      indeksProvinsiUMR
+    ].value as number;
 
-  // Global Expense
-  const StaffExpense = kalkulasiStaffExp(inputUMR, inputJumlahStaff);
-  const RentalExpense = kalkulasiRentalExp(inputLamaSewa, inputBiayaSewaTotal);
-  const FitoutExpense = kalkulasiFitoutExp(inputBiayaFitoutTotal);
-  const GlobalExpense = StaffExpense + RentalExpense + FitoutExpense;
+    // Global Expense
+    const StaffExpense = kalkulasiStaffExp(inputUMR, inputJumlahStaff);
+    const RentalExpense = kalkulasiRentalExp(
+      inputLamaSewa,
+      inputBiayaSewaTotal
+    );
+    const FitoutExpense = kalkulasiFitoutExp(inputBiayaFitoutTotal);
+    const GlobalExpense = StaffExpense + RentalExpense + FitoutExpense;
 
-  // User Generated Related Sales and Cost
-  const ug = formulir.values.output.user_generated;
-  const ugSales = ug.sales ? ug.sales : 0;
-  const ugPPN = kalkulasiPPN(ugSales, inputPPNRate);
-  const ugNetSales = ugSales - ugPPN;
-  const ugCOGS = kalkulasiCOGS(ugSales, inputMargin);
-  const ugGrossProfit = ugNetSales - ugCOGS;
-  const ugOAUExpense = kalkulasiOAUExp(inputOAURate, ugGrossProfit);
-  const ugStoreIncome = ugGrossProfit - (ugOAUExpense + GlobalExpense);
+    // User Generated Related Sales and Cost
+    const ug = formulir.values.output.user_generated;
+    const ugSales = ug.sales ? ug.sales : 0;
+    const ugPPN = kalkulasiPPN(ugSales, inputPPNRate);
+    const ugNetSales = ugSales - ugPPN;
+    const ugCOGS = kalkulasiCOGS(ugSales, inputMargin);
+    const ugGrossProfit = ugNetSales - ugCOGS;
+    const ugOAUExpense = kalkulasiOAUExp(inputOAURate, ugGrossProfit);
+    const ugStoreIncome = ugGrossProfit - (ugOAUExpense + GlobalExpense);
 
-  // Model Generated Related Sales and Cost
-  const mg = formulir.values.output.model_generated;
-  const mgSales = mg.sales ? mg.sales : 0;
-  const mgPPN = kalkulasiPPN(mgSales, inputPPNRate);
-  const mgNetSales = mgSales - mgPPN;
-  const mgCOGS = kalkulasiCOGS(mgSales, inputMargin);
-  const mgGrossProfit = mgNetSales - mgCOGS;
-  const mgOAUExpense = kalkulasiOAUExp(inputOAURate, mgGrossProfit);
-  const mgStoreIncome = mgGrossProfit - (mgOAUExpense + GlobalExpense);
+    // Model Generated Related Sales and Cost
+    const mg = formulir.values.output.model_generated;
+    const mgSales = mg.sales ? mg.sales : 0;
+    const mgPPN = kalkulasiPPN(mgSales, inputPPNRate);
+    const mgNetSales = mgSales - mgPPN;
+    const mgCOGS = kalkulasiCOGS(mgSales, inputMargin);
+    const mgGrossProfit = mgNetSales - mgCOGS;
+    const mgOAUExpense = kalkulasiOAUExp(inputOAURate, mgGrossProfit);
+    const mgStoreIncome = mgGrossProfit - (mgOAUExpense + GlobalExpense);
 
-  formulir.setValues((stateSebelumnya) => ({
-    ...stateSebelumnya,
-    output: {
-      user_generated: {
-        ...stateSebelumnya.output!.user_generated,
-        vat: ugPPN,
-        net_sales: ugNetSales,
-        cogs: ugCOGS,
-        gross_profit: ugGrossProfit,
-        staff_expense: StaffExpense,
-        oau_expense: ugOAUExpense,
-        rental_expense: RentalExpense,
-        fitout_expense: FitoutExpense,
-        store_income: ugStoreIncome,
+    formulir.setValues((stateSebelumnya) => ({
+      ...stateSebelumnya,
+      output: {
+        user_generated: {
+          ...stateSebelumnya.output?.user_generated,
+          vat: ugPPN,
+          net_sales: ugNetSales,
+          cogs: ugCOGS,
+          gross_profit: ugGrossProfit,
+          staff_expense: StaffExpense,
+          oau_expense: ugOAUExpense,
+          rental_expense: RentalExpense,
+          fitout_expense: FitoutExpense,
+          store_income: ugStoreIncome,
+        },
+        model_generated: {
+          ...stateSebelumnya.output?.model_generated,
+          vat: mgPPN,
+          net_sales: mgNetSales,
+          cogs: mgCOGS,
+          gross_profit: mgGrossProfit,
+          staff_expense: StaffExpense,
+          oau_expense: mgOAUExpense,
+          rental_expense: RentalExpense,
+          fitout_expense: FitoutExpense,
+          store_income: mgStoreIncome,
+        },
       },
-      model_generated: {
-        ...stateSebelumnya.output!.model_generated,
-        vat: mgPPN,
-        net_sales: mgNetSales,
-        cogs: mgCOGS,
-        gross_profit: mgGrossProfit,
-        staff_expense: StaffExpense,
-        oau_expense: mgOAUExpense,
-        rental_expense: RentalExpense,
-        fitout_expense: FitoutExpense,
-        store_income: mgStoreIncome,
-      },
-    },
-  }));
+    }));
+  }
 };
 
 // fungsi render format teks output
@@ -1066,9 +1105,13 @@ export const renderOutput = (
   }
   return (
     <Text c={warna} ta="center">
-      {`Rp ${nilaiOutput.toLocaleString("id-ID", {
-        maximumFractionDigits: 0,
-      })}`}
+      {`Rp ${
+        nilaiOutput !== undefined
+          ? nilaiOutput.toLocaleString("id-ID", {
+              maximumFractionDigits: 0,
+            })
+          : 0
+      }`}
     </Text>
   );
 };
@@ -1146,13 +1189,19 @@ export const setInitialValue = (
         input: {
           versi_model: input?.versi_model,
           nama_model: input?.nama_model,
-          sbu: setItemSBU(input?.sbu!, dataInputItem.sbuItem),
+          sbu: setItemSBU(
+            popUp.togglePopUp,
+            input?.sbu!,
+            dataInputItem.sbuItem
+          ),
           kota_kabupaten: input?.kota_kabupaten,
           rentang_populasi: setItemRentangPopulasi(
+            popUp.togglePopUp,
             input?.rentang_populasi!,
             dataInputItem.rentangPopulasi
           ),
           kelas_mall: setItemKelasMall(
+            popUp.togglePopUp,
             input?.kelas_mall!,
             props.inputItem.kelasMallItem.map((item) => {
               return item.label;

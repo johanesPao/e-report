@@ -26,16 +26,12 @@ import { useForm } from "@mantine/form";
 import {
   kalkulasiStoreIncome,
   StateKelayakanTokoBaru,
-  generateProposalID,
   handleKotaKabupatenHilangFokus,
   handlePerubahanKotaKabupaten,
   monitorInputPrediksiModel,
   renderOutput,
   KonfirmasiProposal,
   cekFormValid,
-  setItemRentangPopulasi,
-  setItemSBU,
-  setItemKelasMall,
   setDisabilitasInputAwal,
   setInitialValue,
 } from "../../fungsi/halaman/kelayakanTokoBaru";
@@ -61,6 +57,7 @@ import {
   IconCalculator,
   IconCalendar,
   IconCalendarTime,
+  IconExclamationMark,
   IconFriends,
   IconHomeBolt,
   IconMapPin,
@@ -73,11 +70,12 @@ import {
   IconWallet,
   IconZoomInArea,
 } from "@tabler/icons-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppSelector } from "../../state/hook";
 import { getParameterBc } from "../../fitur_state/dataParam";
 import { getNamaPengguna } from "../../fitur_state/pengguna";
 import { StatePopUp } from "../PopUp";
+import { notifications } from "@mantine/notifications";
 
 export const InputPopUpKelayakanTokoBaru = ({
   data,
@@ -271,7 +269,7 @@ export const InputPopUpKelayakanTokoBaru = ({
   // Nilai Initial Value Formulir pada dasarnya akan bergantung kepada EModePopUpKelayakanTokoBaru
   // co: EModePopUpKelayakanTokoBaru.PENAMBAHAN, EModePopUpKelayakanTokoBaru.PERSETUJUAN,
   // EModePopUpKelayakanTokoBaru.SUNTING atau EModePopUpKelayakanTokoBaru.HAPUS
-  let initialValueFormulir: Formulir = setInitialValue(
+  const initialValueFormulir: Formulir = setInitialValue(
     popUp,
     props,
     dataInputItem,
@@ -303,25 +301,75 @@ export const InputPopUpKelayakanTokoBaru = ({
   // Validitas Formulir
   const [valid, setValid] = useState(false);
 
-  // }, [statusDisabilitasInput]);
+  const prediksiSales = useCallback(() => {
+    monitorInputPrediksiModel(
+      formulir,
+      props,
+      popUp.modeProposal!,
+      initialValueFormulir
+    );
+  }, [
+    formulir.values.input.sbu,
+    formulir.values.input.rentang_populasi,
+    formulir.values.input.kelas_mall,
+    formulir.values.input.luas_toko,
+  ]);
 
-  console.log(formulir.values);
+  const rekalkulasiOutput = useCallback(() => {
+    kalkulasiStoreIncome(formulir, props);
+  }, [
+    formulir.values.output.model_generated.sales,
+    formulir.values.output.user_generated.sales,
+    formulir.values.input.margin_penjualan,
+    formulir.values.input.ppn,
+    formulir.values.input.tahun_umr,
+    formulir.values.input.provinsi_umr,
+    formulir.values.input.jumlah_staff,
+    formulir.values.input.biaya_oau,
+    formulir.values.input.biaya_sewa,
+    formulir.values.input.lama_sewa,
+    formulir.values.input.biaya_fitout,
+  ]);
 
-  // // Render Prediksi Sales
-  // useEffect(() => {
-  //   monitorInputPrediksiModel(formulir, props);
-  // }, [
-  //   formulir.values.input.sbu,
-  //   formulir.values.input.rentang_populasi,
-  //   formulir.values.input.kelas_mall,
-  //   formulir.values.input.luas_toko,
-  // ]);
+  // Render Prediksi Sales dan rekalkulasiOutput
+  useEffect(() => {
+    prediksiSales();
+    rekalkulasiOutput();
+  }, [prediksiSales, rekalkulasiOutput]);
 
-  // THIS KEEPS RERENDERING ON SUNTING
-  // Render teks Output
-  // useEffect(() => {
-  //   kalkulasiStoreIncome(formulir, props);
-  // }, [formulir.values.output]);
+  // render notifikasi untuk inkonsistensi nilai existing dengan item input saat ini
+  useEffect(() => {
+    const notifikasi = (item: string) => {
+      notifications.show({
+        title: `Input Item Tidak Sama`,
+        message: `Item ${item} yang sebelumnya terdapat pada proposal kini tidak tersedia.`,
+        autoClose: false,
+        color: "yellow",
+        icon: <IconExclamationMark />,
+        withCloseButton: true,
+      });
+    };
+
+    if (popUp.modeProposal === EModePopUpKelayakanTokoBaru.SUNTING) {
+      const input = dataProposalTerakhir.data.input;
+      if (!dataInputItem.sbuItem.includes(input.sbu)) {
+        notifikasi(input.sbu);
+      }
+      const arrayLabelProvinsi = dataInputItem.rentangPopulasi.map(
+        (item) => item.label
+      );
+      if (!arrayLabelProvinsi.includes(input.rentang_populasi)) {
+        notifikasi(input.rentang_populasi);
+      }
+      if (
+        !props.inputItem.kelasMallItem
+          .map((item) => item.label)
+          .includes(input.kelas_mall)
+      ) {
+        notifikasi(input.kelas_mall);
+      }
+    }
+  }, []);
 
   const handlerJumlahStaff = useRef<NumberInputHandlers>();
   const handlerJumlahTahunSewa = useRef<NumberInputHandlers>();
