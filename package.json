@@ -13,6 +13,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@emailjs/browser": "^3.11.0",
     "@emotion/react": "^11.10.8",
     "@mantine/carousel": "^6.0.10",
     "@mantine/core": "^6.0.10",
