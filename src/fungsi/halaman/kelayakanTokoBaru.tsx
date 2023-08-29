@@ -153,6 +153,7 @@ export const KonfirmasiProposal = (
   setKonfirmasiPopUp: React.Dispatch<React.SetStateAction<boolean>>,
   valid: boolean,
   formulir: UseFormReturnType<Formulir, (values: Formulir) => Formulir>,
+  dataProposal: DataKelayakanTokoBaru[],
   aksenWarna: IAksenWarnaPopUp,
   props: StateKelayakanTokoBaru,
   tindakanProposal: ETindakanProposalTokoBaru,
@@ -186,12 +187,6 @@ export const KonfirmasiProposal = (
       case ETindakanProposalTokoBaru.KIRIM:
         status = EStatusProposalTokoBaru.SUBMIT;
         break;
-      case ETindakanProposalTokoBaru.DITOLAK:
-        status = EStatusProposalTokoBaru.DITOLAK;
-        break;
-      case ETindakanProposalTokoBaru.DITERIMA:
-        status = EStatusProposalTokoBaru.DITERIMA;
-        break;
       default:
         break;
     }
@@ -214,6 +209,7 @@ export const KonfirmasiProposal = (
       default:
         break;
     }
+
     // map input output dengan interface IProposalToko
     proposalToko = {
       proposal_id: form.proposal_id,
@@ -272,13 +268,18 @@ export const KonfirmasiProposal = (
         dibuat:
           popUp.modeProposal === EModePopUpKelayakanTokoBaru.PENAMBAHAN
             ? new Date().toISOString()
-            : props.dataKelayakanTokoBaru[0].data.dibuat.toISOString(),
+            : new Date(
+                //@ts-ignore
+                parseInt(dataProposal[0].data.dibuat.$date.$numberLong)
+              ).toISOString(),
         diedit: new Date().toISOString(),
         pengguna: pengguna,
         status,
       },
     };
-    console.log(proposalToko);
+
+    // jika mode tindakan adalah kirim, maka kirim email notifikasi
+    // kepada pihak yang berkepentingan
   }
 
   // Konten PopUp Formulir tidak valid
