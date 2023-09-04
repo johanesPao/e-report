@@ -608,7 +608,7 @@ export const rppuByILEPostDate = (
     ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
     ), lsctse_stat AS (
       SELECT DISTINCT
-        ${parameterBc.kolom_bc.date} [Tanggal],
+        ${parameterBc.kolom_bc.statement_no} [No Statement],
         ${parameterBc.kolom_bc.store_no} [Kode Toko],
         ${parameterBc.kolom_bc.trans_no} [No. Transaksi],
         ${parameterBc.kolom_bc.oricode} [OriCode],
@@ -644,7 +644,8 @@ export const rppuByILEPostDate = (
     LEFT JOIN lsctse_stat
       ON  (
         ile.[No. Dokumen] NOT LIKE '${parameterBc.argumen_bc.sales_ret_series_prefix}' AND
-        ile.[Tanggal] = lsctse_stat.[Tanggal] AND
+        -- tanggal ILE bisa berbeda dengan tanggal LSCTSE_STAT
+        ile.[No. Dokumen] = lsctse_stat.[No Statement] AND
         ile.[Kode Toko] = lsctse_stat.[Kode Toko] AND
         ile.[OriCode] = lsctse_stat.[OriCode] AND
         ile.[Ukuran] = lsctse_stat.[Ukuran]
