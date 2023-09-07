@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/tauri";
 import {
   DataKelayakanTokoBaru,
-  DataTabelKelayakanTokoBaru,
+  TDataTabelKelayakanTokoBaru,
   EKelasMallProposalToko,
   EKelasMallStringProposalToko,
   EModePopUpKelayakanTokoBaru,
@@ -21,15 +21,26 @@ import {
   IProposalToko,
   TLabelValueInputItem,
   toTitle,
+  IApprovalTokoBaru,
+  ResponJSONSemuaProposalTokoBaru,
+  ResponJSONSemuaApprovalTokoBaru,
+  IKredensialApproverTokoBaru,
+  ResponJSONKredensialApproverTokoBaru,
+  IApproverKredensialTokoBaruStatus,
+  ResponJSON,
+  ResponJSONApprovalProposalID,
+  EStatusApprovalTokoBaru,
 } from "../basic";
 import {
   Button,
+  Grid,
   Group,
   Modal,
   Text,
   Title,
   useMantineTheme,
 } from "@mantine/core";
+import emailjs from "@emailjs/browser";
 import { setDataKelayakanTokoBaru } from "../../fitur_state/dataBank";
 import { UseFormReturnType } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
@@ -37,10 +48,19 @@ import { IconCheck, IconExclamationMark, IconX } from "@tabler/icons-react";
 import { StatePopUp } from "../../komponen/PopUp";
 
 export interface StateKelayakanTokoBaru {
-  tampilanTabel: DataTabelKelayakanTokoBaru[];
+  tampilanTabel: TDataTabelKelayakanTokoBaru[];
   dataKelayakanTokoBaru: DataKelayakanTokoBaru[];
   muatTabelKelayakanTokoBaru: boolean;
   inputItem: IInputItemKelayakanTokoBaru;
+  approver: IKredensialApproverTokoBaru[];
+  konfigurasiEmail: IKonfigEmailTokoBaru;
+  objekIdPengguna: string;
+}
+
+interface IKonfigEmailTokoBaru {
+  serviceId: string;
+  templateId: string;
+  apiKey: string;
 }
 
 export const ambilInputItemModelKelayakanTokoBaru = async (
@@ -153,7 +173,9 @@ export const KonfirmasiProposal = (
   setKonfirmasiPopUp: React.Dispatch<React.SetStateAction<boolean>>,
   valid: boolean,
   formulir: UseFormReturnType<Formulir, (values: Formulir) => Formulir>,
+  nilaiAwal: DataKelayakanTokoBaru,
   dataProposal: DataKelayakanTokoBaru[],
+  stateTombolDua: boolean,
   aksenWarna: IAksenWarnaPopUp,
   props: StateKelayakanTokoBaru,
   tindakanProposal: ETindakanProposalTokoBaru,
@@ -161,9 +183,9 @@ export const KonfirmasiProposal = (
   popUp: StatePopUp,
   setPopUp: React.Dispatch<React.SetStateAction<StatePopUp>>
 ) => {
+  const theme = useMantineTheme();
   // Jika terdapat kesalahan, ubah aksenWarna
   if (!valid) {
-    const theme = useMantineTheme();
     aksenWarna = {
       ...aksenWarna,
       header: theme.colors.red[9],
@@ -186,6 +208,12 @@ export const KonfirmasiProposal = (
         break;
       case ETindakanProposalTokoBaru.KIRIM:
         status = EStatusProposalTokoBaru.SUBMIT;
+        break;
+      case ETindakanProposalTokoBaru.DITERIMA:
+        status = EStatusProposalTokoBaru.DITERIMA;
+        break;
+      case ETindakanProposalTokoBaru.DITOLAK:
+        status = EStatusProposalTokoBaru.DITOLAK;
         break;
       default:
         break;
@@ -213,6 +241,8 @@ export const KonfirmasiProposal = (
     // map input output dengan interface IProposalToko
     proposalToko = {
       proposal_id: form.proposal_id,
+      // versi_proposal tidak dirubah di interface ini, tapi di fungsi simpanProposal
+      // atau updateProposal
       versi: parseInt(form.versi_proposal),
       data: {
         input: {
@@ -277,9 +307,6 @@ export const KonfirmasiProposal = (
         status,
       },
     };
-
-    // jika mode tindakan adalah kirim, maka kirim email notifikasi
-    // kepada pihak yang berkepentingan
   }
 
   // Konten PopUp Formulir tidak valid
@@ -304,35 +331,328 @@ export const KonfirmasiProposal = (
   // Konten PopUp Formulir valid
   const RenderKonfirmasi = (
     setKonfirmasiPopUp: React.Dispatch<React.SetStateAction<boolean>>,
-    proposal: IProposalToko
+    proposal: IProposalToko,
+    modeProposal: EModePopUpKelayakanTokoBaru,
+    tindakanProposal: ETindakanProposalTokoBaru
   ) => {
+    // inisiasi approver email
+    const listApprover = props.approver;
+    interface PopUpInfoFungsi {
+      info: JSX.Element;
+      prosesProposal: (
+        tambahVersi?: boolean,
+        approval?: boolean
+      ) => Promise<void>;
+      tambahVersi?: boolean;
+      approval?: boolean;
+    }
+    // fungsi komponen
+    const komponenTeksInfo = (
+      teks: string,
+      peringatan?: string,
+      warnaPeringatan?: string
+    ) => {
+      return (
+        <div>
+          <Text>{teks}</Text>
+          <Grid grow my="md" gutter={0}>
+            <Grid.Col span={7}>
+              <Text>Proposal ID</Text>
+            </Grid.Col>
+            <Grid.Col span={5}>
+              <Text>{`: ${proposal.proposal_id}`}</Text>
+            </Grid.Col>
+            <Grid.Col span={7}>
+              <Text>Strategic Business Unit</Text>
+            </Grid.Col>
+            <Grid.Col span={5}>
+              <Text>{`: ${proposal.data.input.sbu}`}</Text>
+            </Grid.Col>
+            <Grid.Col span={7}>
+              <Text>Kota/Kabupaten</Text>
+            </Grid.Col>
+            <Grid.Col span={5}>
+              <Text>{`: ${proposal.data.input.kota_kabupaten}`}</Text>
+            </Grid.Col>
+            <Grid.Col span={7}>
+              <Text>Kelas Mall</Text>
+            </Grid.Col>
+            <Grid.Col span={5}>
+              <Text>{`: ${proposal.data.input.kelas_mall}`}</Text>
+            </Grid.Col>
+            <Grid.Col span={7}>
+              <Text>Luas Toko</Text>
+            </Grid.Col>
+            <Grid.Col span={5}>
+              <Text>{`: ${proposal.data.input.luas_toko} m2`}</Text>
+            </Grid.Col>
+            <Grid.Col span={7}>
+              <Text>Store Income (User)</Text>
+            </Grid.Col>
+            <Grid.Col span={5}>
+              <Text>{`: Rp ${proposal.data.output.user_generated.store_income.toLocaleString(
+                "id-ID",
+                { maximumFractionDigits: 0 }
+              )}`}</Text>
+            </Grid.Col>
+            <Grid.Col span={7}>
+              <Text>Store Income (Model)</Text>
+            </Grid.Col>
+            <Grid.Col span={5}>
+              <Text>{`: Rp ${proposal.data.output.model_generated.store_income.toLocaleString(
+                "id-ID",
+                { maximumFractionDigits: 0 }
+              )}`}</Text>
+            </Grid.Col>
+          </Grid>
+          {peringatan && (
+            <Text
+              italic
+              c={
+                warnaPeringatan ? warnaPeringatan : aksenWarna.tombolBatal.utama
+              }
+              align="center"
+              styles={{}}
+            >
+              {peringatan}
+            </Text>
+          )}
+        </div>
+      );
+    };
+
+    let infoFungsi: PopUpInfoFungsi = {} as PopUpInfoFungsi;
+    switch (modeProposal) {
+      case EModePopUpKelayakanTokoBaru.PENAMBAHAN:
+        switch (tindakanProposal) {
+          case ETindakanProposalTokoBaru.SIMPAN:
+            infoFungsi = {
+              info: komponenTeksInfo(
+                `Anda akan menyimpan proposal baru dengan proposal ID ${proposal.proposal_id} sebagai DRAFT dengan ringkasan sebagai berikut:`
+              ),
+              prosesProposal: (tambahVersi?: boolean, approval?: boolean) =>
+                simpanProposal(proposal, props, tambahVersi, approval),
+            };
+            break;
+          case ETindakanProposalTokoBaru.KIRIM:
+            infoFungsi = {
+              info: komponenTeksInfo(
+                `Anda akan mengirimkan proposal dengan proposal ID ${proposal.proposal_id} untuk proses PERSETUJUAN dengan ringkasan sebagai berikut:`,
+                `Kami akan mengirimkan notifikasi melalui email kepada pengguna yang memiliki otorisasi persetujuan untuk melakukan review atas proposal toko baru ini. ${
+                  listApprover.length > 0 &&
+                  `(` +
+                    listApprover
+                      .map((approver) => `${approver.nama} <${approver.email}>`)
+                      .join(`, `) +
+                    `)`
+                }`,
+                aksenWarna.tombolKirim.utama
+              ),
+              prosesProposal: (tambahVersi?: boolean, approval?: boolean) =>
+                simpanProposal(proposal, props, tambahVersi, approval),
+              approval: true,
+            };
+
+            break;
+          default:
+            return null;
+        }
+        break;
+      case EModePopUpKelayakanTokoBaru.SUNTING:
+        switch (tindakanProposal) {
+          case ETindakanProposalTokoBaru.SIMPAN:
+            infoFungsi = {
+              info: komponenTeksInfo(
+                `Anda akan melakukan perubahan pada proposal dengan ID ${
+                  proposal.proposal_id
+                } dan menciptakan versi ${proposal.versi + 1}
+                  yang akan kembali disimpan sebagai DRAFT dengan ringkasan sebagai berikut:`,
+                `Store Income (User) Rp ${nilaiAwal.data.output.user_generated.store_income.toLocaleString(
+                  "id-ID",
+                  { maximumFractionDigits: 0 }
+                )} > Rp ${proposal.data.output.user_generated.store_income.toLocaleString(
+                  "id-ID",
+                  { maximumFractionDigits: 0 }
+                )} dan Store Income (Model) Rp ${nilaiAwal.data.output.model_generated.store_income.toLocaleString(
+                  "id-ID",
+                  { maximumFractionDigits: 0 }
+                )} > Rp ${proposal.data.output.model_generated.store_income.toLocaleString(
+                  "id-ID",
+                  { maximumFractionDigits: 0 }
+                )}`,
+                aksenWarna.mayor
+              ),
+              prosesProposal: (tambahVersi?: boolean, approval?: boolean) =>
+                simpanProposal(proposal, props, tambahVersi, approval),
+              tambahVersi: true,
+            };
+            break;
+          case ETindakanProposalTokoBaru.KIRIM:
+            let teks: string = "";
+            if (stateTombolDua) {
+              teks = `Tidak ada perubahan pada proposal dengan ID ${proposal.proposal_id} versi ${proposal.versi}, maka kami akan merubah status proposal dari DRAFT menjadi SUBMITTED untuk menunggu review dan PERSETUJUAN dari pihak terkait. Berikut adalah ringkasan proposal yang diajukan:`;
+            } else {
+              teks = `Anda akan melakukan perubahan pada proposal dengan ID ${
+                proposal.proposal_id
+              } dan menciptakan versi ${
+                proposal.versi + 1
+              } untuk selanjutnya dikirimkan untuk proses PERSETUJUAN dengan pihak terkait. Berikut adalah ringkasan proposal yang diajukan:`;
+            }
+            infoFungsi = {
+              info: komponenTeksInfo(
+                teks,
+                `Kami akan mengirimkan notifikasi melalui email kepada pengguna yang memiliki otorisasi persetujuan untuk melakukan review ${
+                  listApprover.length > 0 &&
+                  `(` +
+                    listApprover
+                      .map((approver) => `${approver.nama} <${approver.email}>`)
+                      .join(`, `) +
+                    `)`
+                } atas proposal toko baru ini.${
+                  stateTombolDua
+                    ? ``
+                    : ` Store Income (User) Rp ${nilaiAwal.data.output.user_generated.store_income.toLocaleString(
+                        "id-ID",
+                        { maximumFractionDigits: 0 }
+                      )} > Rp ${proposal.data.output.user_generated.store_income.toLocaleString(
+                        "id-ID",
+                        { maximumFractionDigits: 0 }
+                      )} dan Store Income (Model) Rp ${nilaiAwal.data.output.model_generated.store_income.toLocaleString(
+                        "id-ID",
+                        { maximumFractionDigits: 0 }
+                      )} > Rp ${proposal.data.output.model_generated.store_income.toLocaleString(
+                        "id-ID",
+                        { maximumFractionDigits: 0 }
+                      )}`
+                }`,
+                aksenWarna.tombolKirim.utama
+              ),
+              prosesProposal: (tambahVersi?: boolean, approval?: boolean) =>
+                stateTombolDua
+                  ? updateStatusProposal(
+                      proposal,
+                      EStatusProposalTokoBaru.SUBMIT,
+                      approval
+                    )
+                  : simpanProposal(proposal, props, tambahVersi, approval),
+              approval: true,
+              tambahVersi: !stateTombolDua,
+            };
+            break;
+          default:
+            return null;
+        }
+        break;
+      // CONTINUE HERE, COME UP WITH A WAY TO
+      // simpanProposal or updateStatusProposal for SUNTING and
+      // PERSETUJUAN skenario
+      case EModePopUpKelayakanTokoBaru.PERSETUJUAN:
+        switch (tindakanProposal) {
+          case ETindakanProposalTokoBaru.DITERIMA:
+            infoFungsi = {
+              info: komponenTeksInfo(
+                `Anda akan MENERIMA proposal dengan Proposal ID ${proposal.proposal_id} dengan ringkasan sebagai berikut:`
+              ),
+              prosesProposal: () =>
+                updateStatusApproval(
+                  proposal,
+                  ETindakanProposalTokoBaru.DITERIMA
+                ),
+            };
+            break;
+          case ETindakanProposalTokoBaru.DITOLAK:
+            infoFungsi = {
+              info: komponenTeksInfo(
+                `Anda akan MENOLAK proposal dengan Proposal ID ${proposal.proposal_id} dengan ringkasan sebagai berikut:`,
+                `Melakukan penolakan terhadap proposal akan menutup approval dari proposal dan proposal dengan ID ${proposal.proposal_id} akan langsung berubah statusnya menjadi REJECTED. Anda yakin untuk melanjutkan penolakan ini?`,
+                theme.colors.red[9]
+              ),
+              prosesProposal: () =>
+                updateStatusApproval(
+                  proposal,
+                  ETindakanProposalTokoBaru.DITOLAK
+                ),
+            };
+            break;
+          default:
+            return null;
+        }
+        break;
+      default:
+        return null;
+    }
+    // fungsi ini perlu untuk mengetahui modeProposal dan tindakanPopUp
     return (
       <>
-        <Group>
-          Anda akan menambahkan data proposal {formulir.values.proposal_id}
-        </Group>
+        <Group>{infoFungsi.info}</Group>
         <Group grow mt="md">
-          <Button onClick={() => simpanProposal(proposal)}>Lanjutkan</Button>
-          <Button onClick={() => setKonfirmasiPopUp(false)}>Batal</Button>
+          <Button
+            variant="outline"
+            onClick={() =>
+              infoFungsi.prosesProposal(
+                infoFungsi.tambahVersi,
+                infoFungsi.approval
+              )
+            }
+            styles={{
+              root: {
+                color: aksenWarna.tombolKirim.utama,
+                borderColor: aksenWarna.tombolKirim.utama,
+                ...theme.fn.hover({
+                  backgroundColor: aksenWarna.tombolKirim.hover.background,
+                  color: aksenWarna.tombolKirim.hover.teks,
+                }),
+              },
+              label: {
+                fontSize: "20px",
+              },
+            }}
+          >
+            Lanjutkan
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setKonfirmasiPopUp(false)}
+            styles={{
+              root: {
+                color: aksenWarna.tombolBatal.utama,
+                borderColor: aksenWarna.tombolBatal.utama,
+                ...theme.fn.hover({
+                  backgroundColor: aksenWarna.tombolBatal.hover.background,
+                  color: aksenWarna.tombolBatal.hover.teks,
+                }),
+              },
+              label: {
+                fontSize: "20px",
+              },
+            }}
+          >
+            Batal
+          </Button>
         </Group>
       </>
     );
   };
 
   // Tulis dokumen ke database mongo
-  const simpanProposal = async (proposal: IProposalToko) => {
+  const simpanProposal = async (
+    proposal: IProposalToko,
+    props: StateKelayakanTokoBaru,
+    tambahVersi?: boolean,
+    approval?: boolean
+  ) => {
+    let proposalToko = proposal;
+    if (tambahVersi) {
+      proposalToko = {
+        ...proposalToko,
+        versi: proposalToko.versi + 1,
+      };
+    }
     const respon: string = await invoke("simpan_proposal_toko_baru", {
-      proposal,
+      proposal: proposalToko,
     });
     const hasil = JSON.parse(respon);
-    // Tutup popup konfirmasi
-    setKonfirmasiPopUp(false);
     if (hasil.status) {
-      // Tutup formulir
-      setPopUp((stateSebelumnya) => ({
-        ...stateSebelumnya,
-        togglePopUp: false,
-      }));
       // Beritahukan pengguna bahwa dokumen berhasil disimpan
       notifications.show({
         title: "Sukses",
@@ -349,6 +669,17 @@ export const KonfirmasiProposal = (
         withCloseButton: false,
         // Refresh tabel
       });
+      // jika approval
+      if (approval) {
+        buatApproval(props, proposal.proposal_id);
+      }
+      // Tutup popup konfirmasi
+      setKonfirmasiPopUp(false);
+      // Tutup formulir
+      setPopUp((stateSebelumnya) => ({
+        ...stateSebelumnya,
+        togglePopUp: false,
+      }));
     } else {
       // Beritahukan pengguna bahwa terjadi kesalahan dalam proses menyimpan dokumen
       notifications.show({
@@ -363,6 +694,338 @@ export const KonfirmasiProposal = (
     }
   };
 
+  // Buat approval baru
+  const buatApproval = async (
+    props: StateKelayakanTokoBaru,
+    proposalID: string
+  ) => {
+    const listApprover = props.approver.map((approver) => approver.id.$oid);
+    const respon: string = await invoke("buat_approval_baru", {
+      proposalId: proposalID,
+      vektorApprover: listApprover,
+    });
+    const hasil = JSON.parse(respon);
+
+    if (hasil.status) {
+      notifications.show({
+        title: "Sukses",
+        message: `Approval untuk proposal toko dengan Proposal ID ${proposalID} berhasil dibuat`,
+        autoClose: 3000,
+        color: "green",
+        icon: <IconCheck />,
+        withCloseButton: false,
+      });
+      await kirimEmailRekuesApproval(
+        props.konfigurasiEmail,
+        proposalToko,
+        proposalToko.data.input.nama_model,
+        listApprover
+      );
+    }
+  };
+
+  // Kirim email approval
+  const kirimEmailRekuesApproval = async (
+    konfigurasiEmail: IKonfigEmailTokoBaru,
+    proposal: IProposalToko,
+    namaModel: string,
+    approver: string[]
+  ) => {
+    // nama dan email approver
+    const respon: string = await invoke("ambil_nama_email_approval_toko_baru", {
+      vektorIdString: approver,
+    });
+    const hasil: ResponJSONKredensialApproverTokoBaru = JSON.parse(respon);
+
+    if (hasil.status) {
+      const arrayEmail = hasil.konten.map((approver) => approver.email);
+      // data email
+      const data = {
+        pengirim: proposal.data.pengguna,
+        tujuan: arrayEmail.join(", "),
+        nama_model: namaModel,
+        sbu: proposal.data.input.sbu,
+        kota_kabupaten: proposal.data.input.kota_kabupaten,
+        user_store_income: `Rp ${proposal.data.output.user_generated.store_income.toLocaleString(
+          "id-ID",
+          { maximumFractionDigits: 0 }
+        )}`,
+        model_store_income: `Rp ${proposal.data.output.model_generated.store_income.toLocaleString(
+          "id-ID",
+          { maximumFractionDigits: 0 }
+        )}`,
+        luas_toko: `${proposal.data.input.luas_toko.toLocaleString("id-ID", {
+          maximumFractionDigits: 2,
+        })} m2`,
+        biaya_sewa: `Rp ${proposal.data.input.biaya_sewa.toLocaleString(
+          "id-ID",
+          {
+            maximumFractionDigits: 0,
+          }
+        )}`,
+        lama_sewa: `${proposal.data.input.lama_sewa}`,
+        biaya_fitout: `Rp ${proposal.data.input.biaya_fitout.toLocaleString(
+          "id-ID",
+          { maximumFractionDigits: 0 }
+        )}`,
+        proposal_id: proposal.proposal_id,
+      };
+      // kirim email
+      emailjs
+        .send(
+          konfigurasiEmail.serviceId,
+          konfigurasiEmail.templateId,
+          data,
+          konfigurasiEmail.apiKey
+        )
+        .then(
+          (_respon) => {
+            notifications.show({
+              title: "Email Approval Berhasil",
+              message: `Approval untuk Proposal Toko Baru berhasil dibuat dan email notifikasi sudah dikirimkan kepada approver`,
+              autoClose: 3000,
+              color: "teal",
+              icon: <IconCheck />,
+              withCloseButton: false,
+            });
+          },
+          (error) => {
+            notifications.show({
+              title: "Email Approval Gagal",
+              message: `Approval untuk Proposal Toko Baru gagal dikirimkan kepada approver. (${error})`,
+              autoClose: 3000,
+              color: "red",
+              icon: <IconX />,
+              withCloseButton: false,
+            });
+          }
+        );
+    }
+  };
+
+  // Update status proposal pada database mongo
+  const updateStatusProposal = async (
+    proposal: IProposalToko,
+    status: EStatusProposalTokoBaru,
+    approval?: boolean
+  ) => {
+    const respon: ResponJSON = await invoke(
+      "update_status_proposal_toko_baru",
+      {
+        proposalId: proposal.proposal_id,
+        versi: proposal.versi,
+        status,
+      }
+    );
+
+    if (respon.status) {
+      // Beritahukan pengguna bahwa status dokumen berhasil diupdate
+      notifications.show({
+        title: "Sukses",
+        message: `Proposal toko dengan Proposal ID ${
+          proposal.proposal_id
+        } versi ${proposal.versi} berhasil dirubah statusnya menjadi 
+        ${
+          tindakanProposal === ETindakanProposalTokoBaru.KIRIM
+            ? `SUBMITTED`
+            : tindakanProposal === ETindakanProposalTokoBaru.DITERIMA
+            ? `DITERIMA`
+            : `DITOLAK`
+        }`,
+        autoClose: 3000,
+        color: "green",
+        icon: <IconCheck />,
+        withCloseButton: false,
+        // Refresh tabel
+      });
+      if (approval) {
+        buatApproval(props, proposal.proposal_id);
+      }
+      // Tutup popup konfirmasi
+      setKonfirmasiPopUp(false);
+      // Tutup formulir
+      setPopUp((stateSebelumnya) => ({
+        ...stateSebelumnya,
+        togglePopUp: false,
+      }));
+    } else {
+      notifications.show({
+        title: "Gagal",
+        message: `Terjadi kesalahan saat melakukan proses update proposal`,
+        autoClose: 3000,
+        color: "red",
+        icon: <IconX />,
+        withCloseButton: false,
+        // Refresh tabel
+      });
+    }
+  };
+
+  // Update status approval pada database mongo
+  const updateStatusApproval = async (
+    proposal: IProposalToko,
+    tindakanApproval:
+      | ETindakanProposalTokoBaru.DITERIMA
+      | ETindakanProposalTokoBaru.DITOLAK
+  ) => {
+    // get proposal approval status
+    const responApproval: ResponJSONApprovalProposalID = await invoke(
+      "ambil_approval_proposal_toko_baru",
+      {
+        proposalId: proposal.proposal_id,
+      }
+    );
+    // jika approval.status
+    if (responApproval.status) {
+      // jika ada data yang dikembalikan
+      if (
+        responApproval.approval_count !== undefined &&
+        responApproval.approval_count > 0
+      ) {
+        // placeholder jumlahSetuju
+        let jumlahSetuju: number =
+          tindakanProposal === ETindakanProposalTokoBaru.DITERIMA
+            ? responApproval.konten!.approval.filter(
+                (approval) =>
+                  approval.status === EStatusApprovalTokoBaru.DITERIMA
+              ).length
+            : 0;
+        // update status approval proposal pada koleksi approval
+        const responPersetujuan: ResponJSON = await invoke(
+          "update_status_approval_proposal_toko_baru",
+          {
+            proposalId: proposal.proposal_id,
+            idApprover: props.objekIdPengguna,
+            status:
+              tindakanApproval === ETindakanProposalTokoBaru.DITOLAK
+                ? EStatusApprovalTokoBaru.DITOLAK
+                : EStatusApprovalTokoBaru.DITERIMA,
+          }
+        );
+        // jika perubahan status approval proposal berhasil
+        if (responPersetujuan.status) {
+          // berikan pengguna notifikasi bahwa status approval telah berhasil diupdate
+          notifications.show({
+            title: "Update Status Approval Sukses",
+            message: `Update status approval dari proposal dengan ID ${proposal.proposal_id} berhasil dilakukan`,
+            autoClose: 3000,
+            color: "teal",
+            icon: <IconCheck />,
+            withCloseButton: false,
+          });
+          // switch case tindakanProposal untuk penanganan yang berbeda
+          switch (tindakanProposal) {
+            case ETindakanProposalTokoBaru.DITERIMA:
+              // jika jumlahSetuju == responApproval.konten!.approval.length - 1
+              // maka pengguna adalah approver terakhir dan kita perlu untuk merubah
+              // status proposal pada koleksi proposal menjadi
+              // EStatusProposalTokoBaru.DITERIMA
+              if (jumlahSetuju === responApproval.konten!.approval.length - 1) {
+                updateStatusProposal(
+                  proposal,
+                  EStatusProposalTokoBaru.DITERIMA
+                );
+              } else {
+                // Tutup popup konfirmasi
+                setKonfirmasiPopUp(false);
+                // Tutup formulir
+                setPopUp((stateSebelumnya) => ({
+                  ...stateSebelumnya,
+                  togglePopUp: false,
+                }));
+              }
+              break;
+            case ETindakanProposalTokoBaru.DITOLAK:
+              // update status proposal pada koleksi proposal menjadi
+              // EStatusProposalTokoBaru.DITOLAK
+              updateStatusProposal(proposal, EStatusProposalTokoBaru.DITOLAK);
+              // tidak perlu menutup konfirmasiPopUp dan popUp karena
+              // sudah ditangani oleh updateStatusProposal
+              break;
+            default:
+              return;
+          }
+        } else {
+          // berikan pengguna notifikasi bahwa update status proposal
+          // tidak berhasil dilakukan
+          notifications.show({
+            title: "Update Status Approval Gagal",
+            message: `Update status approval dari proposal dengan ID ${proposal.proposal_id} tidak berhasil dilakukan`,
+            autoClose: 3000,
+            color: "red",
+            icon: <IconX />,
+            withCloseButton: false,
+          });
+        }
+      } else {
+        // berikan pengguna notifikasi bahwa proposal tersebut tidak
+        // memiliki approval
+        notifications.show({
+          title: "Approval Tidak Ditemukan",
+          message: `Approval untuk Proposal ${proposal.proposal_id} tidak dapat ditemukan, pastikan status proposal adalah SUBMITTED`,
+          autoClose: 3000,
+          color: "yellow",
+          icon: <IconExclamationMark />,
+          withCloseButton: false,
+        });
+      }
+    } else {
+      // jika responApproval.status false (error)
+      // berikan pengguna notifikasi bahwa terjadi kesalahan
+      // dalam proses penarikan data approval proposal
+      notifications.show({
+        title: "Terjadi Kesalahan",
+        message: `Tidak berhasil melakukan penarikan data approval untuk proposal ${proposal.proposal_id}, periksa kembali jaringan anda atau coba beberapa saat lagi.`,
+        autoClose: 3000,
+        color: "yellow",
+        icon: <IconExclamationMark />,
+        withCloseButton: false,
+      });
+    }
+  };
+
+  let judulKonfirmasi: string = "";
+  switch (popUp.modeProposal) {
+    case EModePopUpKelayakanTokoBaru.PENAMBAHAN:
+      switch (tindakanProposal) {
+        case ETindakanProposalTokoBaru.SIMPAN:
+          judulKonfirmasi = `DRAFT Proposal ID ${proposalToko.proposal_id}`;
+          break;
+        case ETindakanProposalTokoBaru.KIRIM:
+          judulKonfirmasi = `PERSETUJUAN Proposal ID ${proposalToko.proposal_id}`;
+          break;
+        default:
+          return null;
+      }
+      break;
+    case EModePopUpKelayakanTokoBaru.SUNTING:
+      switch (tindakanProposal) {
+        case ETindakanProposalTokoBaru.SIMPAN:
+          judulKonfirmasi = `DRAFT Proposal ID ${proposalToko.proposal_id} Versi ${proposalToko.versi}`;
+          break;
+        case ETindakanProposalTokoBaru.KIRIM:
+          judulKonfirmasi = `PERSETUJUAN Proposal ID ${proposalToko.proposal_id}`;
+          break;
+        default:
+          return null;
+      }
+      break;
+    case EModePopUpKelayakanTokoBaru.PERSETUJUAN:
+      switch (tindakanProposal) {
+        case ETindakanProposalTokoBaru.DITERIMA:
+          judulKonfirmasi = `PERSETUJUAN Proposal ID ${proposalToko.proposal_id}`;
+          break;
+        case ETindakanProposalTokoBaru.DITOLAK:
+          judulKonfirmasi = `PENOLAKAN Proposal ID ${proposalToko.proposal_id}`;
+          break;
+        default:
+          return null;
+      }
+      break;
+    default:
+      return null;
+  }
+
   return (
     <Modal.Root
       opened={konfirmasiPopUp}
@@ -376,14 +1039,19 @@ export const KonfirmasiProposal = (
         <Modal.Header sx={{ backgroundColor: aksenWarna.header }} p={10}>
           <Modal.Title>
             <Title order={4} color="white">
-              Konfirmasi
+              {`${judulKonfirmasi}`}
             </Title>
           </Modal.Title>
         </Modal.Header>
         <Modal.Body m={15}>
           {!valid
             ? TidakValid(setKonfirmasiPopUp)
-            : RenderKonfirmasi(setKonfirmasiPopUp, proposalToko)}
+            : RenderKonfirmasi(
+                setKonfirmasiPopUp,
+                proposalToko,
+                popUp.modeProposal!,
+                tindakanProposal
+              )}
         </Modal.Body>
       </Modal.Content>
     </Modal.Root>
@@ -448,41 +1116,123 @@ export const kueriChatGPT = async (
   }
 };
 
-export const ambilProposal = async (
+export const ambilProposalDanApproval = async (
   dispatch: any,
+  arrayObjekIdApprover: string[],
   setProps: React.Dispatch<React.SetStateAction<StateKelayakanTokoBaru>>
 ) => {
+  // set state loading tabel
   setProps((stateSebelumnya) => ({
     ...stateSebelumnya,
     muatTabelKelayakanTokoBaru: true,
   }));
-  const respon: string = await invoke("ambil_semua_proposal_toko_baru");
-  const hasil = JSON.parse(respon);
-
-  if (hasil.length > 0) {
-    // simpan data full proposal
-    dispatch(setDataKelayakanTokoBaru(hasil));
-    // unik proposal
-    let proposalList: string[] = [];
-    for (let hitung = 0; hitung < hasil.length; hitung++) {
-      proposalList.push(hasil[hitung].proposal_id);
+  // fungsi async untuk mengambil semua proposal dari koleksi proposal
+  const allProposal = async () => {
+    const respon: string = await invoke("ambil_semua_proposal_toko_baru");
+    return await JSON.parse(respon);
+  };
+  // fungsi async untuk mengambil semua approval status dari tabel approval
+  const allApproval = async () => {
+    const respon: string = await invoke(
+      "ambil_semua_status_approval_toko_baru"
+    );
+    return await JSON.parse(respon);
+  };
+  // fungsi async untuk mengekstrak nama email dari arrayObjekIdApprover
+  const arrayKredensialApprover = async () => {
+    const respon: string = await invoke("ambil_nama_email_approval_toko_baru", {
+      vektorIdString: arrayObjekIdApprover,
+    });
+    return await JSON.parse(respon);
+  };
+  // fungsi async untuk mendapatkan IKredensialApproverTokoBaru untuk mapping
+  // dengan ObjekID pada approval.konten[0].approval.id.$oid
+  const getApproverKredensial = async (
+    approval: ResponJSONSemuaApprovalTokoBaru
+  ) => {
+    // Jika approval.konten length lebih dari 0 jalankan fungsi ini
+    if (approval.status && approval.konten.length > 0) {
+      // inisiasi array untuk menampung ObjekId
+      let arrayObjekId: string[] = [];
+      // lakukan looping per approval
+      for (var proposalApproval of approval.konten) {
+        // looping approval dalam proposalApproval dan simpan ObjekId
+        // dalam arrayObjectId
+        for (var approver of proposalApproval.approval) {
+          arrayObjekId.push(approver.id.$oid);
+        }
+      }
+      // ekstrak unik ObjekId dari arrayObjekId
+      const unikArrayObjekId = [...new Set<string>(arrayObjekId)];
+      // kueri kredensial approver
+      const respon: string = await invoke(
+        "ambil_nama_email_approval_toko_baru",
+        {
+          vektorIdString: unikArrayObjekId,
+        }
+      );
+      const hasil: ResponJSONKredensialApproverTokoBaru = JSON.parse(respon);
+      // jika hasil.status dan hasil.konten.length lebih dari 0
+      if (hasil.status && hasil.konten.length > 0) {
+        // kembalikan array IKredensialApproverTokoBaru
+        return hasil.konten;
+      } else {
+        return [] as IKredensialApproverTokoBaru[];
+      }
+    } else {
+      return [] as IKredensialApproverTokoBaru[];
     }
-    const unikProposal = [...new Set<string>(proposalList)];
+  };
+
+  const [proposal, approval, approver]: [
+    proposal: ResponJSONSemuaProposalTokoBaru,
+    approval: ResponJSONSemuaApprovalTokoBaru,
+    approver: ResponJSONKredensialApproverTokoBaru
+  ] = await Promise.all([
+    allProposal(),
+    allApproval(),
+    arrayKredensialApprover(),
+  ]);
+
+  if (approver.status) {
+    setProps((stateSebelumnya) => ({
+      ...stateSebelumnya,
+      approver: approver.konten,
+    }));
+  }
+
+  if (proposal.status && approval.status) {
+    // ekstrak array kredensial approver
+    const kredensialApprover = await getApproverKredensial(approval);
+    // simpan data full proposal
+    dispatch(setDataKelayakanTokoBaru(proposal.konten));
+    // unik proposal
+    const unikProposal = [
+      ...new Set<string>(
+        proposal.konten.map((proposal: any) => proposal.proposal_id)
+      ),
+    ];
 
     // ekstrak dan transform data untuk tampilan tabel
-    let proposalTabelData: DataTabelKelayakanTokoBaru[] = [];
-    for (var proposal of unikProposal) {
-      let listVersiProposal: number[] = [];
-      for (var proposalSaatIni of hasil) {
-        proposalSaatIni.proposal_id === proposal &&
-          listVersiProposal.push(proposalSaatIni.versi);
-      }
-      const versiMaxProposal = Math.max(...listVersiProposal);
-      const proposalTampilan = hasil.filter(
+    let proposalTabelData: TDataTabelKelayakanTokoBaru[] = [];
+    // looping semua proposalID dalam unikPropoasl
+    for (var proposalID of unikProposal) {
+      const proposalTampilan = proposal.konten.filter(
         (item: any) =>
-          item.proposal_id === proposal && item.versi === versiMaxProposal
+          item.proposal_id === proposalID &&
+          item.versi ===
+            Math.max(
+              ...proposal.konten
+                .filter((proposal: any) => proposal.proposal_id === proposalID)
+                .map((proposal: any) => proposal.versi)
+            )
       );
-      const proposalData: DataTabelKelayakanTokoBaru = {
+      // cek jika proposalID memiliki approval
+      const adaStatusApproval: boolean = approval.konten
+        .map((approval: IApprovalTokoBaru) => approval.proposal_id)
+        .includes(proposalID);
+      // generate interface data proposal untuk tampilan tabel
+      const proposalData: TDataTabelKelayakanTokoBaru = {
         proposal_id: proposalTampilan[0].proposal_id,
         versi: proposalTampilan[0].versi,
         sbu: proposalTampilan[0].data.input.sbu,
@@ -495,20 +1245,47 @@ export const ambilProposal = async (
           proposalTampilan[0].data.output.model_generated.store_income,
         submit_by: proposalTampilan[0].data.pengguna,
         dibuat: new Date(
+          //@ts-ignore
           parseInt(proposalTampilan[0].data.dibuat.$date.$numberLong)
         ),
         diedit: new Date(
+          //@ts-ignore
           parseInt(proposalTampilan[0].data.diedit.$date.$numberLong)
         ),
         status: proposalTampilan[0].data.status,
+        approval_status: adaStatusApproval
+          ? approval.konten
+              // filter item approval berdasar proposal id yang sama
+              .filter((approval) => approval.proposal_id === proposalID)[0]
+              // map item approval untuk mendapatkan IApproverKredensialTokoBaruStatus
+              // dimana approver ObjekId sama dengan kredensialApprover ObjekID
+              // ambil id, nama, email dan status
+              .approval.map((approver) => {
+                const approverKredensial = kredensialApprover.filter(
+                  (kredensial) => kredensial.id.$oid === approver.id.$oid
+                )[0];
+                const approverKredensialDanStatus: IApproverKredensialTokoBaruStatus =
+                  {
+                    id: approver.id,
+                    nama: approverKredensial.nama,
+                    email: approverKredensial.email,
+                    status: approver.status,
+                  };
+                return approverKredensialDanStatus;
+              })
+          : ([] as IApproverKredensialTokoBaruStatus[]),
       };
+      // tambahkan data proposal ke dalam array proposal yang akan ditampilkan
+      // dalam tabel
       proposalTabelData.push(proposalData);
     }
+    // set prop tampilanTabel
     setProps((stateSebelumnya) => ({
       ...stateSebelumnya,
       tampilanTabel: proposalTabelData,
     }));
   }
+  // set prop memuat tabel menjadi false
   setProps((stateSebelumnya) => ({
     ...stateSebelumnya,
     muatTabelKelayakanTokoBaru: false,
@@ -833,7 +1610,6 @@ export const handleKotaKabupatenHilangFokus = async (
       // TIDAK DIPERLUKAN KARENA FUNGSI DIBAWAH INI
       // BERADA DALAM useEffect
       // monitorInputPrediksiModel(formulir, props);
-      // console.log(formulir.getInputProps("input.kota_kabupaten").value);
     } else {
       // nilai kota_kabupaten = "" atau undefined
       // set rentang_populasi ke 0
@@ -891,6 +1667,7 @@ export const monitorInputPrediksiModel = async (
     formulir.isDirty("input.sbu") ||
     formulir.isDirty("input.rentang_populasi") ||
     formulir.isDirty("input.kota_kabupaten") ||
+    formulir.isDirty("input.kelas_mall") ||
     formulir.isDirty("input.luas_toko")
   ) {
     // cek jika salah satu nilai dari input adalah kosong
@@ -1130,10 +1907,10 @@ export const setInitialValue = (
       formulir = {
         log: [],
         proposal_id: generateProposalID(props),
-        versi_proposal: "",
+        versi_proposal: "1",
         input: {
-          versi_model: "",
-          nama_model: "",
+          versi_model: props.inputItem.model.versi,
+          nama_model: props.inputItem.model.namaModel,
           sbu: "",
           kota_kabupaten: "",
           rentang_populasi: -1,
@@ -1272,18 +2049,47 @@ export const setDisabilitasInputAwal = (popUp: StatePopUp) => {
       biaya_sewa: false,
       lama_sewa: false,
       biaya_fitout: false,
+      remark: false,
+      tombol_satu: false,
+      tombol_dua: true,
+      tombol_tiga: true,
     };
   switch (popUp.modeProposal) {
     case EModePopUpKelayakanTokoBaru.PENAMBAHAN:
     case EModePopUpKelayakanTokoBaru.SUNTING:
       statusAwalDisabilitasInput = {
+        ...statusAwalDisabilitasInput,
         rentang_populasi: true,
         tahun_umr: true,
         provinsi_umr: true,
       };
       break;
+    case EModePopUpKelayakanTokoBaru.PERSETUJUAN:
+      statusAwalDisabilitasInput = {
+        ...statusAwalDisabilitasInput,
+        sbu: true,
+        kota_kabupaten: true,
+        rentang_populasi: true,
+        kelas_mall: true,
+        luas_toko: true,
+        prediksi_penjualan_user: true,
+        margin_penjualan: true,
+        ppn: true,
+        tahun_umr: true,
+        provinsi_umr: true,
+        jumlah_staff: true,
+        biaya_oau: true,
+        biaya_sewa: true,
+        lama_sewa: true,
+        remark: true,
+        tombol_satu: false,
+        tombol_dua: false,
+        tombol_tiga: false,
+      };
+      break;
     default:
       break;
   }
+
   return statusAwalDisabilitasInput;
 };

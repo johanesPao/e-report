@@ -38,10 +38,12 @@ import {
 } from "../../fitur_state/event";
 import { appWindow } from "@tauri-apps/api/window";
 import {
+  PenggunaState,
   setCompKueri,
   setCompPengguna,
   setDepartemenPengguna,
   setEmailPengguna,
+  setIdPengguna,
   setNamaPengguna,
   setPeranPengguna,
 } from "../../fitur_state/pengguna";
@@ -446,7 +448,7 @@ export const prosesLogin = async (
   }
 
   let hasil = JSON.parse(respon);
-  if (Object.keys(hasil).length === 0) {
+  if (hasil.status && hasil.konten === "No User") {
     dispatch(setAuthGagal(true));
     setNama("");
     setKataKunci("");
@@ -460,13 +462,22 @@ export const prosesLogin = async (
       withCloseButton: false,
     });
   } else {
+    const pengguna: Partial<PenggunaState> = {
+      idPengguna: hasil.konten._id.$oid,
+      namaPengguna: hasil.konten.nama,
+      emailPengguna: hasil.konten.email,
+      departemenPengguna: hasil.konten.departemen,
+      peranPengguna: hasil.konten.peran,
+      compPengguna: hasil.konten.comp,
+    };
     dispatch(setAuthGagal(false));
     dispatch(setSesiAktif(true));
-    dispatch(setNamaPengguna(nama));
-    dispatch(setEmailPengguna(hasil.email));
-    dispatch(setDepartemenPengguna(hasil.departemen));
-    dispatch(setPeranPengguna(hasil.peran));
-    dispatch(setCompPengguna(hasil.comp));
+    dispatch(setIdPengguna(pengguna.idPengguna!));
+    dispatch(setNamaPengguna(pengguna.namaPengguna!));
+    dispatch(setEmailPengguna(pengguna.emailPengguna!));
+    dispatch(setDepartemenPengguna(pengguna.departemenPengguna!));
+    dispatch(setPeranPengguna(pengguna.peranPengguna!));
+    dispatch(setCompPengguna(pengguna.compPengguna!));
     if (koneksiBC) {
       dispatch(setKonekKeBC(true));
       let parameterBc;
@@ -476,10 +487,12 @@ export const prosesLogin = async (
         parameterBc = JSON.parse(respon);
         if (parameterBc.status) {
           dispatch(setParameterBc(parameterBc.konten));
-          if (hasil.comp.length === 1) {
+          if (pengguna.compPengguna!.length === 1) {
             dispatch(
               setCompKueri(
-                parameterBc.konten.tabel_bc[`${hasil.comp[0].toLowerCase()}`]
+                parameterBc.konten.tabel_bc[
+                  `${pengguna.compPengguna![0].toLowerCase()}`
+                ]
               )
             );
           } else {
@@ -487,16 +500,24 @@ export const prosesLogin = async (
           }
           try {
             // inisiasi data brand
-            await muatBrand(hasil.comp, parameterBc.konten, dispatch);
+            await muatBrand(
+              pengguna.compPengguna!,
+              parameterBc.konten,
+              dispatch
+            );
             // inisiasi data mc
-            await muatMC(hasil.comp, parameterBc.konten, dispatch);
+            await muatMC(pengguna.compPengguna!, parameterBc.konten, dispatch);
             // inisiasi data lokasi
-            await muatLokasi(hasil.comp, parameterBc.konten, dispatch);
+            await muatLokasi(
+              pengguna.compPengguna!,
+              parameterBc.konten,
+              dispatch
+            );
             // inisiasi data SBU jika PRI
             if (
-              (hasil.comp.length === 1 &&
-                hasil.comp[0] === parameterBc.konten.comp.pri) ||
-              hasil.comp.includes(parameterBc.konten.comp.pri)
+              (pengguna.compPengguna!.length === 1 &&
+                pengguna.compPengguna![0] === parameterBc.konten.comp.pri) ||
+              pengguna.compPengguna!.includes(parameterBc.konten.comp.pri)
             ) {
               let arraySBU: DataMultiSelect[] = [];
               parameterBc.konten.sbu.map((sbu: string) => {
@@ -509,12 +530,20 @@ export const prosesLogin = async (
             }
             // inisiasi data Klasifikasi & Region jika PNT
             if (
-              (hasil.comp.length === 1 &&
-                hasil.comp[0] === parameterBc.konten.comp.pnt) ||
-              hasil.comp.includes(parameterBc.konten.comp.pnt)
+              (pengguna.compPengguna!.length === 1 &&
+                pengguna.compPengguna![0] === parameterBc.konten.comp.pnt) ||
+              pengguna.compPengguna!.includes(parameterBc.konten.comp.pnt)
             ) {
-              await muatKlasifikasi(hasil.comp, parameterBc.konten, dispatch);
-              await muatRegion(hasil.comp, parameterBc.konten, dispatch);
+              await muatKlasifikasi(
+                pengguna.compPengguna!,
+                parameterBc.konten,
+                dispatch
+              );
+              await muatRegion(
+                pengguna.compPengguna!,
+                parameterBc.konten,
+                dispatch
+              );
             }
           } catch (e) {
             resetAplikasi(dispatch);
@@ -537,13 +566,12 @@ export const prosesLogin = async (
     } else {
       // Tidak terhubung ke BC
       dispatch(setKonekKeBC(false));
-
     }
     LogRocket.identify(nama, {
-      name: nama,
-      email: hasil.email,
-      departemen: hasil.departemen,
-      peran: hasil.peran,
+      name: pengguna.namaPengguna!,
+      email: pengguna.emailPengguna!,
+      departemen: pengguna.departemenPengguna!,
+      peran: pengguna.peranPengguna!,
     });
     notifications.show({
       title: "Login Sukses",

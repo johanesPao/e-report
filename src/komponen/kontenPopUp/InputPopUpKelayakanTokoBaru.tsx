@@ -1,6 +1,5 @@
 import {
   ActionIcon,
-  Button,
   Center,
   Chip,
   Flex,
@@ -31,11 +30,11 @@ import {
   monitorInputPrediksiModel,
   renderOutput,
   KonfirmasiProposal,
-  cekFormValid,
   setDisabilitasInputAwal,
   setInitialValue,
   setItemKelasMall,
   setItemRentangPopulasi,
+  cekFormValid,
 } from "../../fungsi/halaman/kelayakanTokoBaru";
 import {
   DataKelayakanTokoBaru,
@@ -78,6 +77,7 @@ import { getParameterBc } from "../../fitur_state/dataParam";
 import { getNamaPengguna } from "../../fitur_state/pengguna";
 import { StatePopUp } from "../PopUp";
 import { notifications } from "@mantine/notifications";
+import { TombolKelayakanTokoBaru } from "./TombolKelayakanTokoBaru";
 
 export const InputPopUpKelayakanTokoBaru = ({
   data,
@@ -314,8 +314,6 @@ export const InputPopUpKelayakanTokoBaru = ({
         return;
       }
 
-      console.log(dataProposal);
-
       // jika modeProposal selain penambahan, konversi versi menjadi integer
       const versiProposalInt = parseInt(versi);
       // tentukan indeks proposal dalam dataProposal berdasar nilai versiProposalInt
@@ -325,7 +323,6 @@ export const InputPopUpKelayakanTokoBaru = ({
       );
       // pilih data proposal dengan versi dimaksud
       const proposal = dataProposal[indeksProposal];
-      console.log(proposal);
       // shortcut objek data
       const input = proposal.data.input;
       const output = proposal.data.output;
@@ -397,23 +394,28 @@ export const InputPopUpKelayakanTokoBaru = ({
       const versiAkhir =
         versiProposalInt !==
         Math.max(...dataProposal.map((proposal) => proposal.versi));
+      const modePersetujuan =
+        popUp.modeProposal === EModePopUpKelayakanTokoBaru.PERSETUJUAN;
       const toggleDisabilitas = versiAkhir ? true : false;
       setStatusDisabilitasInput({
-        sbu: toggleDisabilitas,
-        kota_kabupaten: toggleDisabilitas,
+        sbu: modePersetujuan ? true : toggleDisabilitas,
+        kota_kabupaten: modePersetujuan ? true : toggleDisabilitas,
         rentang_populasi: true,
-        kelas_mall: toggleDisabilitas,
-        luas_toko: toggleDisabilitas,
-        prediksi_penjualan_user: toggleDisabilitas,
-        margin_penjualan: toggleDisabilitas,
-        ppn: toggleDisabilitas,
+        kelas_mall: modePersetujuan ? true : toggleDisabilitas,
+        luas_toko: modePersetujuan ? true : toggleDisabilitas,
+        prediksi_penjualan_user: modePersetujuan ? true : toggleDisabilitas,
+        margin_penjualan: modePersetujuan ? true : toggleDisabilitas,
+        ppn: modePersetujuan ? true : toggleDisabilitas,
         tahun_umr: true,
         provinsi_umr: true,
-        jumlah_staff: toggleDisabilitas,
-        biaya_oau: toggleDisabilitas,
-        biaya_sewa: toggleDisabilitas,
-        lama_sewa: toggleDisabilitas,
-        biaya_fitout: toggleDisabilitas,
+        jumlah_staff: modePersetujuan ? true : toggleDisabilitas,
+        biaya_oau: modePersetujuan ? true : toggleDisabilitas,
+        biaya_sewa: modePersetujuan ? true : toggleDisabilitas,
+        lama_sewa: modePersetujuan ? true : toggleDisabilitas,
+        biaya_fitout: modePersetujuan ? true : toggleDisabilitas,
+        remark: modePersetujuan ? true : toggleDisabilitas,
+        tombol_dua: modePersetujuan ? true : toggleDisabilitas,
+        tombol_tiga: modePersetujuan ? true : toggleDisabilitas,
       });
     },
     [formulir.values.versi_proposal]
@@ -449,11 +451,78 @@ export const InputPopUpKelayakanTokoBaru = ({
     formulir.values.input.biaya_fitout,
   ]);
 
+  // render grup tombol
+  // const renderTombolKelayakanTokoBaru = useCallback(() => {
+  //   renderTombol();
+  // }, [formulir.values.versi_proposal]);
+
   // Render Prediksi Sales dan rekalkulasiOutput
   useEffect(() => {
     prediksiSales();
     rekalkulasiOutput();
+    // renderTombolKelayakanTokoBaru();
   }, [prediksiSales, rekalkulasiOutput]);
+
+  useEffect(() => {
+    let disable: boolean = true;
+    switch (popUp.modeProposal) {
+      case EModePopUpKelayakanTokoBaru.PENAMBAHAN:
+        if (formulir.isDirty() && cekFormValid(formulir)) {
+          disable = false;
+        } else {
+          disable = true;
+        }
+        break;
+      case EModePopUpKelayakanTokoBaru.SUNTING:
+        if (
+          formulir.values.versi_proposal ===
+          Math.max(...dataProposal.map((proposal) => proposal.versi)).toString()
+        ) {
+          if (formulir.isDirty("input") && cekFormValid(formulir)) {
+            disable = false;
+          } else {
+            disable = true;
+          }
+        }
+        break;
+      case EModePopUpKelayakanTokoBaru.PERSETUJUAN:
+        if (
+          formulir.values.versi_proposal ===
+          Math.max(...dataProposal.map((proposal) => proposal.versi)).toString()
+        ) {
+          disable = false;
+        } else {
+          true;
+        }
+        break;
+      default:
+        return;
+    }
+
+    setStatusDisabilitasInput((stateSebelumnya) => ({
+      ...stateSebelumnya,
+      tombol_dua: disable,
+      tombol_tiga:
+        popUp.modeProposal === EModePopUpKelayakanTokoBaru.SUNTING &&
+        formulir.values.versi_proposal ===
+          Math.max(...dataProposal.map((proposal) => proposal.versi)).toString()
+          ? false
+          : disable,
+    }));
+  }, [
+    formulir.values.versi_proposal,
+    formulir.values.output.model_generated.sales,
+    formulir.values.output.user_generated.sales,
+    formulir.values.input.margin_penjualan,
+    formulir.values.input.ppn,
+    formulir.values.input.tahun_umr,
+    formulir.values.input.provinsi_umr,
+    formulir.values.input.jumlah_staff,
+    formulir.values.input.biaya_oau,
+    formulir.values.input.biaya_sewa,
+    formulir.values.input.lama_sewa,
+    formulir.values.input.biaya_fitout,
+  ]);
 
   // render notifikasi untuk inkonsistensi nilai existing dengan item input saat ini
   useEffect(() => {
@@ -1412,6 +1481,7 @@ export const InputPopUpKelayakanTokoBaru = ({
                 minRows={15}
                 maxRows={15}
                 {...formulir.getInputProps("remark")}
+                disabled={statusDisabilitasInput.remark}
               ></Textarea>
             </Grid.Col>
           </Grid>
@@ -1419,87 +1489,24 @@ export const InputPopUpKelayakanTokoBaru = ({
       </Grid>
       <Grid grow justify="space-around" mt={20}>
         <Grid.Col span={12} px={0}>
-          <Group grow spacing="lg">
-            <Button
-              variant="outline"
-              onClick={() =>
-                setPopUp((stateSebelumnya) => ({
-                  ...stateSebelumnya,
-                  togglePopUp: false,
-                  judulPopUp: "",
-                  // dataPopUp: undefined,
-                }))
-              }
-              styles={{
-                root: {
-                  color: aksenWarna.tombolBatal.utama,
-                  borderColor: aksenWarna.tombolBatal.utama,
-                  ...theme.fn.hover({
-                    backgroundColor: aksenWarna.tombolBatal.hover.background,
-                    color: aksenWarna.tombolBatal.hover.teks,
-                  }),
-                },
-                label: {
-                  fontSize: "20px",
-                },
-              }}
-            >
-              Batal
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setValid(cekFormValid(formulir));
-                setTindakanPopUp(ETindakanProposalTokoBaru.SIMPAN);
-                setKonfirmasiPopUp(true);
-              }}
-              styles={{
-                root: {
-                  color: aksenWarna.tombolSimpan.utama,
-                  borderColor: aksenWarna.tombolSimpan.utama,
-                  ...theme.fn.hover({
-                    backgroundColor: aksenWarna.tombolSimpan.hover.background,
-                    color: aksenWarna.tombolSimpan.hover.teks,
-                  }),
-                },
-                label: {
-                  fontSize: "20px",
-                },
-              }}
-              type="submit"
-            >
-              Simpan
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setValid(cekFormValid(formulir));
-                setTindakanPopUp(ETindakanProposalTokoBaru.KIRIM);
-                setKonfirmasiPopUp(true);
-              }}
-              styles={{
-                root: {
-                  color: aksenWarna.tombolKirim.utama,
-                  borderColor: aksenWarna.tombolKirim.utama,
-                  ...theme.fn.hover({
-                    backgroundColor: aksenWarna.tombolKirim.hover.background,
-                    color: aksenWarna.tombolKirim.hover.teks,
-                  }),
-                },
-                label: {
-                  fontSize: "20px",
-                },
-              }}
-              type="submit"
-            >
-              Kirim
-            </Button>
-          </Group>
+          <TombolKelayakanTokoBaru
+            formulir={formulir}
+            modeProposal={popUp.modeProposal!}
+            disabilitasTombol={statusDisabilitasInput}
+            popUp={setPopUp}
+            temaWarna={aksenWarna}
+            validasi={setValid}
+            tindakanPopUp={setTindakanPopUp}
+            konfirmasiPopUp={setKonfirmasiPopUp}
+          />
           {KonfirmasiProposal(
             konfirmasiPopUp,
             setKonfirmasiPopUp,
             valid,
             formulir,
+            dataProposalTerakhir,
+            dataProposal,
+            statusDisabilitasInput.tombol_dua!,
             aksenWarna,
             props,
             tindakanPopUp,

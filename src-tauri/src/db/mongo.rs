@@ -1,3 +1,4 @@
+use bson::oid::ObjectId;
 use futures::stream::TryStreamExt;
 use mongodb::{
     bson::{doc, to_document, Document},
@@ -9,7 +10,8 @@ use serde_json::json;
 use std::error::Error;
 
 use crate::struktur::{
-    BuatProposalTokoBaru, InputItemKelayakanTokoBaru, InputItemUMRKelayakanTokoBaru, InputModel,
+    ApprovalStatus, ApprovalTokoBaru, BuatProposalTokoBaru, InputItemKelayakanTokoBaru,
+    InputItemUMRKelayakanTokoBaru, InputModel, KredensialPenggunaApprovalTokoBaru,
     LabelValueInputItem, Model, Pengguna,
 };
 use crate::{fungsi::rahasia, struktur::ProposalTokoBaru};
@@ -60,7 +62,7 @@ pub async fn get_all_proposal_toko_baru() -> Result<Option<Vec<ProposalTokoBaru>
     let mut hasil_kueri = koleksi_proposal
         .find(None, None)
         .await
-        .expect("Gagal memuat data proposal dari mongodb");
+        .expect("Gagal memuat data proposal toko baru dari mongodb");
 
     // Iterasi cursor
     let mut kumpulan_proposal: Vec<ProposalTokoBaru> = Vec::new();
@@ -74,6 +76,163 @@ pub async fn get_all_proposal_toko_baru() -> Result<Option<Vec<ProposalTokoBaru>
     } else {
         Ok(None)
     }
+}
+
+pub async fn get_all_approval_toko_baru() -> Result<Option<Vec<ApprovalTokoBaru>>, Box<dyn Error>> {
+    let database = bc_database()
+        .await
+        .expect("Gagal membuka koneksi dengan database mongo");
+    let koleksi_approval = database.collection(rahasia::KOLEKSI_APPROVAL_TOKO_BARU);
+
+    let mut hasil_kueri = koleksi_approval
+        .find(None, None)
+        .await
+        .expect("Gagal memuat data approval toko baru dari mongodb");
+
+    // Iterasi cursor
+    let mut kumpulan_approval: Vec<ApprovalTokoBaru> = Vec::new();
+    while let Some(approval) = hasil_kueri.try_next().await? {
+        kumpulan_approval.push(approval);
+    }
+
+    // Kembalikan Option Some None jika Ok
+    if kumpulan_approval.len() > 0 {
+        Ok(Some(kumpulan_approval))
+    } else {
+        Ok(None)
+    }
+}
+
+pub async fn get_pengguna_approval_toko_baru(
+    vektor_id: Vec<ObjectId>,
+) -> Result<Option<Vec<KredensialPenggunaApprovalTokoBaru>>, Box<dyn Error>> {
+    let database = bc_database()
+        .await
+        .expect("Gagal membuka koneksi dengan database mongo");
+    let koleksi_pengguna: mongodb::Collection<Pengguna> =
+        database.collection(rahasia::KOLEKSI_PENGGUNA);
+
+    let pengguna = doc! {"_id": { "$in": vektor_id}};
+
+    let mut hasil_kueri = koleksi_pengguna
+        .find(pengguna, None)
+        .await
+        .expect("Gagal memuat data pengguna approval toko baru dari mongodb");
+
+    // Iterasi cursor
+    let mut kumpulan_pengguna: Vec<KredensialPenggunaApprovalTokoBaru> = Vec::new();
+    while let Some(pengguna) = hasil_kueri.try_next().await? {
+        let pengguna_terkueri = KredensialPenggunaApprovalTokoBaru {
+            id: pengguna._id,
+            nama: pengguna.nama,
+            email: pengguna.email,
+        };
+        kumpulan_pengguna.push(pengguna_terkueri)
+    }
+
+    // Kembalikan Opton Some None jika Ok
+    if kumpulan_pengguna.len() > 0 {
+        Ok(Some(kumpulan_pengguna))
+    } else {
+        Ok(None)
+    }
+}
+
+pub async fn buat_dokumen_approval_proposal_toko_baru(
+    proposal_id: String,
+    array_approver_id: Vec<String>,
+) -> Result<String, String> {
+    // konversi array_approver_id menjadi Vec<ApprovalStatus>
+    let mut vektor_approver_obj_id = Vec::new();
+    for approver_id in array_approver_id {
+        let approver = ApprovalStatus {
+            id: ObjectId::parse_str(&approver_id)
+                .expect(format!("Gagal mengkonversi ObjekID {}", &approver_id).as_str()),
+            status: 0,
+        };
+        vektor_approver_obj_id.push(approver);
+    }
+
+    // buat struct ApprovalTokoBaru
+    let approval_baru = ApprovalTokoBaru {
+        proposal_id: proposal_id,
+        approval: vektor_approver_obj_id,
+    };
+
+    let database = bc_database()
+        .await
+        .expect("Gagal membuka koneksi dengan database mongo");
+    let koleksi_approval: mongodb::Collection<ApprovalTokoBaru> =
+        database.collection(rahasia::KOLEKSI_APPROVAL_TOKO_BARU);
+
+    // tulis approval ke dalam koleksi approval
+    let hasil = koleksi_approval
+        .insert_one(approval_baru, None)
+        .await
+        .expect("Gagal memasukkan approval ke dalam koleksi approval");
+
+    Ok(json!({"status": true, "konten": hasil.inserted_id.as_str()}).to_string())
+}
+
+pub async fn update_status_proposal_toko(
+    proposal_id: String,
+    versi: i32,
+    status: i32,
+) -> Result<(), Box<dyn Error>> {
+    let database = bc_database()
+        .await
+        .expect("Gagal membuka koneksi dengan database mongo");
+    let koleksi_proposal: mongodb::Collection<ProposalTokoBaru> =
+        database.collection(rahasia::KOLEKSI_PROPOSAL_TOKO_BARU);
+
+    let dokumen = doc! {"proposal_id": proposal_id, "versi": versi};
+    let update = doc! {"$set": {"data.status": status}};
+
+    koleksi_proposal
+        .find_one_and_update(dokumen, update, None)
+        .await
+        .unwrap();
+
+    Ok(())
+}
+
+pub async fn ambil_approval_proposal(
+    proposal_id: &String,
+) -> Result<Option<ApprovalTokoBaru>, Box<dyn Error>> {
+    let database = bc_database()
+        .await
+        .expect("Gagal membuka koneksi dengan database mongo");
+    let koleksi_approval: mongodb::Collection<ApprovalTokoBaru> =
+        database.collection(rahasia::KOLEKSI_APPROVAL_TOKO_BARU);
+
+    let filter = doc! {"proposal_id": &proposal_id};
+
+    let hasil = koleksi_approval.find_one(filter, None)
+        .await
+        .expect(format!("Terjadi kesalahan pada kueri find_one untuk mendapatkan approval proposal dengan ID {}", proposal_id).as_str());
+
+    Ok(hasil)
+}
+
+pub async fn update_status_approval_proposal(
+    proposal_id: &String,
+    id_approver: &ObjectId,
+    status: &i32,
+) -> Result<(), Box<dyn Error>> {
+    let database = bc_database()
+        .await
+        .expect("Gagal membuka koneksi dengan database mongo");
+    let koleksi_approval: mongodb::Collection<ApprovalTokoBaru> =
+        database.collection(rahasia::KOLEKSI_APPROVAL_TOKO_BARU);
+
+    let filter = doc! {"proposal_id": proposal_id, "approval.id": id_approver};
+    let update = doc! {"$set": {"approval.$.status": status}};
+
+    koleksi_approval.find_one_and_update(filter, update, None)
+        .await
+        .expect(format!("Gagal mengupdate status approval Proposal ID {proposal_id} untuk pengguna dengan Objek ID {}", id_approver.to_string()).as_str());
+
+    Ok(())
 }
 
 pub async fn get_all_input_item_model_toko_baru(

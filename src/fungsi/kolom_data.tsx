@@ -9,10 +9,12 @@ import {
   DataPenerimaanBarang,
   DataPenjualan,
   DataStok,
-  DataTabelKelayakanTokoBaru,
+  TDataTabelKelayakanTokoBaru,
   EModePopUpKelayakanTokoBaru,
   EStatusProposalTokoBaru,
   unduhTabelKeExcel,
+  EStatusApprovalTokoBaru,
+  IApproverKredensialTokoBaruStatus,
 } from "./basic";
 import { StatePenjualan } from "./halaman/penjualan";
 import { StatePenerimaanBarang } from "./halaman/penerimaanBarang";
@@ -23,12 +25,17 @@ import {
   Badge,
   Box,
   Button,
+  Group,
   Stack,
   Title,
   Tooltip,
+  useMantineTheme,
 } from "@mantine/core";
 import {
+  IconCircleCheckFilled,
+  IconCircleXFilled,
   IconDownload,
+  IconHelpCircle,
   IconHomeCheck,
   IconHomeQuestion,
   IconHomeX,
@@ -68,6 +75,7 @@ export interface TableProps {
 
 export const buatPropsTabel = (
   halaman: string,
+  objekIdPengguna: string,
   data: any[],
   memuat: boolean,
   setPopUp?: React.Dispatch<React.SetStateAction<StatePopUp>>
@@ -217,37 +225,65 @@ export const buatPropsTabel = (
         },
         //@ts-ignore
         renderRowActions: ({ row }: MantineReactTableProps) => {
+          // Untuk persetujuan/penolakan
+          // 1. Cek apakah status proposal adalah EStatusProposalTokoBaru.SUBMIT
+          const statusProposalSubmit =
+            row.original.status === EStatusProposalTokoBaru.SUBMIT;
+          // 2. Cek apakah objekIdPengguna ada dalam array objekId
+          // pada row dan statusnya masih 0 (EStatusApprovalTokoBaru.PENDING)
+          const array_approval_status: IApproverKredensialTokoBaruStatus[] =
+            row.original.approval_status;
+          const bisaMelakukanPersetujuan =
+            array_approval_status.filter(
+              (approver) =>
+                approver.id.$oid === objekIdPengguna &&
+                approver.status === EStatusApprovalTokoBaru.PENDING
+            ).length === 1;
+          array_approval_status.filter((approver) => {
+            return (
+              approver.id.$oid === objekIdPengguna &&
+              approver.status === EStatusApprovalTokoBaru.PENDING
+            );
+          });
+
           return (
             <Box sx={{ display: "flex", flexWrap: "nowrap", gap: "8px" }}>
-              {/* Approval hanya ada jika status proposal 1 (SUBMIT) */}
-              {row.original.status == EStatusProposalTokoBaru.SUBMIT ? (
-                <Tooltip
-                  label={`Approval atau Rejection untuk Proposal ${row.original.proposal_id}`}
-                  withArrow
-                  transitionProps={{ transition: "rotate-left", duration: 300 }}
-                  position="left"
-                  pos="fixed"
-                  color="teal"
-                >
-                  <ActionIcon
-                    variant="light"
-                    color={"green"}
-                    onClick={() => {
-                      if (setPopUp !== undefined) {
-                        setPopUp((stateSebelumnya) => ({
-                          ...stateSebelumnya,
-                          togglePopUp: true,
-                          judulPopUp: `Persetujuan ${row.original.proposal_id}`,
-                          modeProposal: EModePopUpKelayakanTokoBaru.PERSETUJUAN,
-                          proposalID: row.original.proposal_id,
-                        }));
-                      }
+              {
+                // Approval hanya ada jika status proposal 1 (SUBMIT)
+                // Dan jika ObjectId Pengguna ada dalam array approver baris dimaksud
+                statusProposalSubmit && bisaMelakukanPersetujuan ? (
+                  <Tooltip
+                    label={`Approval atau Rejection untuk Proposal ${row.original.proposal_id}`}
+                    withArrow
+                    transitionProps={{
+                      transition: "rotate-left",
+                      duration: 300,
                     }}
+                    position="left"
+                    pos="fixed"
+                    color="teal"
                   >
-                    <IconHomeCheck />
-                  </ActionIcon>
-                </Tooltip>
-              ) : null}
+                    <ActionIcon
+                      variant="light"
+                      color={"green"}
+                      onClick={() => {
+                        if (setPopUp !== undefined) {
+                          setPopUp((stateSebelumnya) => ({
+                            ...stateSebelumnya,
+                            togglePopUp: true,
+                            judulPopUp: `Persetujuan ${row.original.proposal_id}`,
+                            modeProposal:
+                              EModePopUpKelayakanTokoBaru.PERSETUJUAN,
+                            proposalID: row.original.proposal_id,
+                          }));
+                        }
+                      }}
+                    >
+                      <IconHomeCheck />
+                    </ActionIcon>
+                  </Tooltip>
+                ) : null
+              }
               {/* SUNTING atau HAPUS hanya ada jika status proposal 0 (DRAFT) */}
               {row.original.status == EStatusProposalTokoBaru.DRAFT ? (
                 <>
@@ -403,6 +439,15 @@ export const definisiKolomPenjualan = (props: StatePenjualan) => {
     {
       accessorKey: "source_no",
       header: "Customer",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: props.customerListTabel as any,
+      },
+    },
+    {
+      accessorKey: "customer_name",
+      header: "Nama Customer",
       enableColumnActions: true,
       filterVariant: "multi-select",
       mantineFilterMultiSelectProps: {
@@ -675,6 +720,15 @@ export const definisiKolomPenjualan = (props: StatePenjualan) => {
           currency: "IDR",
           maximumFractionDigits: 0,
         }),
+    },
+    {
+      accessorKey: "obsolete",
+      header: "Obsolete (PNT)",
+      enableColumnActions: true,
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: ["OB", "NON OB"],
+      },
     },
   ];
   return kolomDef;
@@ -1145,7 +1199,6 @@ export const definisiKolomLabaRugiToko = (data: DataLabaRugiToko[]) => {
     }
   }
   const tokoUnik = [...new Set<string>(list_toko)];
-  console.log(tokoUnik);
   for (var toko of tokoUnik) {
     let total = 0;
     for (let hitung = 0; hitung <= data.length - 1; hitung++) {
@@ -1193,7 +1246,7 @@ export const definisiKolomLabaRugiToko = (data: DataLabaRugiToko[]) => {
 };
 
 export const definisiKolomKelayakanTokoBaru = () => {
-  let kolomDef: MRT_ColumnDef<DataTabelKelayakanTokoBaru>[] = [];
+  let kolomDef: MRT_ColumnDef<TDataTabelKelayakanTokoBaru>[] = [];
   kolomDef = [
     {
       accessorKey: "proposal_id",
@@ -1211,52 +1264,123 @@ export const definisiKolomKelayakanTokoBaru = () => {
       accessorKey: "status",
       accessorFn: (baris: any) => {
         // Template Badge
-        const statusBadge = (
-          statusTeks: string,
-          warnaKiri: string,
-          warnaKanan: string
-        ) => {
+        const statusBadge = (statusTeks: string, warna: string) => {
           return (
             <Badge
-              variant="gradient"
-              gradient={{ from: warnaKiri, to: warnaKanan }}
+              variant="outline"
+              color={warna}
+              // variant="gradient"
+              // gradient={{ from: warnaKiri, to: warnaKanan }}
             >
               {statusTeks}
             </Badge>
           );
         };
         let statusTeks: string;
-        let warnaKiri: string;
-        let warnaKanan: string;
+        let warna: string;
         switch (baris.status) {
           case EStatusProposalTokoBaru.DRAFT:
             statusTeks = "DRAFT";
-            warnaKiri = "orange";
-            warnaKanan = "red";
+            warna = "purple";
             break;
           case EStatusProposalTokoBaru.SUBMIT:
             statusTeks = "SUBMITTED";
-            warnaKiri = "indigo";
-            warnaKanan = "cyan";
+            warna = "cyan";
             break;
           case EStatusProposalTokoBaru.DITOLAK:
             statusTeks = "REJECTED";
-            warnaKiri = "red";
-            warnaKanan = "black";
+            warna = "red";
             break;
           case EStatusProposalTokoBaru.DITERIMA:
             statusTeks = "APPROVED";
-            warnaKiri = "lime";
-            warnaKanan = "green";
+            warna = "lime";
             break;
           default:
             return;
         }
-        return statusBadge(statusTeks, warnaKiri, warnaKanan);
+        return statusBadge(statusTeks, warna);
       },
       header: "Status Proposal",
       enableColumnActions: true,
       filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "approval_status",
+      accessorFn: (baris: any) => {
+        const statusApproval: IApproverKredensialTokoBaruStatus[] =
+          baris.approval_status;
+        const theme = useMantineTheme();
+
+        // Iterasi indikator approval dan kembalikan
+        return (
+          <Group>
+            {statusApproval.map((approval) => {
+              interface IApproval {
+                teksTooltip: string;
+                warnaTooltip: string;
+                ikon: JSX.Element;
+                warnaIkon: string;
+              }
+              let interfaceApproval: IApproval = {} as IApproval;
+              switch (approval.status) {
+                case EStatusApprovalTokoBaru.PENDING:
+                  interfaceApproval = {
+                    //@ts-ignore
+                    teksTooltip: `Menunggu review dari ${approval.nama} ( ${approval.email} )`,
+                    warnaTooltip: theme.colors.dark[5],
+                    //@ts-ignore
+                    ikon: <IconHelpCircle />,
+                    warnaIkon: "dark",
+                  };
+                  break;
+                case EStatusApprovalTokoBaru.DITERIMA:
+                  interfaceApproval = {
+                    //@ts-ignore
+                    teksTooltip: `Proposal telah disetujui oleh ${approval.nama} ( ${approval.email} )`,
+                    warnaTooltip: theme.colors.teal[8],
+                    //@ts-ignore
+                    ikon: <IconCircleCheckFilled />,
+                    warnaIkon: "green",
+                  };
+                  break;
+                case EStatusApprovalTokoBaru.DITOLAK:
+                  interfaceApproval = {
+                    //@ts-ignore
+                    teksTooltip: `Proposal telah ditolak oleh ${approval.nama} ( ${approval.email} )`,
+                    warnaTooltip: theme.colors.red[8],
+                    //@ts-ignore
+                    ikon: <IconCircleXFilled />,
+                    warnaIkon: "red",
+                  };
+                  break;
+                default:
+                  break;
+              }
+              return (
+                <Tooltip
+                  //@ts-ignore
+                  label={interfaceApproval.teksTooltip}
+                  withArrow
+                  transitionProps={{ transition: "slide-up", duration: 300 }}
+                  position="top"
+                  pos="fixed"
+                  color={interfaceApproval.warnaTooltip}
+                  key={approval.id.$oid}
+                >
+                  <ActionIcon
+                    variant="light"
+                    color={interfaceApproval.warnaIkon}
+                    radius="xl"
+                  >
+                    {interfaceApproval.ikon}
+                  </ActionIcon>
+                </Tooltip>
+              );
+            })}
+          </Group>
+        );
+      },
+      header: "Status Approval",
     },
     {
       accessorKey: "sbu",

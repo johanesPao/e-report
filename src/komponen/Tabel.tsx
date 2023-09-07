@@ -4,6 +4,7 @@ import { useAppSelector } from "../state/hook";
 import { getHalaman } from "../fitur_state/event";
 import { TableProps, buatPropsTabel } from "../fungsi/kolom_data";
 import { StatePopUp } from "./PopUp";
+import { getIdPengguna } from "../fitur_state/pengguna";
 
 interface Props<T extends Record<string, any>> {
   arrKolom: MRT_ColumnDef<T>[];
@@ -19,8 +20,10 @@ export const Tabel = <T extends Record<string, any>>({
   setPopUp,
 }: Props<T>) => {
   const halaman = useAppSelector(getHalaman);
+  const idPengguna = useAppSelector(getIdPengguna);
   const props: TableProps = buatPropsTabel(
     halaman,
+    idPengguna,
     arrData,
     memuatData,
     setPopUp

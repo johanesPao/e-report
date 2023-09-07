@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../state/store";
 
 export interface PenggunaState {
+  idPengguna: string;
   namaPengguna: string;
   emailPengguna: string;
   departemenPengguna: string;
@@ -12,6 +13,7 @@ export interface PenggunaState {
 }
 
 const initialState: PenggunaState = {
+  idPengguna: "",
   namaPengguna: "",
   emailPengguna: "",
   departemenPengguna: "",
@@ -26,6 +28,9 @@ const penggunaSlice = createSlice({
   name: "pengguna",
   initialState,
   reducers: {
+    setIdPengguna: (state, action: PayloadAction<string>) => {
+      state.idPengguna = action.payload;
+    },
     setNamaPengguna: (state, action: PayloadAction<string>) => {
       state.namaPengguna = action.payload;
     },
@@ -48,6 +53,7 @@ const penggunaSlice = createSlice({
 });
 
 export const {
+  setIdPengguna,
   setNamaPengguna,
   setEmailPengguna,
   setDepartemenPengguna,
@@ -57,6 +63,7 @@ export const {
   // ...
 } = penggunaSlice.actions;
 
+export const getIdPengguna = (state: RootState) => state.pengguna.idPengguna;
 export const getNamaPengguna = (state: RootState) =>
   state.pengguna.namaPengguna;
 export const getEmailPengguna = (state: RootState) =>

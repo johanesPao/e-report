@@ -88,7 +88,6 @@ export const tarik_data_laba_rugi_toko = async (
 };
 
 const bacaDataLabaRugiToko = (dispatch: any, data: any[]) => {
-  console.log(data);
   const coaUnik = [...new Set<string>(data[0]["values"])];
   const storeCodeUnik = [...new Set<string>(data[2]["values"])];
   let arrDataLabaRugiToko: DataLabaRugiToko[] = [];
@@ -123,8 +122,6 @@ const bacaDataLabaRugiToko = (dispatch: any, data: any[]) => {
     }
     arrDataLabaRugiTokoTransform.push(dataCoAStore);
   }
-
-  console.log(arrDataLabaRugiTokoTransform);
   dispatch(setDataLabaRugiToko(arrDataLabaRugiTokoTransform));
 };
 

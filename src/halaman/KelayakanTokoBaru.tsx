@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { DataTabelKelayakanTokoBaru } from "../fungsi/basic";
+import { TDataTabelKelayakanTokoBaru } from "../fungsi/basic";
 import { Tabel } from "../komponen/Tabel";
 import { MRT_ColumnDef } from "mantine-react-table";
 import { definisiKolomKelayakanTokoBaru } from "../fungsi/kolom_data";
@@ -19,7 +19,7 @@ const KelayakanTokoBaru = ({
   setPopUp: React.Dispatch<React.SetStateAction<StatePopUp>>;
 }) => {
   const data = useAppSelector(getDataTabelKelayakanTokoBaru);
-  const definisiKolom = useMemo<MRT_ColumnDef<DataTabelKelayakanTokoBaru>[]>(
+  const definisiKolom = useMemo<MRT_ColumnDef<TDataTabelKelayakanTokoBaru>[]>(
     () => definisiKolomKelayakanTokoBaru(),
     []
   );

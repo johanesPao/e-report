@@ -2,10 +2,12 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use std::collections::HashMap;
 
+use bson::oid::ObjectId;
 use db::mongo::hapus_proposal_id;
 use db::mongo::simpan_proposal;
 use polars::prelude::*;
 use regex::Regex;
+use serde_json::Value;
 use serde_json::{self, json};
 
 use crate::db::mongo;
@@ -21,11 +23,14 @@ mod struktur;
 async fn login(nama: String, kata_kunci: String) -> Result<String, String> {
     match mongo::autentikasi_user(nama, kata_kunci).await {
         Ok(Some(pengguna)) => {
-            let json = serde_json::to_string(&pengguna).map_err(|e| e.to_string())?;
+            let json = json!({"status": true, "konten": pengguna}).to_string();
             Ok(json)
         }
-        Ok(None) => Ok(r###"{}"###.to_string()),
-        Err(e) => Err(e.to_string()),
+        Ok(None) => {
+            let json = json!({"status": true, "konten": "No User"}).to_string();
+            Ok(json)
+        }
+        Err(e) => Err(json!({"status": false, "konten": e.to_string()}).to_string()),
     }
 }
 
@@ -556,6 +561,7 @@ async fn handle_data_penjualan(
             "no_dokumen",
             "no_dokumen_oth",
             "source_no",
+            "customer_name",
             "classification",
             "salesperson",
             "region",
@@ -928,11 +934,61 @@ async fn handle_data_laba_rugi_toko(
 async fn ambil_semua_proposal_toko_baru() -> Result<String, String> {
     match mongo::get_all_proposal_toko_baru().await {
         Ok(Some(kumpulan_proposal)) => {
-            let json = serde_json::to_string(&kumpulan_proposal).map_err(|e| e.to_string())?;
-            Ok(json)
+            Ok(json!({"status": true, "konten": kumpulan_proposal}).to_string())
         }
-        Ok(None) => Ok(r###"{}"###.to_string()),
-        Err(e) => Err(e.to_string()),
+        Ok(None) => {
+            let vector_kosong: Vec<ProposalTokoBaru> = Vec::new();
+            Ok(json!({"status": true, "konten": vector_kosong}).to_string())
+        }
+        Err(e) => {
+            Err(json!({"status": false, "konten": e.to_string()}).to_string())
+        }
+    }
+}
+
+#[tauri::command]
+async fn ambil_semua_status_approval_toko_baru() -> Result<String, String> {
+    // fungsi ini juga harus mengembalikan nama dari pengguna untuk tampilan tooltip
+    match mongo::get_all_approval_toko_baru().await {
+        Ok(Some(kumpulan_approval)) => {
+            Ok(json!({"status": true, "konten": kumpulan_approval}).to_string())
+        }
+        Ok(None) => {
+            let vector_kosong: Vec<ApprovalTokoBaru> = Vec::new();
+            Ok(json!({"status": true, "konten": vector_kosong}).to_string())
+        }
+        Err(e) => Err(json!({"status": false, "konten": e.to_string()}).to_string()),
+    }
+}
+
+#[tauri::command]
+async fn ambil_nama_email_approval_toko_baru(
+    vektor_id_string: Vec<String>,
+) -> Result<String, String> {
+    let mut vektor_id = Vec::new();
+    for id in vektor_id_string {
+        vektor_id.push(ObjectId::parse_str(id.as_str()).unwrap())
+    }
+    match mongo::get_pengguna_approval_toko_baru(vektor_id).await {
+        Ok(Some(kumpulan_pengguna)) => {
+            Ok(json!({"status": true, "konten": kumpulan_pengguna}).to_string())
+        }
+        Ok(None) => {
+            let vektor_kosong: Vec<KredensialPenggunaApprovalTokoBaru> = Vec::new();
+            Ok(json!({"status": true, "konten": vektor_kosong}).to_string())
+        }
+        Err(e) => Err(json!({"status": false, "konten": e.to_string()}).to_string()),
+    }
+}
+
+#[tauri::command]
+async fn buat_approval_baru(
+    proposal_id: String,
+    vektor_approver: Vec<String>,
+) -> Result<String, String> {
+    match mongo::buat_dokumen_approval_proposal_toko_baru(proposal_id, vektor_approver).await {
+        Ok(_) => Ok(json!({"status": true, "konten": "Sukses"}).to_string()),
+        Err(e) => Err(json!({"status": false, "konten": e.to_string()}).to_string()),
     }
 }
 
@@ -940,11 +996,52 @@ async fn ambil_semua_proposal_toko_baru() -> Result<String, String> {
 async fn ambil_input_item_model_kelayakan_toko_baru() -> Result<String, String> {
     match mongo::get_all_input_item_model_toko_baru().await {
         Ok(Some(kumpulan_input_item)) => {
-            let json = serde_json::to_string(&kumpulan_input_item).map_err(|e| e.to_string())?;
-            Ok(json)
+            Ok(serde_json::to_string(&kumpulan_input_item).map_err(|e| e.to_string())?)
         }
         Ok(None) => Ok(r###"{}"###.to_string()),
         Err(e) => Err(e.to_string()),
+    }
+}
+
+#[tauri::command]
+async fn update_status_proposal_toko_baru(proposal_id: String, versi: i32, status: i32) -> Value {
+    match mongo::update_status_proposal_toko(proposal_id, versi, status).await {
+        Ok(_) => json!({"status": true}),
+        Err(_) => json!({"status": false}),
+    }
+}
+
+#[tauri::command]
+async fn ambil_approval_proposal_toko_baru(proposal_id: String) -> Value {
+    match mongo::ambil_approval_proposal(&proposal_id).await {
+        Ok(approval) => match approval {
+            Some(proposal_approval) => {
+                json!({"status": true, "approval_count": 1, "konten": proposal_approval})
+            }
+            None => {
+                json!({"status": true, "approval_count": 0, "konten": format!("Tidak dapat menemukan approval untuk proposal ID: {}", proposal_id)})
+            }
+        },
+        Err(e) => {
+            json!({"status": false, "konten": format!("Terjadi kesalahan saat mengambil approval proposal dari mongo db: {}",e.to_string())})
+        }
+    }
+}
+
+#[tauri::command]
+async fn update_status_approval_proposal_toko_baru(
+    proposal_id: String,
+    id_approver: String,
+    status: i32
+) -> Value {
+    match mongo::update_status_approval_proposal(
+        &proposal_id, 
+        &ObjectId::parse_str(id_approver)
+            .expect("Gagal parsing string ke dalam ObjectId"), 
+        &status
+    ).await {
+        Ok(_) => json!({"status": true}),
+        Err(_) => json!({"status": false})
     }
 }
 
@@ -1023,16 +1120,16 @@ async fn kueri_kota_kabupaten_chatgpt(
 }
 
 #[tauri::command]
-async fn prediksi_penjualan_toko_baru(instance: Vec<f32>, model_url: String) -> Result<String, String> {
-    println!("{:?}", instance);
-    println!("{}", model_url);
+async fn prediksi_penjualan_toko_baru(
+    instance: Vec<f32>,
+    model_url: String,
+) -> Result<String, String> {
     let mut input_instance = HashMap::new();
     input_instance.insert("instances", vec![instance]);
-    // let input = InputPrediksiPenjualanTokoBaru {
-    //     instances: Vec::from(instance)
-    // };
+
     let klien = reqwest::Client::new();
-    let respon = klien.post(model_url)
+    let respon = klien
+        .post(model_url)
         .json(&input_instance)
         .send()
         .await
@@ -1047,12 +1144,10 @@ async fn prediksi_penjualan_toko_baru(instance: Vec<f32>, model_url: String) -> 
 
 #[tauri::command]
 async fn simpan_proposal_toko_baru(proposal: BuatProposalTokoBaru) -> Result<String, String> {
-    simpan_proposal(proposal)
-    .await
-    .expect(
+    simpan_proposal(proposal).await.expect(
         json!({"status": false, "konten": "Gagal menyimpan proposal ke dalam koleksi proposal"})
-        .to_string()
-        .as_str()
+            .to_string()
+            .as_str(),
     );
     Ok(json!({"status": true}).to_string())
 }
@@ -1083,7 +1178,13 @@ async fn main() {
             handle_data_ketersediaan_stok,
             handle_data_laba_rugi_toko,
             ambil_semua_proposal_toko_baru,
+            ambil_semua_status_approval_toko_baru,
+            ambil_nama_email_approval_toko_baru,
+            buat_approval_baru,
+            ambil_approval_proposal_toko_baru,
+            update_status_approval_proposal_toko_baru,
             ambil_input_item_model_kelayakan_toko_baru,
+            update_status_proposal_toko_baru,
             kueri_kota_kabupaten_chatgpt,
             prediksi_penjualan_toko_baru,
             simpan_proposal_toko_baru,

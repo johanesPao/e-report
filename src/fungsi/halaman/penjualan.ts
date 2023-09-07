@@ -49,6 +49,7 @@ export interface StatePenjualan {
   kodeTokoListTabel: string[];
   tokoListTabel: string[];
   customerListTabel: string[];
+  customerNameListTabel: string[];
   klasifikasiListTabel: string[];
   salespersonListTabel: string[];
   regionListTabel: string[];
@@ -246,40 +247,43 @@ const setFilterDataPenjualan = (
     customerListTabel: [...new Set<string>(kolom[8]["values"])].map(
       (item: any) => (item !== null ? item : "")
     ),
-    klasifikasiListTabel: [...new Set<string>(kolom[9]["values"])].map(
+    customerNameListTabel: [...new Set<string>(kolom[9]["values"])].map(
       (item: any) => (item !== null ? item : "")
     ),
-    salespersonListTabel: [...new Set<string>(kolom[10]["values"])].map(
+    klasifikasiListTabel: [...new Set<string>(kolom[10]["values"])].map(
       (item: any) => (item !== null ? item : "")
     ),
-    regionListTabel: [...new Set<string>(kolom[11]["values"])].map(
+    salespersonListTabel: [...new Set<string>(kolom[11]["values"])].map(
       (item: any) => (item !== null ? item : "")
     ),
-    brandListTabel: [...new Set<string>(kolom[12]["values"])].map((item: any) =>
+    regionListTabel: [...new Set<string>(kolom[12]["values"])].map(
+      (item: any) => (item !== null ? item : "")
+    ),
+    brandListTabel: [...new Set<string>(kolom[13]["values"])].map((item: any) =>
       item !== null ? item : ""
     ),
-    oricodeListTabel: [...new Set<string>(kolom[13]["values"])].map(
+    oricodeListTabel: [...new Set<string>(kolom[14]["values"])].map(
       (item: any) => (item !== null ? item : "")
     ),
-    ukuranListTabel: [...new Set<string>(kolom[14]["values"])].map(
+    ukuranListTabel: [...new Set<string>(kolom[15]["values"])].map(
       (item: any) => (item !== null ? item : "")
     ),
-    prodDivListTabel: [...new Set<string>(kolom[17]["values"])].map(
+    prodDivListTabel: [...new Set<string>(kolom[16]["values"])].map(
       (item: any) => (item !== null ? item : "")
     ),
-    prodGrpListTabel: [...new Set<string>(kolom[18]["values"])].map(
+    prodGrpListTabel: [...new Set<string>(kolom[17]["values"])].map(
       (item: any) => (item !== null ? item : "")
     ),
-    prodCatListTabel: [...new Set<string>(kolom[19]["values"])].map(
+    prodCatListTabel: [...new Set<string>(kolom[20]["values"])].map(
       (item: any) => (item !== null ? item : "")
     ),
-    periodListTabel: [...new Set<string>(kolom[20]["values"])].map(
+    periodListTabel: [...new Set<string>(kolom[21]["values"])].map(
       (item: any) => (item !== null ? item : "")
     ),
-    seasonListTabel: [...new Set<string>(kolom[21]["values"])].map(
+    seasonListTabel: [...new Set<string>(kolom[22]["values"])].map(
       (item: any) => (item !== null ? item : "")
     ),
-    promoListTabel: [...new Set<string>(kolom[23]["values"])].map((item: any) =>
+    promoListTabel: [...new Set<string>(kolom[24]["values"])].map((item: any) =>
       item !== null ? item : ""
     ),
   }));
@@ -304,47 +308,52 @@ const bacaDataPenjualan = (dispatch: any, data: any[]) => {
       no_dokumen: data[6]["values"][hitung],
       no_dokumen_oth: data[7]["values"][hitung],
       source_no: data[8]["values"][hitung],
-      classification: data[9]["values"][hitung],
-      salesperson: data[10]["values"][hitung],
-      region: data[11]["values"][hitung],
-      brand_dim: data[12]["values"][hitung],
-      oricode: data[13]["values"][hitung],
-      ukuran: data[14]["values"][hitung],
-      deskripsi_produk: data[15]["values"][hitung],
-      warna: data[16]["values"][hitung],
-      prod_div: data[17]["values"][hitung],
-      prod_grp: data[18]["values"][hitung],
-      prod_cat: data[19]["values"][hitung],
-      period: data[20]["values"][hitung],
-      season: data[21]["values"][hitung],
-      ppn: data[22]["values"][hitung] !== null ? data[22]["values"][hitung] : 0,
-      promo: data[23]["values"][hitung],
+      customer_name: data[9]["values"][hitung],
+      classification: data[10]["values"][hitung],
+      salesperson: data[11]["values"][hitung],
+      region: data[12]["values"][hitung],
+      brand_dim: data[13]["values"][hitung],
+      oricode: data[14]["values"][hitung],
+      ukuran: data[15]["values"][hitung],
+      deskripsi_produk: data[16]["values"][hitung],
+      warna: data[17]["values"][hitung],
+      prod_div: data[18]["values"][hitung],
+      prod_grp: data[19]["values"][hitung],
+      prod_cat: data[20]["values"][hitung],
+      period: data[21]["values"][hitung],
+      season: data[22]["values"][hitung],
+      ppn: data[23]["values"][hitung] !== null ? data[23]["values"][hitung] : 0,
+      promo: data[24]["values"][hitung],
       diskon:
-        data[24]["values"][hitung] !== null ? data[24]["values"][hitung] : 0,
-      kuantitas:
         data[25]["values"][hitung] !== null ? data[25]["values"][hitung] : 0,
-      cost_price_per_unit:
+      kuantitas:
         data[26]["values"][hitung] !== null ? data[26]["values"][hitung] : 0,
-      retail_price_per_unit:
+      cost_price_per_unit:
         data[27]["values"][hitung] !== null ? data[27]["values"][hitung] : 0,
-      retail_price_per_unit_aft_disc:
+      retail_price_per_unit:
         data[28]["values"][hitung] !== null ? data[28]["values"][hitung] : 0,
-      retail_price_per_unit_aft_vat:
+      retail_price_per_unit_aft_disc:
         data[29]["values"][hitung] !== null ? data[29]["values"][hitung] : 0,
-      total_sales_at_retail:
+      retail_price_per_unit_aft_vat:
         data[30]["values"][hitung] !== null ? data[30]["values"][hitung] : 0,
-      total_sales_at_retail_aft_disc:
+      total_sales_at_retail:
         data[31]["values"][hitung] !== null ? data[31]["values"][hitung] : 0,
-      total_sales_at_retail_aft_vat:
+      total_sales_at_retail_aft_disc:
         data[32]["values"][hitung] !== null ? data[32]["values"][hitung] : 0,
-      total_sales_at_cost:
+      total_sales_at_retail_aft_vat:
         data[33]["values"][hitung] !== null ? data[33]["values"][hitung] : 0,
-      total_margin_aft_vat_rp:
+      total_sales_at_cost:
         data[34]["values"][hitung] !== null ? data[34]["values"][hitung] : 0,
-      total_margin_aft_vat_persen:
+      total_margin_aft_vat_rp:
         data[35]["values"][hitung] !== null ? data[35]["values"][hitung] : 0,
-      total_bruto_aft_vat:
+      total_margin_aft_vat_persen:
         data[36]["values"][hitung] !== null ? data[36]["values"][hitung] : 0,
+      total_bruto_aft_vat:
+        data[37]["values"][hitung] !== null ? data[37]["values"][hitung] : 0,
+      obsolete:
+        data[25]["values"][hitung] === null || data[25]["values"][hitung] < 0.5
+          ? "NON OB"
+          : "OB",
     });
   }
   dispatch(setDataPenjualan(arrDataPenjualan));

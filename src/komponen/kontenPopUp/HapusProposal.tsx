@@ -20,9 +20,11 @@ export const HapusProposal = ({
     return proposal.proposal_id === popUp.proposalID;
   });
   // ambil data untuk versi terakhir
-  const dataVersiAkhir = dataProposal.filter((proposal) => {
-    return proposal.versi === dataProposal.length;
-  })[0];
+  const dataVersiAkhir = dataProposal.filter(
+    (proposal) =>
+      proposal.versi ===
+      Math.max(...dataProposal.map((proposal) => proposal.versi))
+  )[0];
 
   // fungsi untuk menghapus proposal
   const hapusProposal = async (proposalID: string) => {

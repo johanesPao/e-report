@@ -113,23 +113,26 @@ export const ILEByPostDate = (
     judul: "ILEByPostDate",
     kueri: `
     SELECT DISTINCT
-    ${parameterBc.kolom_bc.no_entry} [No. Entri],
-    ${parameterBc.kolom_bc.post_date} [Tanggal],
-    ${parameterBc.kolom_bc.system_created_at} [Waktu],
-    ${parameterBc.kolom_bc.store_dim} [Dimensi Toko],
-    ${parameterBc.kolom_bc.loc_code} [Kode Toko],
-    ${parameterBc.kolom_bc.no_doc} [No. Dokumen],
-    ${parameterBc.kolom_bc.source_no} [Customer],
-    ${parameterBc.kolom_bc.brand_dim} [Brand],
-    ${parameterBc.kolom_bc.oricode} [OriCode],
-    ${parameterBc.kolom_bc.size} [Ukuran]
-    FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}]
+    ile.${parameterBc.kolom_bc.no_entry} [No. Entri],
+    ile.${parameterBc.kolom_bc.post_date} [Tanggal],
+    ile.${parameterBc.kolom_bc.system_created_at} [Waktu],
+    ile.${parameterBc.kolom_bc.store_dim} [Dimensi Toko],
+    ile.${parameterBc.kolom_bc.loc_code} [Kode Toko],
+    ile.${parameterBc.kolom_bc.no_doc} [No. Dokumen],
+    ile.${parameterBc.kolom_bc.source_no} [Customer],
+    cust.${parameterBc.kolom_bc.customer_name} [Customer Name],
+    ile.${parameterBc.kolom_bc.brand_dim} [Brand],
+    ile.${parameterBc.kolom_bc.oricode} [OriCode],
+    ile.${parameterBc.kolom_bc.size} [Ukuran]
+    FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}] AS ile
+    LEFT JOIN [${compKueri}${parameterBc.tabel_bc.customer_437}] AS cust
+    ON ile.${parameterBc.kolom_bc.source_no} = cust.${parameterBc.kolom_bc.no}
     WHERE
-    ${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
-    ${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
-    ${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.sales_prefix}' AND
-    ${parameterBc.kolom_bc.brand_dim} != '' AND
-    ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}' ${eksklusi}
+    ile.${parameterBc.kolom_bc.post_date} >= '${tglAwal}' AND
+    ile.${parameterBc.kolom_bc.post_date} <= '${tglAkhir}' AND
+    ile.${parameterBc.kolom_bc.store_dim} LIKE '${parameterBc.argumen_bc.sales_prefix}' AND
+    ile.${parameterBc.kolom_bc.brand_dim} != '' AND
+    ile.${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}' ${eksklusi}
     `,
   };
   return setKueri;

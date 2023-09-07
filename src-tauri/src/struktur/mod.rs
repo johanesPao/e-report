@@ -1,3 +1,4 @@
+use bson::oid::ObjectId;
 use chrono::{NaiveDateTime, Utc};
 use mongodb::bson::DateTime;
 use polars::prelude::*;
@@ -6,12 +7,19 @@ use struct_field_names_as_array::FieldNamesAsArray;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Pengguna {
+    pub _id: ObjectId,
     pub nama: String,
     pub password: String,
     pub peran: String,
     pub departemen: String,
     pub email: String,
     pub comp: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Hasil {
+    pub status: bool,
+    pub konten: String,
 }
 
 #[derive(Clone, Debug, FieldNamesAsArray)]
@@ -24,6 +32,7 @@ pub struct DataILE {
     pub loc_code: Option<String>,
     pub no_dokumen: Option<String>,
     pub source_no: Option<String>,
+    pub customer_name: Option<String>,
     pub brand_dim: Option<String>,
     pub oricode: Option<String>,
     pub ukuran: Option<String>,
@@ -303,6 +312,39 @@ struct RemarkProposal {
     konten: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ApprovalTokoBaru {
+    pub proposal_id: String,
+    pub approval: Vec<ApprovalStatus>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ApprovalStatus {
+    pub id: ObjectId,
+    pub status: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ApprovalTooltip {
+    proposal_id: String,
+    approval: Vec<ApprovalStatusTooltip>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct KredensialPenggunaApprovalTokoBaru {
+    pub id: ObjectId,
+    pub nama: String,
+    pub email: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct ApprovalStatusTooltip {
+    id: ObjectId,
+    nama: String,
+    email: String,
+    status: i32,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LabelValueInputItem {
     label: String,
@@ -358,6 +400,7 @@ impl DataFrameSerial for Vec<DataILE> {
         let mut vektor_loc_code = Vec::new();
         let mut vektor_no_dokumen = Vec::new();
         let mut vektor_source_no = Vec::new();
+        let mut vektor_customer_name = Vec::new();
         let mut vektor_brand_dim = Vec::new();
         let mut vektor_oricode = Vec::new();
         let mut vektor_ukuran = Vec::new();
@@ -372,9 +415,10 @@ impl DataFrameSerial for Vec<DataILE> {
                     4 => vektor_loc_code.push(baris.loc_code.clone()),
                     5 => vektor_no_dokumen.push(baris.no_dokumen.clone()),
                     6 => vektor_source_no.push(baris.source_no.clone()),
-                    7 => vektor_brand_dim.push(baris.brand_dim.clone()),
-                    8 => vektor_oricode.push(baris.oricode.clone()),
-                    9 => vektor_ukuran.push(baris.ukuran.clone()),
+                    7 => vektor_customer_name.push(baris.customer_name.clone()),
+                    8 => vektor_brand_dim.push(baris.brand_dim.clone()),
+                    9 => vektor_oricode.push(baris.oricode.clone()),
+                    10 => vektor_ukuran.push(baris.ukuran.clone()),
                     _ => println!("Nothing!"),
                 }
             }
@@ -413,13 +457,17 @@ impl DataFrameSerial for Vec<DataILE> {
                 )),
                 7 => vektor_series.push(Series::new(
                     DataILE::FIELD_NAMES_AS_ARRAY[hitung],
-                    vektor_brand_dim.clone(),
+                    vektor_customer_name.clone(),
                 )),
                 8 => vektor_series.push(Series::new(
                     DataILE::FIELD_NAMES_AS_ARRAY[hitung],
-                    vektor_oricode.clone(),
+                    vektor_brand_dim.clone(),
                 )),
                 9 => vektor_series.push(Series::new(
+                    DataILE::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_oricode.clone(),
+                )),
+                10 => vektor_series.push(Series::new(
                     DataILE::FIELD_NAMES_AS_ARRAY[hitung],
                     vektor_ukuran.clone(),
                 )),

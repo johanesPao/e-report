@@ -24,16 +24,20 @@ import { StateLabaRugiToko } from "../fungsi/halaman/labaRugiToko";
 import {
   StateKelayakanTokoBaru,
   ambilInputItemModelKelayakanTokoBaru,
-  ambilProposal,
+  ambilProposalDanApproval,
 } from "../fungsi/halaman/kelayakanTokoBaru";
 import { EHalaman, resetAplikasi } from "../fungsi/basic";
 import { StatePopUp } from "./PopUp";
+import { getParameterBc } from "../fitur_state/dataParam";
+import { getIdPengguna } from "../fitur_state/pengguna";
 
 const Konten = () => {
   const navigasi = useNavigate();
   const dispatch = useAppDispatch();
   const sesiAktif = useAppSelector(getSesiAktif);
   const halaman = useAppSelector(getHalaman);
+  const parameterBc = useAppSelector(getParameterBc);
+  const objekIdPengguna = useAppSelector(getIdPengguna);
 
   // PENJUALAN
   const initialStatePenjualan: StatePenjualan = {
@@ -53,6 +57,7 @@ const Konten = () => {
     kodeTokoListTabel: [],
     tokoListTabel: [],
     customerListTabel: [],
+    customerNameListTabel: [],
     klasifikasiListTabel: [],
     salespersonListTabel: [],
     regionListTabel: [],
@@ -171,6 +176,13 @@ const Konten = () => {
         std: "",
       },
     },
+    approver: [],
+    konfigurasiEmail: {
+      serviceId: parameterBc.email.SERVICE_ID,
+      templateId: parameterBc.email.TEMPLATE_ID,
+      apiKey: parameterBc.email.API_KEY,
+    },
+    objekIdPengguna,
   };
   const [stateKelayakanTokoBaru, setStateKelayakanTokoBaru] = useState(
     initialStateKelayakanTokoBaru
@@ -185,7 +197,11 @@ const Konten = () => {
 
   useEffect(() => {
     async function proposalDanInput() {
-      await ambilProposal(dispatch, setStateKelayakanTokoBaru);
+      await ambilProposalDanApproval(
+        dispatch,
+        parameterBc.new_store_approver.id.map((approver: any) => approver.$oid),
+        setStateKelayakanTokoBaru
+      );
       await ambilInputItemModelKelayakanTokoBaru(setStateKelayakanTokoBaru);
     }
 

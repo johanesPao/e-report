@@ -40,6 +40,7 @@ import {
   setCompPengguna,
   setDepartemenPengguna,
   setEmailPengguna,
+  setIdPengguna,
   setNamaPengguna,
   setPeranPengguna,
 } from "../fitur_state/pengguna";
@@ -53,6 +54,7 @@ export const toTitle = (kalimat: string) => {
 export const resetAplikasi = (dispatch: any) => {
   dispatch(setSesiAktif(false));
   dispatch(setProsesAuth(false));
+  dispatch(setIdPengguna(""));
   dispatch(setNamaPengguna(""));
   dispatch(setEmailPengguna(""));
   dispatch(setDepartemenPengguna(""));
@@ -166,6 +168,27 @@ export interface Filter {
   region?: string[];
 }
 
+export interface ResponJSON {
+  status: boolean;
+}
+
+export interface ResponJSONSemuaProposalTokoBaru extends ResponJSON {
+  konten: DataKelayakanTokoBaru[];
+}
+
+export interface ResponJSONSemuaApprovalTokoBaru extends ResponJSON {
+  konten: IApprovalTokoBaru[];
+}
+
+export interface ResponJSONKredensialApproverTokoBaru extends ResponJSON {
+  konten: IKredensialApproverTokoBaru[];
+}
+
+export interface ResponJSONApprovalProposalID extends ResponJSON {
+  approval_count?: number;
+  konten?: IApprovalTokoBaru;
+}
+
 export type DataPenjualan = {
   no_entry: number;
   post_date: string;
@@ -176,6 +199,7 @@ export type DataPenjualan = {
   no_dokumen: string;
   no_dokumen_oth: string;
   source_no: string;
+  customer_name: string;
   classification: string;
   salesperson: string;
   region: string;
@@ -204,6 +228,7 @@ export type DataPenjualan = {
   total_margin_aft_vat_rp: number;
   total_margin_aft_vat_persen: number;
   total_bruto_aft_vat: number;
+  obsolete: string;
 };
 
 export type DataPenerimaanBarang = {
@@ -330,7 +355,7 @@ type RemarkProposal = {
   konten: string;
 };
 
-export type DataTabelKelayakanTokoBaru = {
+export type TDataTabelKelayakanTokoBaru = {
   proposal_id: string;
   versi: number;
   sbu: string;
@@ -343,7 +368,41 @@ export type DataTabelKelayakanTokoBaru = {
   dibuat: Date;
   diedit: Date;
   status: EStatusProposalTokoBaru;
+  approval_status: IApproverKredensialTokoBaruStatus[];
 };
+
+export interface IApprovalTokoBaru {
+  proposal_id: string;
+  approval: IApproverTokoBaru[];
+}
+
+export interface IObjekIdApprover {
+  id: IMongoObjectIdString;
+}
+
+export interface IApproverTokoBaru extends IObjekIdApprover {
+  status: EStatusApprovalTokoBaru;
+}
+
+export interface IKredensialApproverTokoBaru extends IObjekIdApprover {
+  nama: string;
+  email: string;
+}
+
+export interface IApproverKredensialTokoBaruStatus extends IApproverTokoBaru {
+  nama: string;
+  email: string;
+}
+
+export interface IMongoObjectIdString {
+  $oid: string;
+}
+
+export enum EStatusApprovalTokoBaru {
+  "PENDING",
+  "DITERIMA",
+  "DITOLAK",
+}
 
 export interface Formulir {
   log: string[];
@@ -406,6 +465,10 @@ export interface IDisabilitasInputKelayakanTokoBaru {
   biaya_sewa: boolean;
   lama_sewa: boolean;
   biaya_fitout: boolean;
+  remark: boolean;
+  tombol_satu: boolean;
+  tombol_dua: boolean;
+  tombol_tiga: boolean;
 }
 
 export interface IPopUpProps {
