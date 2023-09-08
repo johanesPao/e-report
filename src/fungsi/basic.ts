@@ -189,6 +189,80 @@ export interface ResponJSONApprovalProposalID extends ResponJSON {
   konten?: IApprovalTokoBaru;
 }
 
+export enum ECompany {
+  PRI = "PRI",
+  PNT = "PNT",
+}
+
+export enum EDepartemenPengguna {
+  ADMINISTRATOR = "all",
+  FINANCE_ACCOUNTING = "fa",
+  BUSINESS_DEVELOPMENT = "bizdev",
+  MERCHANDISING = "merchandising",
+}
+
+export enum EPeranPengguna {
+  ADMINISTRATOR = "superadmin",
+  STAFF = "staff",
+  MANAJER = "manajer",
+}
+
+export interface IIconColorMenu {
+  icon: React.ReactNode;
+  color: string;
+}
+
+export interface IMenuDirectLinks extends IIconColorMenu {
+  label: ETampilanIndukMenuHalaman;
+  links?: INavLinkMenu[];
+  subMenu?: IMenuDirectLinks[];
+}
+
+export interface INavLinkMenu extends IIconColorMenu {
+  label: ETampilanLinkHalaman;
+  link: EHalaman;
+}
+
+export enum EHalaman {
+  PENJUALAN = "penjualan",
+  PENERIMAAN_BARANG = "penerimaanBarang",
+  STOK = "stok",
+  KETERSEDIAAN_STOK = "ketersediaanStok",
+  BUYING_PROPOSAL = "buyingProposal",
+  LABA_RUGI_TOKO = "labaRugiToko",
+  KELAYAKAN_TOKO_BARU = "kelayakanTokoBaru",
+}
+
+export enum ETampilanLinkHalaman {
+  PENJUALAN = "Penjualan",
+  PENERIMAAN_BARANG = "Penerimaan Barang",
+  STOK = "Stok",
+  KETERSEDIAAN_STOK = "Ketersediaan Stok",
+  BUYING_PROPOSAL = "Buying Proposal",
+  LABA_RUGI_TOKO = "Laba & Rugi Toko",
+  KELAYAKAN_TOKO_BARU = "Studi Kelayakan Toko Baru",
+}
+
+export enum ETampilanIndukMenuHalaman {
+  DASHBOARD = "Dashboard",
+  DATA = "Data",
+  DEPARTEMEN = "Departemen",
+  MERCHANDISING = "Merchandising",
+  OPERATION = "Operation",
+  FINANCE_ACCOUNTING = "Finance & Accounting",
+  BUSINESS_DEVELOPMENT = "Business Development",
+}
+
+export interface IAksesMenu {
+  penjualan: boolean;
+  penerimaanBarang: boolean;
+  stok: boolean;
+  ketersediaanStok: boolean;
+  buyingProposal: boolean;
+  labaRugiToko: boolean;
+  kelayakanTokoBaru: boolean;
+}
+
 export type DataPenjualan = {
   no_entry: number;
   post_date: string;
@@ -624,16 +698,6 @@ export enum ETindakanProposalTokoBaru {
 export enum EModeTeksOutputNewStore {
   "INCOME" = "income",
   "EXPENSE" = "expense",
-}
-
-export enum EHalaman {
-  "PENJUALAN" = "penjualan",
-  "PENERIMAAN_BARANG" = "penerimaanBarang",
-  "STOK" = "stok",
-  "KETERSEDIAAN_STOK" = "ketersediaanStok",
-  "BUYING_PROPOSAL" = "buyingProposal",
-  "LABA_RUGI_TOKO" = "labaRugiToko",
-  "KELAYAKAN_TOKO_BARU" = "kelayakanTokoBaru",
 }
 
 export enum EModePopUpKelayakanTokoBaru {
