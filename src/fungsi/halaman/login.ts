@@ -292,13 +292,6 @@ const muatLokasi = async (
   dispatch: any
 ) => {
   const arrayLokasiLabel: DataMultiSelect[][] = [];
-  // `${
-  //   compPengguna.length === 1
-  //     ? compPengguna[0].toLowerCase()
-  //     : compPengguna[
-  //         compPengguna.indexOf(parameterBc.comp.pri)
-  //       ].toLowerCase()
-  // }`
   if (compPengguna.length === 1) {
     const respon = await lokasiLabel(
       parameterBc,

@@ -13,6 +13,7 @@ import { getCompPengguna } from "../fitur_state/pengguna";
 import { getHalaman, getIndeksData, setIndeksData } from "../fitur_state/event";
 import { useState } from "react";
 import { useViewportSize } from "@mantine/hooks";
+import { EHalaman } from "../fungsi/basic";
 
 function Layout({
   children,
@@ -25,6 +26,12 @@ function Layout({
   const halaman = useAppSelector(getHalaman);
   const dispatch = useAppDispatch();
   const [comp, toggleComp] = useState(false);
+  // pada halaman ini, kunci switch
+  const kunciSwitch = [
+    EHalaman.KETERSEDIAAN_STOK.toString(),
+    EHalaman.BUYING_PROPOSAL.toString(),
+    EHalaman.KELAYAKAN_TOKO_BARU.toString(),
+  ];
 
   const useStyles = createStyles(() => ({
     inner: {
@@ -70,7 +77,7 @@ function Layout({
                     color="red"
                     checked={comp}
                     onChange={(event) => set_comp(event.currentTarget.checked)}
-                    disabled={halaman === "ketersediaanStok"}
+                    disabled={kunciSwitch.includes(halaman)}
                   />
                 </Group>
               )}

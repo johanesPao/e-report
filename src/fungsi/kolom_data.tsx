@@ -15,6 +15,8 @@ import {
   unduhTabelKeExcel,
   EStatusApprovalTokoBaru,
   IApproverKredensialTokoBaruStatus,
+  EDepartemenPengguna,
+  EPeranPengguna,
 } from "./basic";
 import { StatePenjualan } from "./halaman/penjualan";
 import { StatePenerimaanBarang } from "./halaman/penerimaanBarang";
@@ -76,6 +78,8 @@ export interface TableProps {
 export const buatPropsTabel = (
   halaman: string,
   objekIdPengguna: string,
+  departemen: string,
+  peran: string,
   data: any[],
   memuat: boolean,
   setPopUp?: React.Dispatch<React.SetStateAction<StatePopUp>>
@@ -203,23 +207,26 @@ export const buatPropsTabel = (
           return (
             <Box sx={{ display: "flex", flexWrap: "nowrap", gap: "15px" }}>
               <Title order={2}>Studi Kelayakan Toko Baru</Title>
-              <Tooltip
-                label="Buat Proposal Toko Baru"
-                withArrow
-                transitionProps={{ transition: "rotate-left", duration: 300 }}
-                position="right"
-                pos="fixed"
-                color="blue"
-              >
-                <ActionIcon
-                  variant="filled"
+              {departemen === EDepartemenPengguna.BUSINESS_DEVELOPMENT &&
+              peran === EPeranPengguna.MANAJER ? (
+                <Tooltip
+                  label="Buat Proposal Toko Baru"
+                  withArrow
+                  transitionProps={{ transition: "rotate-left", duration: 300 }}
+                  position="right"
+                  pos="fixed"
                   color="blue"
-                  onClick={() => popUpPenambahanProposal()}
-                  size="2em"
                 >
-                  <IconPlus size="1em" />
-                </ActionIcon>
-              </Tooltip>
+                  <ActionIcon
+                    variant="filled"
+                    color="blue"
+                    onClick={() => popUpPenambahanProposal()}
+                    size="2em"
+                  >
+                    <IconPlus size="1em" />
+                  </ActionIcon>
+                </Tooltip>
+              ) : null}
             </Box>
           );
         },
@@ -284,69 +291,77 @@ export const buatPropsTabel = (
                   </Tooltip>
                 ) : null
               }
-              {/* SUNTING atau HAPUS hanya ada jika status proposal 0 (DRAFT) */}
-              {row.original.status == EStatusProposalTokoBaru.DRAFT ? (
-                <>
-                  <Tooltip
-                    label={`Sunting Perubahan untuk Proposal ${row.original.proposal_id}`}
-                    withArrow
-                    transitionProps={{
-                      transition: "rotate-left",
-                      duration: 300,
-                    }}
-                    position="left"
-                    pos="fixed"
-                    color="orange"
-                  >
-                    <ActionIcon
-                      variant="light"
-                      color={"orange"}
-                      onClick={() => {
-                        if (setPopUp !== undefined) {
-                          setPopUp((stateSebelumnya) => ({
-                            ...stateSebelumnya,
-                            togglePopUp: true,
-                            judulPopUp: `Sunting ${row.original.proposal_id}`,
-                            modeProposal: EModePopUpKelayakanTokoBaru.SUNTING,
-                            proposalID: row.original.proposal_id,
-                          }));
-                        }
+              {
+                // SUNTING atau HAPUS hanya ada jika status proposal 0 (DRAFT)
+                // dan deptartemen saat ini adalah BUSINESS_DEVELOPMENT serta
+                // peran MANAJER
+                [
+                  row.original.status == EStatusProposalTokoBaru.DRAFT,
+                  departemen === EDepartemenPengguna.BUSINESS_DEVELOPMENT &&
+                    peran === EPeranPengguna.MANAJER,
+                ].every((kondisi) => kondisi === true) ? (
+                  <>
+                    <Tooltip
+                      label={`Sunting Perubahan untuk Proposal ${row.original.proposal_id}`}
+                      withArrow
+                      transitionProps={{
+                        transition: "rotate-left",
+                        duration: 300,
                       }}
+                      position="left"
+                      pos="fixed"
+                      color="orange"
                     >
-                      <IconHomeQuestion />
-                    </ActionIcon>
-                  </Tooltip>
-                  <Tooltip
-                    label={`Hapus Proposal ${row.original.proposal_id}?`}
-                    withArrow
-                    transitionProps={{
-                      transition: "rotate-left",
-                      duration: 300,
-                    }}
-                    position="left"
-                    pos="fixed"
-                    color="red"
-                  >
-                    <ActionIcon
-                      variant="light"
-                      color={"red"}
-                      onClick={() => {
-                        if (setPopUp !== undefined) {
-                          setPopUp((stateSebelumnya) => ({
-                            ...stateSebelumnya,
-                            togglePopUp: true,
-                            judulPopUp: `Hapus ${row.original.proposal_id}`,
-                            modeProposal: EModePopUpKelayakanTokoBaru.HAPUS,
-                            proposalID: row.original.proposal_id,
-                          }));
-                        }
+                      <ActionIcon
+                        variant="light"
+                        color={"orange"}
+                        onClick={() => {
+                          if (setPopUp !== undefined) {
+                            setPopUp((stateSebelumnya) => ({
+                              ...stateSebelumnya,
+                              togglePopUp: true,
+                              judulPopUp: `Sunting ${row.original.proposal_id}`,
+                              modeProposal: EModePopUpKelayakanTokoBaru.SUNTING,
+                              proposalID: row.original.proposal_id,
+                            }));
+                          }
+                        }}
+                      >
+                        <IconHomeQuestion />
+                      </ActionIcon>
+                    </Tooltip>
+                    <Tooltip
+                      label={`Hapus Proposal ${row.original.proposal_id}?`}
+                      withArrow
+                      transitionProps={{
+                        transition: "rotate-left",
+                        duration: 300,
                       }}
+                      position="left"
+                      pos="fixed"
+                      color="red"
                     >
-                      <IconHomeX />
-                    </ActionIcon>
-                  </Tooltip>
-                </>
-              ) : null}
+                      <ActionIcon
+                        variant="light"
+                        color={"red"}
+                        onClick={() => {
+                          if (setPopUp !== undefined) {
+                            setPopUp((stateSebelumnya) => ({
+                              ...stateSebelumnya,
+                              togglePopUp: true,
+                              judulPopUp: `Hapus ${row.original.proposal_id}`,
+                              modeProposal: EModePopUpKelayakanTokoBaru.HAPUS,
+                              proposalID: row.original.proposal_id,
+                            }));
+                          }
+                        }}
+                      >
+                        <IconHomeX />
+                      </ActionIcon>
+                    </Tooltip>
+                  </>
+                ) : null
+              }
             </Box>
           );
         },

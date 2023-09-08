@@ -26,115 +26,100 @@ import {
   getCompPengguna,
   getDepartemenPengguna,
 } from "../../fitur_state/pengguna";
-import { getParameterBc } from "../../fitur_state/dataParam";
 import { getIndeksData } from "../../fitur_state/event";
+import {
+  IAksesMenu,
+  EHalaman,
+  IMenuDirectLinks,
+  ETampilanIndukMenuHalaman,
+  ETampilanLinkHalaman,
+  ECompany,
+  EDepartemenPengguna,
+} from "../../fungsi/basic";
 
-interface NavLinkProp {
-  icon: React.ReactNode;
-  color: string;
-  label: string;
-  links?: {
-    icon: React.ReactNode;
-    color: string;
-    label: string;
-    link: string;
-  }[];
-  subMenu?: {
-    icon: React.ReactNode;
-    color: string;
-    label: string;
-    links?: {
-      icon: React.ReactNode;
-      color: string;
-      label: string;
-      link: string;
-    }[];
-  }[];
-}
-
-const halaman: NavLinkProp[] = [
+const halaman: IMenuDirectLinks[] = [
   {
     icon: <IconChartDots size="4rem" />,
     color: "green",
-    label: "Dashboard",
+    label: ETampilanIndukMenuHalaman.DASHBOARD,
   },
   {
     icon: <IconReportSearch size="4rem" />,
     color: "teal",
-    label: "Data",
+    label: ETampilanIndukMenuHalaman.DATA,
     links: [
       {
         icon: <IconBinary size="3rem" />,
         color: "blue",
-        label: "Penjualan",
-        link: "penjualan",
+        label: ETampilanLinkHalaman.PENJUALAN,
+        link: EHalaman.PENJUALAN,
       },
       {
         icon: <IconBinary size="3rem" />,
         color: "blue",
-        label: "Penerimaan Barang",
-        link: "penerimaanBarang",
+        label: ETampilanLinkHalaman.PENERIMAAN_BARANG,
+        link: EHalaman.PENERIMAAN_BARANG,
       },
       {
         icon: <IconBinary size="3rem" />,
         color: "blue",
-        label: "Stok",
-        link: "stok",
+        label: ETampilanLinkHalaman.STOK,
+        link: EHalaman.STOK,
       },
       {
         icon: <IconBinary size="3rem" />,
         color: "blue",
-        label: "Ketersediaan Stok",
-        link: "ketersediaanStok",
+        label: ETampilanLinkHalaman.KETERSEDIAAN_STOK,
+        link: EHalaman.KETERSEDIAAN_STOK,
       },
     ],
   },
   {
     icon: <IconDeviceDesktopAnalytics size="4rem" />,
     color: "gray",
-    label: "Departemen",
+    label: ETampilanIndukMenuHalaman.DEPARTEMEN,
     subMenu: [
       {
         icon: <IconShoe size="4rem" />,
         color: "blue",
-        label: "Merchandising",
+        label: ETampilanIndukMenuHalaman.MERCHANDISING,
         links: [
           {
             icon: <IconDeviceDesktopAnalytics size="4rem" />,
             color: "red",
-            label: "Buying Proposal",
-            link: "buyingProposal",
+            label: ETampilanLinkHalaman.BUYING_PROPOSAL,
+            link: EHalaman.BUYING_PROPOSAL,
           },
         ],
       },
       {
         icon: <IconSubtask size="4rem" />,
         color: "violet",
-        label: "Operation",
+        label: ETampilanIndukMenuHalaman.OPERATION,
       },
       {
         icon: <IconCurrencyDollar size="4rem" />,
         color: "green",
-        label: "Finance & Accounting",
+        label: ETampilanIndukMenuHalaman.FINANCE_ACCOUNTING,
         links: [
           {
             icon: <IconDeviceDesktopAnalytics size="4rem" />,
             color: "red",
-            label: "Store Profit & Loss",
-            link: "labaRugiToko",
+            label: ETampilanLinkHalaman.LABA_RUGI_TOKO,
+            link: EHalaman.LABA_RUGI_TOKO,
           },
         ],
       },
       {
         icon: <IconBackhoe size="4rem" />,
         color: "red",
-        label: "Business Development",
+        label: ETampilanIndukMenuHalaman.BUSINESS_DEVELOPMENT,
         links: [
           {
             icon: <IconDeviceDesktopAnalytics size="4rem" />,
             color: "red",
-            label: "New Store Feasibility Study",
-            link: "kelayakanTokoBaru",
+            label: ETampilanLinkHalaman.KELAYAKAN_TOKO_BARU,
+            link: EHalaman.KELAYAKAN_TOKO_BARU,
           },
         ],
       },
@@ -165,7 +150,7 @@ function NavLink({
   links,
   subMenu,
   onNavlinkClick,
-}: NavLinkProp & { onNavlinkClick: (halamanBaru: string) => void }) {
+}: IMenuDirectLinks & { onNavlinkClick: (halamanBaru: string) => void }) {
   const { classes, theme } = useStyles();
   const [menuTerbuka, toggleMenuTerbuka] = useState(false);
   const [subMenuTerbuka, toggleSubMenuTerbuka] = useState(
@@ -175,12 +160,57 @@ function NavLink({
   const adaSubMenu = Array.isArray(subMenu);
   const compPengguna = useAppSelector(getCompPengguna);
   const deptPengguna = useAppSelector(getDepartemenPengguna);
-  const parameterBc = useAppSelector(getParameterBc);
   const indeksData = useAppSelector(getIndeksData);
-  const singleMode = compPengguna.length === 1;
-  const compPRI: boolean = !singleMode
-    ? indeksData === 0
-    : compPengguna[0] === parameterBc.comp.pri;
+  const singleCompanyMode = compPengguna.length === 1;
+  const PRI = singleCompanyMode
+    ? compPengguna[0] === ECompany.PRI
+    : compPengguna.indexOf(ECompany.PRI) === indeksData;
+  const administrator = deptPengguna === EDepartemenPengguna.ADMINISTRATOR;
+
+  // DEFINISI STATE AWAL AKSES MENU
+  // penting diingat state ini akan dipergunakan pada state disabled dari link,
+  // maka state ini akan merupakan reverse boolean yang berarti false
+  // berarti memiliki akses ke menu yang dimaksud
+  let aksesMenu: Partial<IAksesMenu> = {
+    penjualan: false,
+    penerimaanBarang: false,
+    stok: false,
+    ketersediaanStok: false,
+    buyingProposal: false,
+    labaRugiToko: false,
+    kelayakanTokoBaru: false,
+  };
+
+  // STATE AKSES MENU BERDASAR COMPANY
+  aksesMenu = {
+    ...aksesMenu,
+    ketersediaanStok: PRI,
+    buyingProposal: !PRI,
+    kelayakanTokoBaru: !PRI,
+  };
+
+  // STATE AKSES MENU BERDASAR DEPARTEMEN
+  // administrator skip assignment ini
+  !administrator &&
+    (aksesMenu = {
+      ...aksesMenu,
+      labaRugiToko: deptPengguna !== EDepartemenPengguna.FINANCE_ACCOUNTING,
+      // lakukan evaluasi hanya jika kelayakanTokoBaru sebelumnya pada
+      // company level adalah false. jika kelayakanTokoBaru pada company
+      // level adalah true, maka kembalikan true
+      // // kelayakanTokoBaru: !aksesMenu.kelayakanTokoBaru
+      // // ? // jika bukan BUSINESS_DEVELOPMENT dan bukan FINANCE_ACCOUNTING MANAJER
+      // evaluasi true, else false
+      // // [
+      // // deptPengguna !== EDepartemenPengguna.BUSINESS_DEVELOPMENT,
+      // // deptPengguna !== EDepartemenPengguna.FINANCE_ACCOUNTING &&
+      // //  peranPengguna !== EPeranPengguna.MANAJER,
+      // // ].every((state) => state === true)
+      // // : true,
+      // setelah dipertimbangkan matang - matang, kelayakanTokoBaru bisa dilihat oleh
+      // semua departemen PRI, namun pembuatan proposal toko baru dan persetujuan
+      // diatur dalam halaman Kelayakan Toko Baru (lihat kolom_data.tsx)
+    });
 
   const toggleSubMenu = (index: number) => {
     toggleSubMenuTerbuka((stateSebelumnya) => {
@@ -194,24 +224,19 @@ function NavLink({
     onNavlinkClick(konten);
   };
 
+  const cekDisabilitasLink = (
+    aksesMenu: Partial<IAksesMenu>,
+    link: EHalaman
+  ) => {
+    // ambil akses menu dengan memanfaatkan indexing value berdasar index
+    // Object.keys yang sama dengan subMenuItem.link (EHalaman) pada enumerasi
+    // aksesMenu (IAksesMenu)
+    return Object.values(aksesMenu)[Object.keys(aksesMenu).indexOf(link)];
+  };
+
   const itemSubMenu = (adaSubMenu ? subMenu : []).map((item, index) => {
     const linkSubMenu = item.links?.map((subMenuItem) => {
-      const ketersediaanStokDisabled =
-        subMenuItem.link === "ketersediaanStok"
-          ? singleMode
-            ? compPRI
-              ? true
-              : false
-            : indeksData === 0
-            ? true
-            : false
-          : false;
-      const labaRugiTokoDisabled =
-        subMenuItem.link === "labaRugiToko"
-          ? deptPengguna.includes("fa") || deptPengguna.includes("all")
-            ? false
-            : true
-          : false;
+      const linkDisabled = cekDisabilitasLink(aksesMenu, subMenuItem.link);
       const warnaTeksDisabled = theme.colors.gray[7];
       const warnaTeks = theme.colors.gray[5];
 
@@ -223,7 +248,7 @@ function NavLink({
               className={classes.link}
               key={subMenuItem.label}
               onClick={
-                ketersediaanStokDisabled || labaRugiTokoDisabled
+                linkDisabled
                   ? undefined
                   : () => navigasiKonten(subMenuItem.link)
               }
@@ -232,16 +257,13 @@ function NavLink({
                 "&:hover": {
                   backgroundColor:
                     theme.colorScheme === "dark"
-                      ? !ketersediaanStokDisabled || !labaRugiTokoDisabled
+                      ? !linkDisabled
                         ? theme.colors.dark[9]
                         : theme.colors.dark[7]
                       : theme.colors.gray[0],
                   // borderRadius: theme.radius.lg,
                 },
-                color:
-                  ketersediaanStokDisabled || labaRugiTokoDisabled
-                    ? warnaTeksDisabled
-                    : warnaTeks,
+                color: linkDisabled ? warnaTeksDisabled : warnaTeks,
               }}
             >
               {subMenuItem.label}
@@ -303,17 +325,10 @@ function NavLink({
   });
 
   const itemLink = (adaLinks ? links : []).map((item) => {
-    const disabled =
-      item.link === "ketersediaanStok"
-        ? singleMode
-          ? compPRI
-            ? true
-            : false
-          : indeksData === 0
-          ? true
-          : false
-        : false;
-    const warnaTeks = disabled ? theme.colors.gray[7] : theme.colors.gray[5];
+    const linkDisabled = cekDisabilitasLink(aksesMenu, item.link);
+    const warnaTeks = linkDisabled
+      ? theme.colors.gray[7]
+      : theme.colors.gray[5];
 
     return (
       <React.Fragment key={item.label}>
@@ -322,13 +337,13 @@ function NavLink({
             component="a"
             className={classes.link}
             key={item.label}
-            onClick={disabled ? undefined : () => navigasiKonten(item.link)}
+            onClick={linkDisabled ? undefined : () => navigasiKonten(item.link)}
             sx={{
               marginLeft: "40px",
               "&:hover": {
                 backgroundColor:
                   theme.colorScheme === "dark"
-                    ? !disabled
+                    ? !linkDisabled
                       ? theme.colors.dark[9]
                       : theme.colors.dark[7]
                     : theme.colors.gray[0],
