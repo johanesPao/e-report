@@ -32,7 +32,7 @@ jobs:
       - name: set rahasia.rs
         env: 
            KONTEN_RAHASIA_RS: ${{ secrets.KONTEN_RAHASIA_RS }}
-        run: echo $KONTEN_RAHASIA_RS >> src-tauri/fungsi/rahasia.rs
+        run: echo $KONTEN_RAHASIA_RS >> src-tauri/src/fungsi/rahasia.rs
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
