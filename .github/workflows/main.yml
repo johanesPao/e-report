@@ -30,15 +30,12 @@ jobs:
       - name: Melakukan instalasi frontend React Typescript
         run: npm install
       - name: Set rahasia.rs
+        shell: bash
         env: 
            KONTEN_RAHASIA_RS: ${{ secrets.KONTEN_RAHASIA_RS }}
         run: |
            echo "Current Directory $(pwd)"
            echo $KONTEN_RAHASIA_RS >> src-tauri/src/fungsi/rahasia.rs
-           if [[ "${{ matrix.platform }}" == "windows-latest" ]]; then
-             # Ganti forward slas dengan backslash untuk windows
-             sed -i 's/\//\\/g' src-tauri/src/fungsi/rahasia.rs
-           fi
            ls -l src-tauri/src/fungsi/rahasia.rs
       - uses: tauri-apps/tauri-action@v0
         env:
