@@ -34,7 +34,7 @@ jobs:
            KONTEN_RAHASIA_RS: ${{ secrets.KONTEN_RAHASIA_RS }}
         if: matrix.platform != 'windows-latest'
         run: |
-           echo "Current Directory $(pwd)
+           echo "Current Directory $(pwd)"
            echo $KONTEN_RAHASIA_RS >> src-tauri/src/fungsi/rahasia.rs
       - name: Set rahasia.rs (untuk windows)
         env:
