@@ -343,6 +343,39 @@ pub async fn kueri_penerimaan_barang(
     }
 }
 
+pub async fn kueri_invoice_ext_dok_grn(
+    kueri: Kueri<'_>,
+) -> Result<HasilKueriInvoiceExtDok, Box<dyn std::error::Error>> {
+    match kueri.judul {
+        "noDokPurInvDanEdtDok" => {
+            let mut vektor_data = Vec::new();
+            let hasil_kueri = &mssql::eksekusi_kueri(kueri.kueri.to_string()).await?[0];
+            if hasil_kueri.len() > 0 {
+                for baris in 0..hasil_kueri.len() {
+                    let no_dokumen_pr =
+                        hasil_kueri[baris].get(0).map(|teks: &str| teks.to_string());
+                    let no_dokumen_piv =
+                        hasil_kueri[baris].get(1).map(|teks: &str| teks.to_string());
+                    let no_dokumen_ext =
+                        hasil_kueri[baris].get(2).map(|teks: &str| teks.to_string());
+                    let oricode = hasil_kueri[baris].get(3).map(|teks: &str| teks.to_string());
+                    let ukuran = hasil_kueri[baris].get(4).map(|teks: &str| teks.to_string());
+                    let data_invoice_ext_dok = DataInvoiceExtDok {
+                        no_dokumen_pr,
+                        no_dokumen_piv,
+                        no_dokumen_ext,
+                        oricode,
+                        ukuran,
+                    };
+                    vektor_data.push(data_invoice_ext_dok);
+                }
+            }
+            Ok(HasilKueriInvoiceExtDok::DataInvoiceExtDokEnum(vektor_data))
+        }
+        _ => Err("Shouldn't happened".into()),
+    }
+}
+
 pub async fn kueri_stok(kueri: Kueri<'_>) -> Result<HasilKueriStok, Box<dyn std::error::Error>> {
     match kueri.judul {
         "endingStokByILE" => {

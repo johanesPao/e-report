@@ -147,6 +147,16 @@ pub struct DataPenerimaanBarang {
 
 #[derive(Clone, Debug, FieldNamesAsArray)]
 #[field_names_as_array(visibility = "pub")]
+pub struct DataInvoiceExtDok {
+    pub no_dokumen_pr: Option<String>,
+    pub no_dokumen_piv: Option<String>,
+    pub no_dokumen_ext: Option<String>,
+    pub oricode: Option<String>,
+    pub ukuran: Option<String>,
+}
+
+#[derive(Clone, Debug, FieldNamesAsArray)]
+#[field_names_as_array(visibility = "pub")]
 pub struct DataStok {
     pub loc_code: Option<String>,
     pub brand_dim: Option<String>,
@@ -1025,6 +1035,57 @@ impl DataFrameSerial for Vec<DataPenerimaanBarang> {
     }
 }
 
+impl DataFrameSerial for Vec<DataInvoiceExtDok> {
+    fn ke_series(&self) -> Vec<Series> {
+        let mut vektor_no_dokumen_pr = Vec::new();
+        let mut vektor_no_dokumen_piv = Vec::new();
+        let mut vektor_no_dokumen_ext = Vec::new();
+        let mut vektor_oricode = Vec::new();
+        let mut vektor_ukuran = Vec::new();
+
+        for baris in self {
+            for kolom in 0..DataInvoiceExtDok::FIELD_NAMES_AS_ARRAY.len() {
+                match kolom {
+                    0 => vektor_no_dokumen_pr.push(baris.no_dokumen_pr.clone()),
+                    1 => vektor_no_dokumen_piv.push(baris.no_dokumen_piv.clone()),
+                    2 => vektor_no_dokumen_ext.push(baris.no_dokumen_ext.clone()),
+                    3 => vektor_oricode.push(baris.oricode.clone()),
+                    4 => vektor_ukuran.push(baris.ukuran.clone()),
+                    _ => println!("Nothing"),
+                }
+            }
+        }
+
+        let mut vektor_series = Vec::new();
+        for hitung in 0..DataInvoiceExtDok::FIELD_NAMES_AS_ARRAY.len() {
+            match hitung {
+                0 => vektor_series.push(Series::new(
+                    DataInvoiceExtDok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_no_dokumen_pr.clone(),
+                )),
+                1 => vektor_series.push(Series::new(
+                    DataInvoiceExtDok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_no_dokumen_piv.clone(),
+                )),
+                2 => vektor_series.push(Series::new(
+                    DataInvoiceExtDok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_no_dokumen_ext.clone(),
+                )),
+                3 => vektor_series.push(Series::new(
+                    DataInvoiceExtDok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_oricode.clone(),
+                )),
+                4 => vektor_series.push(Series::new(
+                    DataInvoiceExtDok::FIELD_NAMES_AS_ARRAY[hitung],
+                    vektor_ukuran.clone(),
+                )),
+                _ => println!("Nothing"),
+            }
+        }
+        vektor_series
+    }
+}
+
 impl DataFrameSerial for Vec<DataStok> {
     fn ke_series(&self) -> Vec<Series> {
         let mut vektor_loc_code = Vec::new();
@@ -1367,6 +1428,10 @@ pub enum HasilKueriPenjualan {
 
 pub enum HasilKueriPenerimaanBarang {
     DataPenerimaanBarangEnum(Vec<DataPenerimaanBarang>),
+}
+
+pub enum HasilKueriInvoiceExtDok {
+    DataInvoiceExtDokEnum(Vec<DataInvoiceExtDok>),
 }
 
 pub enum HasilKueriStok {

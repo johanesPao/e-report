@@ -697,6 +697,27 @@ async fn handle_data_penerimaan_barang(
 }
 
 #[tauri::command]
+async fn handle_data_invoice_ext_grn(set_kueri: Vec<Kueri<'_>>) -> Result<String, String> {
+    let mut df_utama: DataFrame = DataFrame::default();
+    for kueri in set_kueri {
+        match kueri_bc::kueri_invoice_ext_dok_grn(kueri).await {
+            Ok(hasil) => match hasil {
+                HasilKueriInvoiceExtDok::DataInvoiceExtDokEnum(vektor_data) => {
+                    // Konversi vektor struct hasil kueri ke dalam dataframe polars
+                    let vektor_series = vektor_data.ke_series();
+                    df_utama = DataFrame::new(vektor_series)
+                        .expect("Gagal membuat dataframe utama invoice dan ext dokumen");
+                }
+            },
+            Err(_) => {
+                json!({"status": false, "konten": "Kesalahan dalam matching Enum dengan hasil kueri"}).to_string();
+            }
+        }
+    }
+    Ok(json!({"status": true, "konten": df_utama}).to_string())
+}
+
+#[tauri::command]
 async fn handle_data_stok(
     set_kueri: Vec<Kueri<'_>>,
     filter_data: Filter,
@@ -940,9 +961,7 @@ async fn ambil_semua_proposal_toko_baru() -> Result<String, String> {
             let vector_kosong: Vec<ProposalTokoBaru> = Vec::new();
             Ok(json!({"status": true, "konten": vector_kosong}).to_string())
         }
-        Err(e) => {
-            Err(json!({"status": false, "konten": e.to_string()}).to_string())
-        }
+        Err(e) => Err(json!({"status": false, "konten": e.to_string()}).to_string()),
     }
 }
 
@@ -1032,16 +1051,17 @@ async fn ambil_approval_proposal_toko_baru(proposal_id: String) -> Value {
 async fn update_status_approval_proposal_toko_baru(
     proposal_id: String,
     id_approver: String,
-    status: i32
+    status: i32,
 ) -> Value {
     match mongo::update_status_approval_proposal(
-        &proposal_id, 
-        &ObjectId::parse_str(id_approver)
-            .expect("Gagal parsing string ke dalam ObjectId"), 
-        &status
-    ).await {
+        &proposal_id,
+        &ObjectId::parse_str(id_approver).expect("Gagal parsing string ke dalam ObjectId"),
+        &status,
+    )
+    .await
+    {
         Ok(_) => json!({"status": true}),
-        Err(_) => json!({"status": false})
+        Err(_) => json!({"status": false}),
     }
 }
 
@@ -1174,6 +1194,7 @@ async fn main() {
             kueri_sederhana,
             handle_data_penjualan,
             handle_data_penerimaan_barang,
+            handle_data_invoice_ext_grn,
             handle_data_stok,
             handle_data_ketersediaan_stok,
             handle_data_laba_rugi_toko,

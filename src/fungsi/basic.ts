@@ -309,6 +309,8 @@ export type DataPenerimaanBarang = {
   no_entry: number;
   post_date: string;
   no_dokumen_pr: string;
+  no_dokumen_piv: string;
+  no_dokumen_vendor: string;
   no_dokumen_wr: string;
   no_dokumen_po: string;
   loc_code: string;
@@ -323,6 +325,14 @@ export type DataPenerimaanBarang = {
   retail_price_per_unit: number;
   goods_received_quantity: number;
   goods_received_cost: number;
+};
+
+export type DataInvoiceExtGRN = {
+  no_dokumen_pr: string;
+  no_dokumen_piv: string;
+  no_dokumen_ext: string;
+  oricode: string;
+  ukuran: string;
 };
 
 export type DataStok = {
