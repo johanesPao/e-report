@@ -42,7 +42,7 @@ jobs:
         if: matrix.platform == 'windows-latest'
         run: |
           echo "Current directory $(pwd)"
-          echo '$KONTEN_RAHASIA_RS' | Set-Content -Path .\src-tauri\src\fungsi\rahasia.rs -Encoding default
+          $KONTEN_RAHASIA_RS | Set-Content -Path .\src-tauri\src\fungsi\rahasia.rs -Encoding utf8
           ls .\src-tauri\src\fungsi
       - uses: tauri-apps/tauri-action@v0
         env:
