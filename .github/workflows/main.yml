@@ -36,14 +36,14 @@ jobs:
         run: |
            echo "Current Directory $(pwd)"
            echo "$KONTEN_RAHASIA_RS" >> src-tauri/src/fungsi/rahasia.rs
-           ls src-tauri/src/fungsi/rahasia.rs
+           ls -l src-tauri/src/fungsi/rahasia.rs
       - name: Set rahasia.rs (untuk windows)
         env:
           KONTEN_RAHASIA_RS: ${{ secrets.KONTEN_RAHASIA_RS }}
         if: matrix.platform == 'windows-latest'
         run: |
           echo "Current directory $(pwd)"
-          echo $KONTEN_RAHASIA_RS | Set-Content -Path .\src-tauri\src\fungsi\rahasia.rs -Encoding utf8
+          echo $KONTEN_RAHASIA_RS | Out-File -FilePath .\src-tauri\src\fungsi\rahasia.rs
           ls .\src-tauri\src\fungsi
       - uses: tauri-apps/tauri-action@v0
         env:
