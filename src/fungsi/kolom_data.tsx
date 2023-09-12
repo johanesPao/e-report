@@ -771,6 +771,16 @@ export const definisiKolomPenerimaanBarang = (props: StatePenerimaanBarang) => {
       filterFn: "fuzzy",
     },
     {
+      accessorKey: "no_dokumen_piv",
+      header: "No. Dokumen PIV",
+      filterFn: "fuzzy",
+    },
+    {
+      accessorKey: "no_dokumen_vendor",
+      header: "No. Dokumen Vendor",
+      filterFn: "fuzzy",
+    },
+    {
       accessorKey: "no_dokumen_wr",
       header: "No. Dokumen WR",
       filterFn: "fuzzy",

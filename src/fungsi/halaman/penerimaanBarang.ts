@@ -1,11 +1,16 @@
 import { invoke } from "@tauri-apps/api/tauri";
 import {
+  DataInvoiceExtGRN,
   DataPenerimaanBarang,
   Filter,
   PropsInput,
   StateInputDrawer,
 } from "../basic";
-import { Kueri, penerimaanBarangByILEPostDate } from "../kueri";
+import {
+  Kueri,
+  noDokPurInvDanExtDok,
+  penerimaanBarangByILEPostDate,
+} from "../kueri";
 import { setDataPenerimaanBarang } from "../../fitur_state/dataBank";
 import { notifications } from "@mantine/notifications";
 import React from "react";
@@ -65,7 +70,8 @@ export const tarik_data_penerimaan_barang = async (
   let tglAwalString: string;
   let tglAkhirString: string;
   let arrFilter: Filter;
-  let arrKueri: Kueri[];
+  let arrGRNKueri: Kueri[];
+  let arrDokKueri: Kueri[];
   if (
     props.penerimaanBarang.tglAwal !== null &&
     props.penerimaanBarang.tglAkhir !== null
@@ -83,7 +89,7 @@ export const tarik_data_penerimaan_barang = async (
       prod_cat: props.penerimaanBarang.prodCat,
       lokasi: props.penerimaanBarang.lokasi,
     };
-    arrKueri = [
+    arrGRNKueri = [
       penerimaanBarangByILEPostDate(
         parameterBc,
         tglAwalString,
@@ -91,23 +97,73 @@ export const tarik_data_penerimaan_barang = async (
         compKueriFinal
       ),
     ];
+    arrDokKueri = [noDokPurInvDanExtDok(parameterBc, compKueriFinal)];
 
     try {
       setProps((statePenerimaanBarang) => ({
         ...statePenerimaanBarang,
         muatDataPenerimaanBarang: true,
       }));
-      const respon: string = await invoke("handle_data_penerimaan_barang", {
-        setKueri: arrKueri,
-        filterData: arrFilter,
-      });
-      const hasil = JSON.parse(respon);
-      setFilterDataPenerimaanBarang(setProps, hasil.konten.columns);
-      bacaDataPenerimaanBarang(dispatch, hasil.konten.columns);
-      setProps((statePenerimaanBarang) => ({
-        ...statePenerimaanBarang,
-        muatDataPenerimaanBarang: false,
-      }));
+      // fungsi async GRN
+      const goodsReceivedData = async (
+        setKueri: Kueri[],
+        arrFilter: Filter
+      ) => {
+        const respon: string = await invoke("handle_data_penerimaan_barang", {
+          setKueri,
+          filterData: arrFilter,
+        });
+        return await JSON.parse(respon);
+      };
+      // fungsu async dokumen invoice dan external dok
+      const invoiceDanExtDokData = async (setKueri: Kueri[]) => {
+        const respon: string = await invoke("handle_data_invoice_ext_grn", {
+          setKueri,
+        });
+        return await JSON.parse(respon);
+      };
+      // Promise all async
+      const [GRNData, invoiceExtDokData] = await Promise.all([
+        goodsReceivedData(arrGRNKueri, arrFilter),
+        invoiceDanExtDokData(arrDokKueri),
+      ]);
+
+      // jika GRNData true
+      if (GRNData.status) {
+        // setFilterDataPenerimaanBarang(setProps, GRNData.konten.columns);
+        // bacaDataPenerimaanBarang(dispatch, GRNData.konten.columns);
+        // buat penampung array object DataInvoiceExtGRN
+        let arrInvExtGRN: DataInvoiceExtGRN[] = [];
+        // jika invoiceExtDokData true
+        if (invoiceExtDokData.status) {
+          // buat array object DataInvoiceExtGRN
+          let dataInvoiceExtGRN = invoiceExtDokData.konten.columns;
+          for (
+            let hitung = 0;
+            hitung < dataInvoiceExtGRN[0]["values"].length;
+            hitung++
+          ) {
+            let invExtGRN: DataInvoiceExtGRN = {
+              no_dokumen_pr: dataInvoiceExtGRN[0]["values"][hitung],
+              no_dokumen_piv: dataInvoiceExtGRN[1]["values"][hitung],
+              no_dokumen_ext: dataInvoiceExtGRN[2]["values"][hitung],
+              oricode: dataInvoiceExtGRN[3]["values"][hitung],
+              ukuran: dataInvoiceExtGRN[4]["values"][hitung],
+            };
+            arrInvExtGRN.push(invExtGRN);
+          }
+          console.log(arrInvExtGRN);
+        }
+        bacaDataPenerimaanBarang(
+          dispatch,
+          GRNData.konten.columns,
+          invoiceExtDokData.status ? arrInvExtGRN : undefined
+        );
+        setProps((statePenerimaanBarang) => ({
+          ...statePenerimaanBarang,
+          muatDataPenerimaanBarang: false,
+        }));
+      }
     } catch (e) {
       setProps((statePenerimaanBarang) => ({
         ...statePenerimaanBarang,
@@ -148,34 +204,87 @@ const setFilterDataPenerimaanBarang = (
   }));
 };
 
-const bacaDataPenerimaanBarang = (dispatch: any, data: any[]) => {
+const bacaDataPenerimaanBarang = (
+  dispatch: any,
+  dataGRN: any[],
+  dataInvExt?: DataInvoiceExtGRN[]
+) => {
   let arrDataPenerimaanBarang: DataPenerimaanBarang[] = [];
-  let panjangArray = data[0]["values"].length;
+  let panjangArray = dataGRN[0]["values"].length;
   for (let hitung = 0; hitung < panjangArray; hitung++) {
-    let postDate = new Date(data[1]["values"][hitung]);
+    let postDate = new Date(dataGRN[1]["values"][hitung]);
+    // inisiasi no_dokumen_piv dan no_dokumen_vendor
+    let [no_dokumen_piv, no_dokumen_vendor] = ["", ""];
+    // EXTRACT PURCHASE INVOICE
+    // jika dataInvExt tidak undefined
+    if (dataInvExt !== undefined) {
+      // buat array purchase receipt berdasar dataGRN[2]["values"][hitung], dataGRN[7]["values"][hitung] dan
+      // dataGRN[10]["values"][hitung]
+      const arrPRT = dataInvExt.filter((dokumen) => {
+        return (
+          dokumen.no_dokumen_pr === dataGRN[2]["values"][hitung] &&
+          dokumen.oricode === dataGRN[7]["values"][hitung] &&
+          dokumen.ukuran === dataGRN[10]["values"][hitung]
+        );
+      });
+      const arrPRTLength = arrPRT.length;
+      // jika arrPRTLength <= 0, break
+      switch (arrPRTLength > 0) {
+        // jika arrPRTLength > 0
+        case true:
+          // unik no_dokumen_piv
+          const unikNoDokumenPIV = [
+            ...new Set<string>(arrPRT.map((dokumen) => dokumen.no_dokumen_piv)),
+          ];
+          const unikNoDokumenVendor = [
+            ...new Set<string>(arrPRT.map((dokumen) => dokumen.no_dokumen_ext)),
+          ];
+          no_dokumen_piv =
+            unikNoDokumenPIV.length === 1
+              ? arrPRT[0].no_dokumen_piv
+              : unikNoDokumenPIV.join(", ");
+          no_dokumen_vendor =
+            unikNoDokumenVendor.length === 1
+              ? arrPRT[0].no_dokumen_ext
+              : unikNoDokumenVendor.join(", ");
+          break;
+        default:
+          break;
+      }
+    }
+
     arrDataPenerimaanBarang.push({
-      no_entry: data[0]["values"][hitung].toLocaleString(),
+      no_entry: dataGRN[0]["values"][hitung].toLocaleString(),
       post_date: postDate.toISOString().split("T")[0],
-      no_dokumen_pr: data[2]["values"][hitung],
-      no_dokumen_wr: data[3]["values"][hitung],
-      no_dokumen_po: data[4]["values"][hitung],
-      loc_code: data[5]["values"][hitung],
-      brand_dim: data[6]["values"][hitung],
-      oricode: data[7]["values"][hitung],
-      deskripsi_produk: data[8]["values"][hitung],
-      warna: data[9]["values"][hitung],
-      ukuran: data[10]["values"][hitung],
-      prod_div: data[11]["values"][hitung],
-      prod_grp: data[12]["values"][hitung],
-      prod_cat: data[13]["values"][hitung],
+      no_dokumen_pr: dataGRN[2]["values"][hitung],
+      no_dokumen_piv,
+      no_dokumen_vendor,
+      no_dokumen_wr: dataGRN[3]["values"][hitung],
+      no_dokumen_po: dataGRN[4]["values"][hitung],
+      loc_code: dataGRN[5]["values"][hitung],
+      brand_dim: dataGRN[6]["values"][hitung],
+      oricode: dataGRN[7]["values"][hitung],
+      deskripsi_produk: dataGRN[8]["values"][hitung],
+      warna: dataGRN[9]["values"][hitung],
+      ukuran: dataGRN[10]["values"][hitung],
+      prod_div: dataGRN[11]["values"][hitung],
+      prod_grp: dataGRN[12]["values"][hitung],
+      prod_cat: dataGRN[13]["values"][hitung],
       retail_price_per_unit:
-        data[14]["values"][hitung] !== null ? data[14]["values"][hitung] : 0,
+        dataGRN[14]["values"][hitung] !== null
+          ? dataGRN[14]["values"][hitung]
+          : 0,
       goods_received_quantity:
-        data[15]["values"][hitung] !== null ? data[15]["values"][hitung] : 0,
+        dataGRN[15]["values"][hitung] !== null
+          ? dataGRN[15]["values"][hitung]
+          : 0,
       goods_received_cost:
-        data[16]["values"][hitung] !== null ? data[16]["values"][hitung] : 0,
+        dataGRN[16]["values"][hitung] !== null
+          ? dataGRN[16]["values"][hitung]
+          : 0,
     });
   }
+  console.log(arrDataPenerimaanBarang);
   dispatch(setDataPenerimaanBarang(arrDataPenerimaanBarang));
 };
 

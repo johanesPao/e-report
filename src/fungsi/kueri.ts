@@ -824,6 +824,56 @@ export const penerimaanBarangByILEPostDate = (
   return setKueri;
 };
 
+export const noDokPurInvDanExtDok = (
+  parameterBc: { [key: string]: any },
+  compKueri: string
+) => {
+  const setKueri: Kueri = {
+    judul: "noDokPurInvDanEdtDok",
+    kueri: `
+    WITH ile AS (
+       SELECT DISTINCT 
+              ${parameterBc.kolom_bc.no_doc} [No. Dokumen PR],
+              ${parameterBc.kolom_bc.oricode} [OriCode],
+              ${parameterBc.kolom_bc.size} [Ukuran]
+       FROM [${compKueri}${parameterBc.tabel_bc.jurnal_item_437}]
+       WHERE 
+              ${parameterBc.kolom_bc.no_doc} LIKE '${parameterBc.argumen_bc.pur_receipt_prefix}' AND 
+              ${parameterBc.kolom_bc.oricode} NOT LIKE '${parameterBc.argumen_bc.item_service_prefix}'
+), pur_invoiced AS (
+       SELECT DISTINCT
+              ${parameterBc.kolom_bc.no_doc} [No. Dokumen PIV],
+              ${parameterBc.kolom_bc.no} [OriCode],
+              ${parameterBc.kolom_bc.size} [Ukuran],
+              ${parameterBc.kolom_bc.receipt_no} [No. Dokumen PR]
+       FROM [${compKueri}${parameterBc.tabel_bc.purc_invoice_line_437}]
+), pur_invoiced_header AS (
+       SELECT DISTINCT
+              ${parameterBc.kolom_bc.no} [No. Dokumen PIV],
+              ${parameterBc.kolom_bc.vendor_invoice_no} [No. Dokumen Ext]
+       FROM [${compKueri}${parameterBc.tabel_bc.purc_invoice_head_437}]
+)
+SELECT
+    ile.[No. Dokumen PR],
+    pur_invoiced.[No. Dokumen PIV],
+    pur_invoiced_header.[No. Dokumen Ext],
+    ile.[OriCode],
+    ile.[Ukuran]
+FROM ile
+LEFT JOIN pur_invoiced
+ON 
+    ile.[No. Dokumen PR] = pur_invoiced.[No. Dokumen PR] AND
+    ile.[OriCode] = pur_invoiced.[OriCode] AND
+    ile.[Ukuran] = pur_invoiced.[Ukuran]
+LEFT JOIN pur_invoiced_header
+ON
+    pur_invoiced.[No. Dokumen PIV] = pur_invoiced_header.[No. Dokumen PIV]
+    `,
+  };
+  console.log(setKueri.kueri);
+  return setKueri;
+};
+
 export const endingStokByILE = (
   parameterBc: { [key: string]: any },
   tglAkhir: string,
