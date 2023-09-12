@@ -43,7 +43,7 @@ jobs:
         if: matrix.platform == 'windows-latest'
         run: |
           echo "Current directory $(pwd)"
-          echo $KONTEN_RAHASIA_RS | Out-File -FilePath .\src-tauri\src\fungsi\rahasia.rs
+          $KONTEN_RAHASIA_RS | Out-File -FilePath .\src-tauri\src\fungsi\rahasia.rs
           ls .\src-tauri\src\fungsi
       - uses: tauri-apps/tauri-action@v0
         env:
