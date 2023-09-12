@@ -36,7 +36,7 @@ jobs:
       - name: Set rahasia.rs (untuk windows)
         env:
           KONTEN_RAHASIA_RS: ${{ secrets.KONTEN_RAHASIA_RS }}
-        if: matrix-platform == 'windows-latest'
+        if: matrix.platform == 'windows-latest'
         run: echo $KONTEN_RAHASIA_RS | Out-File -FilePath .\src-tauri\src\fungsi\rahasia.rs
       - uses: tauri-apps/tauri-action@v0
         env:
