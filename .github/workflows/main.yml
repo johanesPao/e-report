@@ -29,23 +29,18 @@ jobs:
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
       - name: Melakukan instalasi frontend React Typescript
         run: npm install
-      - name: Set rahasia.rs (untuk non-windows, unix based)
+      - name: Set rahasia.rs
         env: 
            KONTEN_RAHASIA_RS: ${{ secrets.KONTEN_RAHASIA_RS }}
         if: matrix.platform != 'windows-latest'
         run: |
            echo "Current Directory $(pwd)"
-           echo "$KONTEN_RAHASIA_RS" >> src-tauri/src/fungsi/rahasia.rs
+           echo $KONTEN_RAHASIA_RS >> src-tauri/src/fungsi/rahasia.rs
+           if [[ "${{ matrix.platform }}" == "windows-latest" ]]; then
+             # Ganti forward slas dengan backslash untuk windows
+             sed -i 's/\//\\/g' src-tauri/src/fungsi/rahasia.rs
+           fi
            ls -l src-tauri/src/fungsi/rahasia.rs
-      - name: Set rahasia.rs (untuk windows)
-        env:
-          KONTEN_RAHASIA_RS: ${{ secrets.KONTEN_RAHASIA_RS }}
-        if: matrix.platform == 'windows-latest'
-        run: |
-          echo "Current directory $(pwd)"
-          echo $KONTEN_RAHASIA_RS | Out-File -FilePath .\src-tauri\src\fungsi\rahasia.rs -Append
-          ls .\src-tauri\src\fungsi
-        shell: pwsh
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
