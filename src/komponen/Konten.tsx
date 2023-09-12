@@ -26,7 +26,7 @@ import {
   ambilInputItemModelKelayakanTokoBaru,
   ambilProposalDanApproval,
 } from "../fungsi/halaman/kelayakanTokoBaru";
-import { EHalaman, resetAplikasi } from "../fungsi/basic";
+import { EHalaman } from "../fungsi/basic";
 import { StatePopUp } from "./PopUp";
 import { getParameterBc } from "../fitur_state/dataParam";
 import { getIdPengguna } from "../fitur_state/pengguna";

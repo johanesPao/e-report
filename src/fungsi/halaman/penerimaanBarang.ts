@@ -130,8 +130,7 @@ export const tarik_data_penerimaan_barang = async (
 
       // jika GRNData true
       if (GRNData.status) {
-        // setFilterDataPenerimaanBarang(setProps, GRNData.konten.columns);
-        // bacaDataPenerimaanBarang(dispatch, GRNData.konten.columns);
+        setFilterDataPenerimaanBarang(setProps, GRNData.konten.columns);
         // buat penampung array object DataInvoiceExtGRN
         let arrInvExtGRN: DataInvoiceExtGRN[] = [];
         // jika invoiceExtDokData true
