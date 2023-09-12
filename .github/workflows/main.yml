@@ -5,7 +5,7 @@ on:
       - main
 
 jobs:
-  publish-tauri:
+  publish-eReport:
     permissions:
       contents: write
     strategy:
@@ -16,29 +16,34 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v3
-      - name: setup node
+      - name: Melakukan setup Node
         uses: actions/setup-node@v3
         with:
           node-version: 16
-      - name: install rust stable channel
+      - name: Melakukan instalasi rust stable channel
         uses: dtolnay/rust-toolchain@stable
-      - name: install rust dependencies (untuk ubuntu)
+      - name: Melakukan instalasi dependencies untuk rust (untuk ubuntu)
         if: matrix.platform == 'ubuntu-20.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
-      - name: install frontend dependencies
+      - name: Melakukan instalasi frontend React Typescript
         run: npm install
-      - name: set rahasia.rs
+      - name: Set rahasia.rs
         env: 
            KONTEN_RAHASIA_RS: ${{ secrets.KONTEN_RAHASIA_RS }}
         run: echo $KONTEN_RAHASIA_RS >> src-tauri/src/fungsi/rahasia.rs
+      - name: Set rahasia.rs (untuk windows)
+        env:
+          KONTEN_RAHASIA_RS: ${{ secrets.KONTEN_RAHASIA_RS }}
+        if: matrix-platform == 'windows-latest'
+        run: echo $KONTEN_RAHASIA_RS | Out-File -FilePath .\src-tauri\src\fungsi\rahasia.rs
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: app-v__VERSION__
-          releaseName: 'App v__VERSION__'
+          tagName: e-Report-v__VERSION__
+          releaseName: 'e-Report v__VERSION__'
           releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true
           prerelease: false
