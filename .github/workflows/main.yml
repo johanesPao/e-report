@@ -44,5 +44,14 @@ jobs:
           tagName: e-Report-v__VERSION__
           releaseName: 'e-Report v__VERSION__'
           releaseBody: 'See the assets to download this version and install.'
-          releaseDraft: true
-          prerelease: false
+  clone-release-ke-public:
+    runs-on: 'ubuntu-latest'
+    needs: publish-eReport
+    steps:
+      - name: Melakukan cloning aset release ke public repo
+        uses: andrewthetechie/gha-clone-releases@v1
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN_RELEASE }}
+          src_repo: johanesPao/e-report
+          dest_repo: johanesPao/e-report-release
+          copy_assets: true
