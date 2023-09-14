@@ -49,7 +49,7 @@ jobs:
     needs: publish-eReport
     steps:
       - name: Melakukan cloning aset release ke public repo
-        uses: andrewthetechie/gha-clone-releases@v1
+        uses: andrewthetechie/gha-clone-releases@v1.8.0
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN_RELEASE }}
           src_repo: johanesPao/e-report
